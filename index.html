@@ -54,13 +54,15 @@
         
         <!-- SIDEBAR NAVIGATION (Desktop) -->
         <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-white min-h-screen sticky top-0 shadow-2xl z-30 no-print">
-            <div class="p-5 flex items-center gap-3 border-b border-slate-800">
-               <div class="flex flex-col items-center justify-center mb-4 mt-8">
-                     <img src="Logo-Mandiri-Farm.png" alt="Mandiri Farm" class="w-20 h-20 object-contain mx-auto mb-2">
+            <div class="p-5 flex items-center justify-between border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-emerald-500/30">
+                        <i class="fa-solid fa-egg"></i>
                     </div>
-                <div>
-                    <h1 class="font-bold text-lg leading-tight text-white tracking-wide">Mandiri Farm</h1>
-                    <p class="text-xs text-emerald-400 font-medium">Monitoring Ayam Kampung</p>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight text-white tracking-wide">Mandiri Farm</h1>
+                        <p class="text-xs text-emerald-400 font-medium">Monitoring Ayam</p>
+                    </div>
                 </div>
             </div>
 
@@ -102,8 +104,11 @@
                     </div>
                 </div>
             </div>
-            <button @click="activeTab = 'pengaturan'" class="p-2 bg-slate-800 text-slate-300 rounded-xl text-xs flex items-center justify-center w-8 h-8 border border-slate-700 active:scale-95 transition">
-                <i class="fa-solid fa-gear"></i>
+            <!-- TOMBOL IKON RODA GERIGI (PENGATURAN & SYNC) -->
+            <button @click="activeTab = 'pengaturan'" 
+                :class="activeTab === 'pengaturan' ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-slate-800 text-slate-300 border-slate-700'"
+                class="p-2 rounded-xl text-xs flex items-center justify-center w-9 h-9 border active:scale-95 transition shadow-sm">
+                <i class="fa-solid fa-gear text-sm"></i>
             </button>
         </header>
 
@@ -117,12 +122,17 @@
                 <span>{{ toast.message }}</span>
             </div>
 
-            <!-- TOP BAR HEADER TITLES -->
+            <!-- TOP BAR HEADER TITLES & SETTINGS GEAR (DESKTOP) -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 sm:mb-6 no-print">
                 <div>
                     <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{{ currentNavTitle }}</h2>
                     <p class="text-slate-500 text-xs sm:text-sm">Kelola penetasan, racikan pakan, HPP, dan keuangan peternakan.</p>
                 </div>
+                <button @click="activeTab = 'pengaturan'" 
+                    :class="activeTab === 'pengaturan' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'"
+                    class="hidden md:flex items-center gap-2 px-3.5 py-2 font-bold rounded-xl text-xs border shadow-sm transition">
+                    <i class="fa-solid fa-gear" :class="activeTab === 'pengaturan' ? 'text-white' : 'text-emerald-600'"></i> Pengaturan &amp; Sync
+                </button>
             </div>
 
             <!-- TAB 1: BERANDA -->
@@ -408,7 +418,7 @@
                             <p class="text-xs text-slate-500">Hitung estimasi harga pakan campuran per kg & kadar protein kasar.</p>
                         </div>
 
-                        <!-- TOMBOL PRESET FASE PAKAN (RESPONSIF DENGAN "Layer (>120 Hari)") -->
+                        <!-- TOMBOL PRESET FASE PAKAN -->
                         <div class="grid grid-cols-3 gap-1.5 w-full sm:w-auto">
                             <button @click="loadPakanPreset('starter')" 
                                 :class="activePakanPreset === 'starter' ? 'bg-amber-600 text-white shadow' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
@@ -460,7 +470,7 @@
                                             <input v-model.number="b.harga" type="number" min="0" step="500" class="w-full p-2 border border-slate-200 rounded-lg text-xs font-bold outline-none focus:ring-1 focus:ring-emerald-500">
                                         </td>
                                         <td class="p-2">
-                                            <input v-model.number="b.protein" type="number" min="0" step="0.1" class="w-full p-2 border border-slate-200 rounded-lg text-xs font-bold outline-none focus:ring-1 focus:ring-emerald-500">
+                                            <input v-model.number="b.protein" type="number" min="0" step="0.1" class="w-full p-2 border border-slate-200 rounded-lg text-xs font-bold outline-none focus:ring-1 focus:ring-emerald-500 font-semibold">
                                         </td>
                                         <td class="p-2 text-center">
                                             <button @click="removeBahanPakan(idx)" class="text-slate-300 hover:text-rose-500 p-1"><i class="fa-solid fa-trash"></i></button>
@@ -697,7 +707,7 @@
 
         </main>
 
-        <!-- BOTTOM NAVIGATION (Mobile Touch Bar - Responsif) -->
+        <!-- BOTTOM NAVIGATION BAR -->
         <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 text-white flex justify-around items-center p-1 z-40 shadow-2xl no-print">
             <button v-for="item in navItems" :key="item.id" 
                 @click="activeTab = item.id"
@@ -873,14 +883,28 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-2.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                            <div>
-                                <label class="block font-bold mb-1 text-slate-700">Pakan Starter (0-30 Hari)</label>
-                                <input v-model.number="formFlock.hargaPakanStarter" type="number" min="0" placeholder="10000" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-bold text-xs">
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-2">
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block font-bold mb-1 text-slate-700">Biaya Pembelian Modal (Rp)</label>
+                                    <input v-model.number="formFlock.biayaDoc" type="number" min="0" placeholder="750000" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-bold text-xs">
+                                </div>
+                                <div class="flex items-end pb-1">
+                                    <label v-if="!editingFlockId && formFlock.biayaDoc > 0" class="flex items-center gap-1.5 font-bold text-emerald-800 cursor-pointer text-[11px]">
+                                        <input type="checkbox" v-model="formFlock.autoRecordKeuangan" class="w-4 h-4 text-emerald-600 rounded">
+                                        <span>Auto Keuangan</span>
+                                    </label>
+                                </div>
                             </div>
-                            <div>
-                                <label class="block font-bold mb-1 text-slate-700">Pakan Grower (>30 Hari)</label>
-                                <input v-model.number="formFlock.hargaPakanGrower" type="number" min="0" placeholder="4000" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-bold text-xs">
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block font-bold mb-1 text-slate-700">Pakan Starter (0-30 Hari)</label>
+                                    <input v-model.number="formFlock.hargaPakanStarter" type="number" min="0" placeholder="10000" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-bold text-xs">
+                                </div>
+                                <div>
+                                    <label class="block font-bold mb-1 text-slate-700">Pakan Grower (>30 Hari)</label>
+                                    <input v-model.number="formFlock.hargaPakanGrower" type="number" min="0" placeholder="4000" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-bold text-xs">
+                                </div>
                             </div>
                         </div>
 
@@ -1019,11 +1043,10 @@
                     navItems: [
                         { id: 'beranda', label: 'Beranda', icon: 'fa-solid fa-house' },
                         { id: 'penetasan', label: 'Penetasan', icon: 'fa-solid fa-temperature-arrow-up' },
-                        { id: 'flock', label: 'Kelompok Ayam', icon: 'fa-solid fa-crow' },
-                        { id: 'pakan', label: 'Formulasi Pakan', icon: 'fa-solid fa-wheat-awn' },
+                        { id: 'flock', label: 'Kelompok', icon: 'fa-solid fa-crow' },
+                        { id: 'pakan', label: 'Pakan', icon: 'fa-solid fa-wheat-awn' },
                         { id: 'harian', label: 'Log Harian', icon: 'fa-solid fa-clipboard-list' },
-                        { id: 'keuangan', label: 'Keuangan', icon: 'fa-solid fa-wallet' },
-                        { id: 'pengaturan', label: 'Sync', icon: 'fa-solid fa-cloud-arrow-up' },
+                        { id: 'keuangan', label: 'Keuangan', icon: 'fa-solid fa-wallet' }
                     ],
                     
                     penetasanList: JSON.parse(localStorage.getItem('mandirifarm_penetasan')) || [],
@@ -1066,7 +1089,7 @@
                     targetFasePakanType: 'starter',
 
                     formPenetasan: { namaBatch: '', mesin: '', tipe: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 50, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0 },
-                    formFlock: { namaFlock: '', tipe: 'Pedaging', faseAwal: 'DOC', kandang: 'Kandang Brooding', jumlahAwal: 100, jumlahSaatIni: 100, biayaDoc: 750000, hargaPakanStarter: 10000, hargaPakanGrower: 4000, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) },
+                    formFlock: { namaFlock: '', tipe: 'Pedaging', faseAwal: 'DOC', kandang: 'Kandang Brooding', jumlahAwal: 100, jumlahSaatIni: 100, biayaDoc: 750000, autoRecordKeuangan: true, hargaPakanStarter: 10000, hargaPakanGrower: 4000, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) },
                     formHarian: { flockId: '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' },
                     formKeuangan: { jenis: 'Pemasukan', kategori: 'Penjualan Telur', nominal: 0, tanggal: new Date().toISOString().substr(0, 10), keterangan: '' },
 
@@ -1076,6 +1099,7 @@
             },
             computed: {
                 currentNavTitle() {
+                    if (this.activeTab === 'pengaturan') return 'Pengaturan & Cloud Sync';
                     const item = this.navItems.find(n => n.id === this.activeTab);
                     return item ? item.label : 'Beranda';
                 },
@@ -1182,7 +1206,8 @@
                     }
                     this.pakanPresets[this.activePakanPreset] = JSON.parse(JSON.stringify(this.currentFormulasiPakan));
                     localStorage.setItem('mandirifarm_pakan_presets', JSON.stringify(this.pakanPresets));
-                    this.showToast(`Preset pakan ${this.activePakanPreset.toUpperCase()} berhasil disimpan.`, 'info');
+                    this.debouncedPushToGas();
+                    this.showToast(`Preset pakan ${this.activePakanPreset.toUpperCase()} disimpan.`, 'info');
                 },
                 applyPakanToFlock() {
                     if (!this.targetFlockPakanId) {
@@ -1233,7 +1258,7 @@
                 exportBackupFile() {
                     const backupData = {
                         app: 'MandiriFarm',
-                        version: '1.4.0',
+                        version: '1.6.0',
                         exportedAt: new Date().toISOString(),
                         data: {
                             penetasanList: this.penetasanList,
@@ -1332,7 +1357,7 @@
 
                 editFlock(f) {
                     this.editingFlockId = f.id;
-                    this.formFlock = { ...f };
+                    this.formFlock = { autoRecordKeuangan: false, ...f };
                     this.modalType = 'flock';
                     this.showModal = true;
                 },
@@ -1375,8 +1400,6 @@
                     
                     const htmlContent = `
                         <div style="font-family: Arial, sans-serif; padding: 25px; color: #1e293b; max-width: 700px; margin: 0 auto; background: #ffffff;">
-                            
-                            <!-- HEADER LOGO PETERNAKAN -->
                             <table style="width: 100%; border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 20px;">
                                 <tr>
                                     <td style="width: 52px; vertical-align: middle;">
@@ -1395,7 +1418,6 @@
                                 </tr>
                             </table>
 
-                            <!-- INFORMASI KELOMPOK AYAM -->
                             <h3 style="font-size: 13px; font-weight: bold; color: #0f172a; margin: 0 0 8px 0; text-transform: uppercase;">1. Informasi Kelompok Ayam</h3>
                             <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 18px;">
                                 <tr style="background-color: #f8fafc;">
@@ -1420,7 +1442,6 @@
                                 </tr>
                             </table>
 
-                            <!-- RINCIAN HARGA POKOK PRODUKSI -->
                             <h3 style="font-size: 13px; font-weight: bold; color: #047857; margin: 0 0 8px 0; text-transform: uppercase;">2. Rincian Harga Pokok Produksi (HPP)</h3>
                             <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 18px;">
                                 <thead>
@@ -1449,7 +1470,6 @@
                                 </tbody>
                             </table>
 
-                            <!-- SIMULASI OMZET & KEUNTUNGAN -->
                             <h3 style="font-size: 13px; font-weight: bold; color: #1e3a8a; margin: 0 0 8px 0; text-transform: uppercase;">3. Ringkasan HPP &amp; Proyeksi Omzet</h3>
                             <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 25px;">
                                 <tr>
@@ -1474,7 +1494,6 @@
                                 </tr>
                             </table>
 
-                            <!-- KOLOM TANDA TANGAN / PENGESAHAN -->
                             <table style="width: 100%; margin-top: 30px; page-break-inside: avoid; font-size: 11px;">
                                 <tr>
                                     <td style="width: 50%; text-align: center; vertical-align: top;">
@@ -1487,7 +1506,6 @@
                                     </td>
                                 </tr>
                             </table>
-
                         </div>
                     `;
 
@@ -1542,6 +1560,7 @@
                             localStorage.removeItem('mandirifarm_flock');
                             localStorage.removeItem('mandirifarm_harian');
                             localStorage.removeItem('mandirifarm_keuangan');
+                            localStorage.removeItem('mandirifarm_pakan_presets');
 
                             this.$nextTick(() => {
                                 this.isSyncingFromGas = false;
@@ -1621,6 +1640,11 @@
                                     nominal: parseFloat(k.nominal) || 0
                                 }));
                             }
+                            if (json.data.pakanPresets) {
+                                this.pakanPresets = json.data.pakanPresets;
+                                localStorage.setItem('mandirifarm_pakan_presets', JSON.stringify(this.pakanPresets));
+                                this.loadPakanPreset(this.activePakanPreset || 'starter');
+                            }
                             this.isGasSynced = true;
                         }
                     } catch (e) {
@@ -1638,7 +1662,8 @@
                             penetasanList: this.penetasanList,
                             flockList: this.flockList,
                             harianList: this.harianList,
-                            keuanganList: this.keuanganList
+                            keuanganList: this.keuanganList,
+                            pakanPresets: this.pakanPresets
                         };
 
                         await fetch(this.gasApiUrl, {
@@ -1760,7 +1785,6 @@
                     b.fertilitasPct = Math.round((fertil / totalTelur) * 100);
                     b.dayaTetas = fertil > 0 ? Math.round((menetas / fertil) * 100) : 0;
 
-                    // H+1 MASUK KANDANG BROODING OTOMATIS
                     if (this.finishHatchingModal.createDocFlock && menetas > 0) {
                         const tglHatching = new Date(b.estMenetas || new Date());
                         const tglBrooding = new Date(tglHatching);
@@ -1797,6 +1821,7 @@
 
                 saveFlock() {
                     const initial = parseInt(this.formFlock.jumlahAwal) || 0;
+                    const modalPembelian = parseFloat(this.formFlock.biayaDoc) || 0;
                     
                     if (this.editingFlockId) {
                         const idx = this.flockList.findIndex(f => f.id === this.editingFlockId);
@@ -1809,7 +1834,7 @@
                                 kandang: this.formFlock.kandang,
                                 jumlahAwal: initial,
                                 jumlahSaatIni: parseInt(this.formFlock.jumlahSaatIni) ?? initial,
-                                biayaDoc: parseFloat(this.formFlock.biayaDoc) || 0,
+                                biayaDoc: modalPembelian,
                                 hargaPakanStarter: parseFloat(this.formFlock.hargaPakanStarter) || 10000,
                                 hargaPakanGrower: parseFloat(this.formFlock.hargaPakanGrower) || 4000,
                                 umurAwalHari: parseInt(this.formFlock.umurAwalHari) || 0,
@@ -1826,7 +1851,7 @@
                             kandang: this.formFlock.kandang,
                             jumlahAwal: initial,
                             jumlahSaatIni: initial,
-                            biayaDoc: parseFloat(this.formFlock.biayaDoc) || 0,
+                            biayaDoc: modalPembelian,
                             hargaPakanStarter: parseFloat(this.formFlock.hargaPakanStarter) || 10000,
                             hargaPakanGrower: parseFloat(this.formFlock.hargaPakanGrower) || 4000,
                             avgBobotKg: 1.2,
@@ -1835,11 +1860,26 @@
                             tglMulai: this.formFlock.tglMulai
                         };
                         this.flockList.unshift(newFlock);
-                        this.showToast('Kelompok ayam berhasil ditambahkan.', 'info');
+
+                        // ENTRI OTOMATIS KE TRANSAKSI KEUANGAN KAS (PENGELUARAN)
+                        if (this.formFlock.autoRecordKeuangan && modalPembelian > 0) {
+                            const newKeuangan = {
+                                id: 'KEU-' + Date.now(),
+                                jenis: 'Pengeluaran',
+                                kategori: 'Pembelian DOC / Indukan',
+                                nominal: modalPembelian,
+                                tanggal: this.formFlock.tglMulai,
+                                keterangan: `Modal Pembelian Ayam: ${this.formFlock.namaFlock} (${initial} ekor)`
+                            };
+                            this.keuanganList.unshift(newKeuangan);
+                            this.showToast('Kelompok ayam disimpan & pengeluaran kas otomatis dicatat!', 'info');
+                        } else {
+                            this.showToast('Kelompok ayam berhasil ditambahkan.', 'info');
+                        }
                     }
 
                     this.closeModal();
-                    this.formFlock = { namaFlock: '', tipe: 'Pedaging', faseAwal: 'DOC', kandang: 'Kandang Brooding', jumlahAwal: 100, jumlahSaatIni: 100, biayaDoc: 750000, hargaPakanStarter: 10000, hargaPakanGrower: 4000, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) };
+                    this.formFlock = { namaFlock: '', tipe: 'Pedaging', faseAwal: 'DOC', kandang: 'Kandang Brooding', jumlahAwal: 100, jumlahSaatIni: 100, biayaDoc: 750000, autoRecordKeuangan: true, hargaPakanStarter: 10000, hargaPakanGrower: 4000, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) };
                 },
                 confirmDeleteFlock(id) {
                     this.showConfirm('Hapus Kelompok Ayam?', 'Apakah Anda yakin ingin menghapus kelompok ayam ini?', () => {
