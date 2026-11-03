@@ -56,12 +56,12 @@
         <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-white min-h-screen sticky top-0 shadow-2xl z-30 no-print">
             <div class="p-5 flex items-center justify-between border-b border-slate-800">
                 <div class="flex items-center gap-3">
-                   <div class="flex flex-col items-center justify-center mb-4 mt-8">
-                     <img src="Logo-Mandiri-Farm.png" alt="Mandiri Farm" class="w-20 h-20 object-contain mx-auto mb-2">
-                     </div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-emerald-500/30">
+                        <i class="fa-solid fa-egg"></i>
+                    </div>
                     <div>
                         <h1 class="font-bold text-lg leading-tight text-white tracking-wide">Mandiri Farm</h1>
-                        <p class="text-xs text-emerald-400 font-medium">Monitoring & HPP Ayam</p>
+                        <p class="text-xs text-emerald-400 font-medium">Monitoring Ayam</p>
                     </div>
                 </div>
             </div>
@@ -381,7 +381,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-600">Harga Jual/Kg:</label>
-                                        <input v-model.number="f.hargaJualPerKg" type="number" step="1000" min="0" class="w-full p-1 rounded-lg border border-emerald-300 bg-white text-xs font-bold outline-none focus:ring-1 focus:ring-emerald-500">
+                                        <input type="text" inputmode="numeric" :value="formatRupiahInputVal(f.hargaJualPerKg)" @input="onRupiahInput($event, f, 'hargaJualPerKg')" class="w-full p-1 rounded-lg border border-emerald-300 bg-white text-xs font-bold outline-none focus:ring-1 focus:ring-emerald-500">
                                     </div>
                                 </div>
 
@@ -467,7 +467,7 @@
                                             <input v-model.number="b.rasio" type="number" min="0" max="100" class="w-full p-2 border border-slate-200 rounded-lg text-xs font-bold outline-none focus:ring-1 focus:ring-emerald-500">
                                         </td>
                                         <td class="p-2">
-                                            <input v-model.number="b.harga" type="number" min="0" step="500" class="w-full p-2 border border-slate-200 rounded-lg text-xs font-bold outline-none focus:ring-1 focus:ring-emerald-500">
+                                            <input type="text" inputmode="numeric" :value="formatRupiahInputVal(b.harga)" @input="onRupiahInput($event, b, 'harga')" class="w-full p-2 border border-slate-200 rounded-lg text-xs font-bold outline-none focus:ring-1 focus:ring-emerald-500">
                                         </td>
                                         <td class="p-2">
                                             <input v-model.number="b.protein" type="number" min="0" step="0.1" class="w-full p-2 border border-slate-200 rounded-lg text-xs font-bold outline-none focus:ring-1 focus:ring-emerald-500 font-semibold">
@@ -887,7 +887,7 @@
                             <div class="grid grid-cols-2 gap-2.5">
                                 <div>
                                     <label class="block font-bold mb-1 text-slate-700">Biaya Pembelian Modal (Rp)</label>
-                                    <input v-model.number="formFlock.biayaDoc" type="number" min="0" placeholder="750000" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-bold text-xs">
+                                    <input type="text" inputmode="numeric" :value="formatRupiahInputVal(formFlock.biayaDoc)" @input="onRupiahInput($event, formFlock, 'biayaDoc')" placeholder="750.000" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-bold text-xs">
                                 </div>
                                 <div class="flex items-end pb-1">
                                     <label v-if="!editingFlockId && formFlock.biayaDoc > 0" class="flex items-center gap-1.5 font-bold text-emerald-800 cursor-pointer text-[11px]">
@@ -899,11 +899,11 @@
                             <div class="grid grid-cols-2 gap-2.5">
                                 <div>
                                     <label class="block font-bold mb-1 text-slate-700">Pakan Starter (0-30 Hari)</label>
-                                    <input v-model.number="formFlock.hargaPakanStarter" type="number" min="0" placeholder="10000" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-bold text-xs">
+                                    <input type="text" inputmode="numeric" :value="formatRupiahInputVal(formFlock.hargaPakanStarter)" @input="onRupiahInput($event, formFlock, 'hargaPakanStarter')" placeholder="10.000" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-bold text-xs">
                                 </div>
                                 <div>
                                     <label class="block font-bold mb-1 text-slate-700">Pakan Grower (>30 Hari)</label>
-                                    <input v-model.number="formFlock.hargaPakanGrower" type="number" min="0" placeholder="4000" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-bold text-xs">
+                                    <input type="text" inputmode="numeric" :value="formatRupiahInputVal(formFlock.hargaPakanGrower)" @input="onRupiahInput($event, formFlock, 'hargaPakanGrower')" placeholder="4.000" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-bold text-xs">
                                 </div>
                             </div>
                         </div>
@@ -997,7 +997,7 @@
                         </div>
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Nominal Rp</label>
-                            <input v-model.number="formKeuangan.nominal" type="number" min="0" required placeholder="500000" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-sm">
+                            <input type="text" inputmode="numeric" :value="formatRupiahInputVal(formKeuangan.nominal)" @input="onRupiahInput($event, formKeuangan, 'nominal')" required placeholder="500.000" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-sm">
                         </div>
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Tanggal Transaksi</label>
@@ -1051,45 +1051,38 @@
                     
                     penetasanList: JSON.parse(localStorage.getItem('mandirifarm_penetasan')) || [],
                     flockList: (JSON.parse(localStorage.getItem('mandirifarm_flock')) || []).map(f => ({
-                        biayaDoc: 750000,
-                        hargaPakanStarter: 10000,
-                        hargaPakanGrower: 4000,
-                        hargaPakanPerKg: 10000,
-                        biayaLainnya: 100000,
+                        biayaDoc: 0,
+                        hargaPakanStarter: 0,
+                        hargaPakanGrower: 0,
+                        hargaPakanPerKg: 0,
+                        biayaLainnya: 0,
                         avgBobotKg: 1.2,
-                        hargaJualPerKg: 45000,
+                        hargaJualPerKg: 0,
                         umurAwalHari: 0,
                         ...f
                     })),
                     harianList: JSON.parse(localStorage.getItem('mandirifarm_harian')) || [],
                     keuanganList: JSON.parse(localStorage.getItem('mandirifarm_keuangan')) || [],
 
-                    // FORMULASI & PRESET PAKAN
+                    // FORMULASI & PRESET PAKAN (DEFAULT 0 / KOSONG UNTUK DIEDIT USER)
                     activePakanPreset: 'starter',
                     pakanPresets: JSON.parse(localStorage.getItem('mandirifarm_pakan_presets')) || {
                         starter: [
-                            { nama: 'Jagung Giling', rasio: 50, harga: 5500, protein: 8.5 },
-                            { nama: 'Konsentrat Broiler/Starter', rasio: 35, harga: 14000, protein: 36 },
-                            { nama: 'Dedak Halus', rasio: 15, harga: 3800, protein: 11 }
+                            { nama: '', rasio: 0, harga: 0, protein: 0 }
                         ],
                         grower: [
-                            { nama: 'Jagung Giling', rasio: 55, harga: 5500, protein: 8.5 },
-                            { nama: 'Konsentrat Grower', rasio: 15, harga: 11000, protein: 32 },
-                            { nama: 'Dedak Halus', rasio: 30, harga: 3800, protein: 11 }
+                            { nama: '', rasio: 0, harga: 0, protein: 0 }
                         ],
                         layer: [
-                            { nama: 'Jagung Giling', rasio: 50, harga: 5500, protein: 8.5 },
-                            { nama: 'Konsentrat Layer', rasio: 30, harga: 12500, protein: 34 },
-                            { nama: 'Dedak Halus', rasio: 15, harga: 3800, protein: 11 },
-                            { nama: 'Tepung Kerang/Kalsium', rasio: 5, harga: 3000, protein: 0 }
+                            { nama: '', rasio: 0, harga: 0, protein: 0 }
                         ]
                     },
                     currentFormulasiPakan: [],
                     targetFlockPakanId: '',
                     targetFasePakanType: 'starter',
 
-                    formPenetasan: { namaBatch: '', mesin: '', tipe: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 50, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0 },
-                    formFlock: { namaFlock: '', tipe: 'Pedaging', faseAwal: 'DOC', kandang: 'Kandang Brooding', jumlahAwal: 100, jumlahSaatIni: 100, biayaDoc: 750000, autoRecordKeuangan: true, hargaPakanStarter: 10000, hargaPakanGrower: 4000, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) },
+                    formPenetasan: { namaBatch: '', mesin: '', tipe: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 0, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0 },
+                    formFlock: { namaFlock: '', tipe: 'Pedaging', faseAwal: 'DOC', kandang: 'Kandang Brooding', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) },
                     formHarian: { flockId: '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' },
                     formKeuangan: { jenis: 'Pemasukan', kategori: 'Penjualan Telur', nominal: 0, tanggal: new Date().toISOString().substr(0, 10), keterangan: '' },
 
@@ -1188,13 +1181,25 @@
                 if (this.pushTimer) clearTimeout(this.pushTimer);
             },
             methods: {
+                // FORMATTER INPUT RUPIAH SERIBU
+                onRupiahInput(event, targetObj, fieldName) {
+                    const raw = event.target.value.replace(/[^0-9]/g, '');
+                    const num = raw ? parseInt(raw, 10) : 0;
+                    targetObj[fieldName] = num;
+                    event.target.value = raw ? new Intl.NumberFormat('id-ID').format(num) : '';
+                },
+                formatRupiahInputVal(val) {
+                    if (!val || isNaN(val) || val === 0) return '';
+                    return new Intl.NumberFormat('id-ID').format(val);
+                },
+
                 // MANAGEMENT FORMULASI PAKAN
                 loadPakanPreset(type) {
                     this.activePakanPreset = type;
                     this.currentFormulasiPakan = JSON.parse(JSON.stringify(this.pakanPresets[type] || []));
                 },
                 addBahanPakan() {
-                    this.currentFormulasiPakan.push({ nama: 'Bahan Baru', rasio: 10, harga: 4000, protein: 10 });
+                    this.currentFormulasiPakan.push({ nama: '', rasio: 0, harga: 0, protein: 0 });
                 },
                 removeBahanPakan(idx) {
                     this.currentFormulasiPakan.splice(idx, 1);
@@ -1835,8 +1840,8 @@
                                 jumlahAwal: initial,
                                 jumlahSaatIni: parseInt(this.formFlock.jumlahSaatIni) ?? initial,
                                 biayaDoc: modalPembelian,
-                                hargaPakanStarter: parseFloat(this.formFlock.hargaPakanStarter) || 10000,
-                                hargaPakanGrower: parseFloat(this.formFlock.hargaPakanGrower) || 4000,
+                                hargaPakanStarter: parseFloat(this.formFlock.hargaPakanStarter) || 0,
+                                hargaPakanGrower: parseFloat(this.formFlock.hargaPakanGrower) || 0,
                                 umurAwalHari: parseInt(this.formFlock.umurAwalHari) || 0,
                                 tglMulai: this.formFlock.tglMulai
                             };
@@ -1852,10 +1857,10 @@
                             jumlahAwal: initial,
                             jumlahSaatIni: initial,
                             biayaDoc: modalPembelian,
-                            hargaPakanStarter: parseFloat(this.formFlock.hargaPakanStarter) || 10000,
-                            hargaPakanGrower: parseFloat(this.formFlock.hargaPakanGrower) || 4000,
+                            hargaPakanStarter: parseFloat(this.formFlock.hargaPakanStarter) || 0,
+                            hargaPakanGrower: parseFloat(this.formFlock.hargaPakanGrower) || 0,
                             avgBobotKg: 1.2,
-                            hargaJualPerKg: 45000,
+                            hargaJualPerKg: 0,
                             umurAwalHari: parseInt(this.formFlock.umurAwalHari) || 0,
                             tglMulai: this.formFlock.tglMulai
                         };
