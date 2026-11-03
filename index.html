@@ -13,6 +13,8 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- html2pdf.js (Ekspor PDF) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
@@ -80,14 +82,9 @@
                         {{ isGasSynced ? 'Google Sheets' : 'Lokal HP' }}
                     </span>
                 </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <button @click="confirmResetSample" class="w-full py-2 px-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] rounded-xl flex items-center justify-center gap-1.5 transition border border-slate-700">
-                        <i class="fa-solid fa-arrows-rotate"></i> Sampel
-                    </button>
-                    <button @click="confirmClearAll" class="w-full py-2 px-2 bg-rose-950/80 hover:bg-rose-900 text-rose-300 text-[11px] rounded-xl flex items-center justify-center gap-1.5 transition border border-rose-800">
-                        <i class="fa-solid fa-trash-can"></i> Hapus Semua
-                    </button>
-                </div>
+                <button @click="confirmClearAll" class="w-full py-2.5 px-3 bg-rose-950/80 hover:bg-rose-900 text-rose-300 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition border border-rose-800">
+                    <i class="fa-solid fa-trash-can"></i> Hapus Semua Data
+                </button>
             </div>
         </aside>
 
@@ -366,6 +363,11 @@
                                         </span>
                                     </div>
                                 </div>
+
+                                <!-- Tombol Ekspor HPP (PDF) -->
+                                <button @click="exportHppPdf(f)" class="w-full mt-2 py-2 px-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm">
+                                    <i class="fa-solid fa-file-pdf"></i> Ekspor Laporan HPP (PDF)
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -517,13 +519,6 @@
                     <div class="border-t border-slate-200 pt-5 space-y-3">
                         <h4 class="font-bold text-slate-800 text-sm">Cadangan & Pemulihan Data</h4>
                         <div class="flex flex-wrap gap-3">
-                            <button @click="exportBackup" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition">
-                                <i class="fa-solid fa-file-export"></i> Ekspor File JSON Cadangan
-                            </button>
-                            <label class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-2 cursor-pointer transition">
-                                <i class="fa-solid fa-file-import"></i> Impor File JSON Cadangan
-                                <input type="file" @change="importBackup" accept=".json" class="hidden">
-                            </label>
                             <button @click="confirmClearAll" class="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm">
                                 <i class="fa-solid fa-trash-can"></i> Hapus Semua Data Peternakan
                             </button>
@@ -665,7 +660,7 @@
                         <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Biaya Modal DOC (Rp)</label>
-                                <input v-model.number="formFlock.biayaDoc" type="number" min="0" placeholder="800000" class="w-full p-2.5 rounded-lg border border-slate-300 bg-white font-bold text-xs">
+                                <input v-model.number="formFlock.biayaDoc" type="number" min="0" placeholder="750000" class="w-full p-2.5 rounded-lg border border-slate-300 bg-white font-bold text-xs">
                             </div>
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Harga Pakan/Kg (Rp)</label>
@@ -897,7 +892,6 @@
                 if (this.pushTimer) clearTimeout(this.pushTimer);
             },
             methods: {
-                // KALKULASI HPP & PROYEKSI LABA
                 hitungHPP(flock) {
                     const totalPakanKg = parseFloat(this.getPakanTotalByFlock(flock.id)) || 0;
                     const hargaPakan = parseFloat(flock.hargaPakanPerKg) || 8500;
@@ -925,6 +919,147 @@
                     const marginPct = estOmzet > 0 ? ((labaBersih / estOmzet) * 100).toFixed(1) : 0;
 
                     return { estOmzet, labaBersih, marginPct };
+                },
+
+                // EKSPOR HPP DENGAN HEADER LOGO & KOLOM TANDA TANGAN
+                exportHppPdf(flock) {
+                    const hpp = this.hitungHPP(flock);
+                    const laba = this.hitungProyeksiLaba(flock);
+                    const pakanTotal = this.getPakanTotalByFlock(flock.id);
+                    const fcr = this.hitungFCR(flock);
+                    
+                    const htmlContent = `
+                        <div style="font-family: Arial, sans-serif; padding: 25px; color: #1e293b; max-width: 700px; margin: 0 auto; background: #ffffff;">
+                            
+                            <!-- HEADER LOGO PETERNAKAN -->
+                            <table style="width: 100%; border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 20px;">
+                                <tr>
+                                    <td style="width: 52px; vertical-align: middle;">
+                                        <div style="width: 44px; height: 44px; background: #10b981; border-radius: 10px; text-align: center; line-height: 44px; color: #ffffff; font-size: 22px;">
+                                            🐓
+                                        </div>
+                                    </td>
+                                    <td style="vertical-align: middle; padding-left: 8px;">
+                                        <h2 style="font-size: 18px; font-weight: 800; margin: 0; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px;">MANDIRI FARM</h2>
+                                        <p style="font-size: 11px; color: #059669; font-weight: 600; margin: 2px 0 0 0;">Sistem Monitoring &amp; Keuangan Peternakan Ayam</p>
+                                    </td>
+                                    <td style="text-align: right; vertical-align: middle;">
+                                        <div style="font-size: 12px; font-weight: bold; color: #0f172a; text-transform: uppercase;">Laporan HPP &amp; Analisis Batch</div>
+                                        <div style="font-size: 10px; color: #64748b; margin-top: 4px; font-family: monospace;">Tgl Cetak: ${this.getFormattedNow()}</div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- INFORMASI KELOMPOK AYAM -->
+                            <h3 style="font-size: 13px; font-weight: bold; color: #0f172a; margin: 0 0 8px 0; text-transform: uppercase;">1. Informasi Kelompok Ayam</h3>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 18px;">
+                                <tr style="background-color: #f8fafc;">
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1; font-weight: bold; width: 40%;">Nama Batch / Kelompok</td>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1; font-weight: bold; color: #047857;">${flock.namaFlock}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Tipe &amp; Fase Pertumbuhan</td>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">${flock.tipe} (${flock.fase})</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Kandang / Lokasi</td>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">${flock.kandang}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Populasi Saat Ini / Awal</td>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">${flock.jumlahSaatIni} / ${flock.jumlahAwal} ekor</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Total Pakan Dikonsumsi</td>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">${pakanTotal} Kg (FCR: ${fcr})</td>
+                                </tr>
+                            </table>
+
+                            <!-- RINCIAN HARGA POKOK PRODUKSI -->
+                            <h3 style="font-size: 13px; font-weight: bold; color: #047857; margin: 0 0 8px 0; text-transform: uppercase;">2. Rincian Harga Pokok Produksi (HPP)</h3>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 18px;">
+                                <thead>
+                                    <tr style="background-color: #ecfdf5; color: #065f46;">
+                                        <th style="padding: 7px 10px; border: 1px solid #a7f3d0; text-align: left;">Komponen Biaya</th>
+                                        <th style="padding: 7px 10px; border: 1px solid #a7f3d0; text-align: right;">Jumlah Nominal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Biaya Modal DOC / Indukan</td>
+                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1; text-align: right;">${this.formatRupiah(flock.biayaDoc)}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Estimasi Biaya Pakan (${pakanTotal} kg @ ${this.formatRupiah(flock.hargaPakanPerKg)})</td>
+                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1; text-align: right;">${this.formatRupiah(pakanTotal * flock.hargaPakanPerKg)}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Biaya Operasional &amp; Obat-obatan</td>
+                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1; text-align: right;">${this.formatRupiah(flock.biayaLainnya || 100000)}</td>
+                                    </tr>
+                                    <tr style="font-weight: bold; background-color: #f0fdf4;">
+                                        <td style="padding: 8px 10px; border: 1px solid #a7f3d0; color: #065f46;">TOTAL BIAYA MODAL BATCH</td>
+                                        <td style="padding: 8px 10px; border: 1px solid #a7f3d0; text-align: right; color: #065f46;">${this.formatRupiah(hpp.totalBiayaModal)}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <!-- SIMULASI OMZET & KEUNTUNGAN -->
+                            <h3 style="font-size: 13px; font-weight: bold; color: #1e3a8a; margin: 0 0 8px 0; text-transform: uppercase;">3. Ringkasan HPP &amp; Proyeksi Omzet</h3>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 25px;">
+                                <tr>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1; width: 60%;">HPP per Ekor Ayam</td>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1; font-weight: bold; text-align: right;">${this.formatRupiah(hpp.hppPerEkor)}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">HPP per Kg (Avg Bobot ${flock.avgBobotKg || 1.2} kg)</td>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1; font-weight: bold; text-align: right; color: #047857;">${this.formatRupiah(hpp.hppPerKg)}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Harga Jual Pasar per Kg</td>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1; text-align: right;">${this.formatRupiah(flock.hargaJualPerKg)}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Estimasi Omzet Panen Total</td>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1; text-align: right;">${this.formatRupiah(laba.estOmzet)}</td>
+                                </tr>
+                                <tr style="font-weight: bold; background-color: #eff6ff;">
+                                    <td style="padding: 8px 10px; border: 1px solid #bfdbfe; color: #1e40af;">PROYEKSI LABA BERSIH (Margin ${laba.marginPct}%)</td>
+                                    <td style="padding: 8px 10px; border: 1px solid #bfdbfe; text-align: right; color: ${laba.labaBersih >= 0 ? '#047857' : '#b91c1c'};">${this.formatRupiah(laba.labaBersih)}</td>
+                                </tr>
+                            </table>
+
+                            <!-- KOLOM TANDA TANGAN / PENGESAHAN -->
+                            <table style="width: 100%; margin-top: 30px; page-break-inside: avoid; font-size: 11px;">
+                                <tr>
+                                    <td style="width: 50%; text-align: center; vertical-align: top;">
+                                        <p style="color: #475569; margin: 0 0 55px 0; font-weight: 600;">Petugas Kandang / Operasional,</p>
+                                        <p style="font-weight: bold; color: #0f172a; margin: 0;">( ________________________ )</p>
+                                    </td>
+                                    <td style="width: 50%; text-align: center; vertical-align: top;">
+                                        <p style="color: #475569; margin: 0 0 55px 0; font-weight: 600;">Pemilik / Pengelola Peternakan,</p>
+                                        <p style="font-weight: bold; color: #0f172a; margin: 0;">( ________________________ )</p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </div>
+                    `;
+
+                    const opt = {
+                        margin:       0.4,
+                        filename:     `Laporan_HPP_${flock.namaFlock.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
+                        image:        { type: 'jpeg', quality: 0.98 },
+                        html2canvas:  { scale: 2 },
+                        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+                    };
+
+                    this.showToast('Menyiapkan file PDF...', 'info');
+                    html2pdf().set(opt).from(htmlContent).save().then(() => {
+                        this.showToast('Laporan HPP berhasil diunduh (PDF).', 'info');
+                    }).catch(() => {
+                        this.showToast('Gagal membuat PDF.', 'error');
+                    });
                 },
 
                 showToast(msg, type = 'info') {
@@ -969,32 +1104,6 @@
                                 this.renderCharts();
                             });
                             this.showToast('Semua data berhasil dibersihkan.', 'info');
-                        }
-                    );
-                },
-                confirmResetSample() {
-                    this.showConfirm(
-                        'Muat Data Contoh?',
-                        'Data lama Anda akan digantikan dengan data sampel peternakan.',
-                        () => {
-                            const today = new Date().toISOString().substr(0, 10);
-                            this.penetasanList = [
-                                { id: 'PEN-01', namaBatch: 'Penetasan #01 Kampung Super', mesin: 'Mesin A Tetas 100', tglMasuk: today, estMenetas: today, jumlahTelur: 80, status: 'Berjalan', dayaTetas: 0 }
-                            ];
-                            this.flockList = [
-                                { id: 'FLK-01', namaFlock: 'Ayam Pedaging Batch 1', tipe: 'Pedaging', fase: 'Pembesaran', kandang: 'Kandang Utama #1', jumlahAwal: 100, jumlahSaatIni: 96, tglMulai: today, biayaDoc: 750000, hargaPakanPerKg: 8500, avgBobotKg: 1.2, hargaJualPerKg: 45000 },
-                                { id: 'FLK-02', namaFlock: 'Indukan Petelur Kampung', tipe: 'Petelur', fase: 'Produksi', kandang: 'Kandang Baterai #2', jumlahAwal: 50, jumlahSaatIni: 50, tglMulai: today, biayaDoc: 500000, hargaPakanPerKg: 8500, avgBobotKg: 1.5, hargaJualPerKg: 50000 }
-                            ];
-                            this.harianList = [
-                                { id: 'HRN-01', flockId: 'FLK-01', tanggal: today, pakanKg: 12.5, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: 'Pakan BR1' },
-                                { id: 'HRN-02', flockId: 'FLK-02', tanggal: today, pakanKg: 4.5, kematian: 0, telurBagus: 38, telurRusak: 2, catatan: 'Pakan Vita Stress' }
-                            ];
-                            this.keuanganList = [
-                                { id: 'KEU-01', jenis: 'Pemasukan', kategori: 'Penjualan Telur', nominal: 120000, tanggal: today, keterangan: 'Jual telur kampung 40 butir' },
-                                { id: 'KEU-02', jenis: 'Pengeluaran', kategori: 'Pembelian Pakan', nominal: 350000, tanggal: today, keterangan: 'Beli Pakan BR1 1 Karung' }
-                            ];
-                            this.showToast('Data sampel berhasil dimuat.', 'info');
-                            this.$nextTick(() => this.renderCharts());
                         }
                     );
                 },
@@ -1066,7 +1175,7 @@
                         }
                     } catch (e) {
                         this.isGasSynced = false;
-                    } flex: {
+                    } finally {
                         this.isSyncingFromGas = false;
                         this.$nextTick(() => this.renderCharts());
                     }
