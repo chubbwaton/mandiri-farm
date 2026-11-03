@@ -27,7 +27,7 @@
             aside, header, nav, button, .no-print, .sync-toast {
                 display: none !important;
             }
-            body { background: white !important; color: black !important; font-size: 12pt; }
+            body { background: white !important; color: black !important; font-size: 11pt; }
             main { padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
             .print-header {
                 display: block !important;
@@ -55,9 +55,9 @@
         <!-- SIDEBAR NAVIGATION (Desktop) -->
         <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-white min-h-screen sticky top-0 shadow-2xl z-30 no-print">
             <div class="p-5 flex items-center gap-3 border-b border-slate-800">
-                <div class="flex flex-col items-center justify-center mb-4 mt-8">
-                     <img src="Logo-Mandiri-Farm.png" alt="Mandiri Farm" class="w-20 h-20 object-contain mx-auto mb-2">
-                    </div>
+                <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-emerald-500/30">
+                    <i class="fa-solid fa-egg"></i>
+                </div>
                 <div>
                     <h1 class="font-bold text-lg leading-tight text-white tracking-wide">Mandiri Farm</h1>
                     <p class="text-xs text-emerald-400 font-medium">Monitoring Ayam Kampung</p>
@@ -68,8 +68,8 @@
                 <button v-for="item in navItems" :key="item.id" 
                     @click="activeTab = item.id"
                     :class="activeTab === item.id ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'"
-                    class="w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 text-sm">
-                    <i :class="item.icon" class="text-lg w-5 text-center"></i>
+                    class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-xs sm:text-sm">
+                    <i :class="item.icon" class="text-base w-5 text-center"></i>
                     <span>{{ item.label }}</span>
                 </button>
             </nav>
@@ -82,121 +82,121 @@
                         {{ isGasSynced ? 'Google Sheets' : 'Lokal HP' }}
                     </span>
                 </div>
-                <button @click="confirmClearAll" class="w-full py-2.5 px-3 bg-rose-950/80 hover:bg-rose-900 text-rose-300 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition border border-rose-800">
+                <button @click="confirmClearAll" class="w-full py-2 px-3 bg-rose-950/80 hover:bg-rose-900 text-rose-300 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition border border-rose-800">
                     <i class="fa-solid fa-trash-can"></i> Hapus Semua Data
                 </button>
             </div>
         </aside>
 
         <!-- HEADER APP BAR (Mobile) -->
-        <header class="md:hidden bg-slate-900 text-white p-4 sticky top-0 z-30 flex justify-between items-center shadow-md no-print">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center text-white text-lg font-bold shadow-md shadow-emerald-500/30">
+        <header class="md:hidden bg-slate-900 text-white p-3.5 sticky top-0 z-30 flex justify-between items-center shadow-md no-print">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-emerald-500 flex items-center justify-center text-white text-base font-bold shadow-md shadow-emerald-500/30">
                     <i class="fa-solid fa-egg"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-base leading-tight">Mandiri Farm</h1>
-                    <div class="flex items-center gap-1.5 text-[10px]" :class="isGasSynced ? 'text-emerald-400' : 'text-amber-400'">
+                    <h1 class="font-bold text-sm leading-tight">Mandiri Farm</h1>
+                    <div class="flex items-center gap-1 text-[10px]" :class="isGasSynced ? 'text-emerald-400' : 'text-amber-400'">
                         <span class="w-1.5 h-1.5 rounded-full" :class="isGasSynced ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'"></span>
-                        <span>{{ isGasSynced ? 'Terhubung Sheets' : 'Modus Offline/Lokal' }}</span>
+                        <span>{{ isGasSynced ? 'Terhubung Cloud' : 'Lokal HP' }}</span>
                     </div>
                 </div>
             </div>
-            <button @click="activeTab = 'pengaturan'" class="p-2 bg-slate-800 text-slate-300 rounded-xl text-xs flex items-center justify-center w-9 h-9 border border-slate-700 active:scale-95 transition">
+            <button @click="activeTab = 'pengaturan'" class="p-2 bg-slate-800 text-slate-300 rounded-xl text-xs flex items-center justify-center w-8 h-8 border border-slate-700 active:scale-95 transition">
                 <i class="fa-solid fa-gear"></i>
             </button>
         </header>
 
         <!-- MAIN WORKSPACE -->
-        <main class="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full">
+        <main class="flex-1 p-3.5 md:p-8 max-w-7xl mx-auto w-full">
             
             <!-- AUTO SYNC TOAST -->
-            <div v-if="toast.show" class="fixed top-5 right-5 z-50 p-4 rounded-2xl text-xs font-bold text-white shadow-2xl flex items-center gap-3 transition-all duration-300 no-print"
+            <div v-if="toast.show" class="fixed top-4 right-4 left-4 sm:left-auto sm:w-auto z-50 p-3.5 rounded-2xl text-xs font-bold text-white shadow-2xl flex items-center gap-3 transition-all duration-300 no-print"
                 :class="toast.type === 'error' ? 'bg-rose-600' : 'bg-emerald-600'">
                 <i class="fa-solid text-base" :class="toast.type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'"></i>
                 <span>{{ toast.message }}</span>
             </div>
 
             <!-- TOP BAR HEADER TITLES -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 no-print">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 sm:mb-6 no-print">
                 <div>
-                    <h2 class="text-2xl font-bold text-slate-900 tracking-tight">{{ currentNavTitle }}</h2>
-                    <p class="text-slate-500 text-xs md:text-sm">Kelola penetasan (21 Hari), pembesaran, kalkulasi HPP, racikan pakan per fase, dan laporan keuangan.</p>
+                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{{ currentNavTitle }}</h2>
+                    <p class="text-slate-500 text-xs sm:text-sm">Kelola penetasan, racikan pakan, HPP, dan keuangan peternakan.</p>
                 </div>
             </div>
 
             <!-- TAB 1: BERANDA -->
-            <div v-if="activeTab === 'beranda'" class="space-y-6">
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-                    <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition">
-                        <div class="flex items-center justify-between text-slate-400 mb-2">
-                            <span class="text-[11px] font-bold uppercase tracking-wider">Total Populasi</span>
-                            <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm"><i class="fa-solid fa-crow"></i></div>
+            <div v-if="activeTab === 'beranda'" class="space-y-4 sm:space-y-6">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+                    <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+                        <div class="flex items-center justify-between text-slate-400 mb-1.5">
+                            <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">Total Populasi</span>
+                            <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs"><i class="fa-solid fa-crow"></i></div>
                         </div>
-                        <div class="text-2xl font-extrabold text-slate-900">{{ totalPopulasi }} <span class="text-xs font-normal text-slate-400">ekor</span></div>
-                        <p class="text-[11px] text-slate-500 mt-1">Brooding, Grower & Indukan</p>
+                        <div class="text-xl sm:text-2xl font-extrabold text-slate-900">{{ totalPopulasi }} <span class="text-xs font-normal text-slate-400">ekor</span></div>
+                        <p class="text-[10px] sm:text-[11px] text-slate-500 mt-0.5">Pedaging & Petelur</p>
                     </div>
 
-                    <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition">
-                        <div class="flex items-center justify-between text-slate-400 mb-2">
-                            <span class="text-[11px] font-bold uppercase tracking-wider">Mesin Tetas</span>
-                            <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm"><i class="fa-solid fa-temperature-arrow-up"></i></div>
+                    <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+                        <div class="flex items-center justify-between text-slate-400 mb-1.5">
+                            <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">Mesin Tetas</span>
+                            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs"><i class="fa-solid fa-temperature-arrow-up"></i></div>
                         </div>
-                        <div class="text-2xl font-extrabold text-slate-900">{{ totalTelurDiinkubasi }} <span class="text-xs font-normal text-slate-400">butir</span></div>
-                        <p class="text-[11px] text-blue-600 font-medium mt-1">{{ totalBatchPenetasan }} Batch (Siklus 21 Hari)</p>
+                        <div class="text-xl sm:text-2xl font-extrabold text-slate-900">{{ totalTelurDiinkubasi }} <span class="text-xs font-normal text-slate-400">butir</span></div>
+                        <p class="text-[10px] sm:text-[11px] text-blue-600 font-medium mt-0.5">{{ totalBatchPenetasan }} Batch Active</p>
                     </div>
 
-                    <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition">
-                        <div class="flex items-center justify-between text-slate-400 mb-2">
-                            <span class="text-[11px] font-bold uppercase tracking-wider">Telur Hari Ini</span>
-                            <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm"><i class="fa-solid fa-egg"></i></div>
+                    <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+                        <div class="flex items-center justify-between text-slate-400 mb-1.5">
+                            <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">Telur Hari Ini</span>
+                            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs"><i class="fa-solid fa-egg"></i></div>
                         </div>
-                        <div class="text-2xl font-extrabold text-slate-900">{{ telurHariIni }} <span class="text-xs font-normal text-slate-400">butir</span></div>
-                        <p class="text-[11px] text-emerald-600 font-medium mt-1">Produksi Kandang Indukan</p>
+                        <div class="text-xl sm:text-2xl font-extrabold text-slate-900">{{ telurHariIni }} <span class="text-xs font-normal text-slate-400">butir</span></div>
+                        <p class="text-[10px] sm:text-[11px] text-emerald-600 font-medium mt-0.5">Panen Harian</p>
                     </div>
 
-                    <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition">
-                        <div class="flex items-center justify-between text-slate-400 mb-2">
-                            <span class="text-[11px] font-bold uppercase tracking-wider">Saldo Arus Kas</span>
-                            <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-sm"><i class="fa-solid fa-wallet"></i></div>
+                    <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+                        <div class="flex items-center justify-between text-slate-400 mb-1.5">
+                            <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">Saldo Kas</span>
+                            <div class="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xs"><i class="fa-solid fa-wallet"></i></div>
                         </div>
-                        <div class="text-xl md:text-2xl font-extrabold" :class="saldoKas >= 0 ? 'text-slate-900' : 'text-rose-600'">
+                        <div class="text-lg sm:text-2xl font-extrabold truncate" :class="saldoKas >= 0 ? 'text-slate-900' : 'text-rose-600'">
                             {{ formatRupiah(saldoKas) }}
                         </div>
-                        <p class="text-[11px] text-slate-400 mt-1">Pemasukan - Pengeluaran</p>
+                        <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Pemasukan - Pengeluaran</p>
                     </div>
                 </div>
 
-                <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm no-print">
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-3">Input Cepat Harian:</span>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                        <button @click="openModal('harian')" class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition shadow-md shadow-emerald-600/20">
-                            <i class="fa-solid fa-plus-circle text-base"></i> Catat Harian Kandang
+                <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-sm no-print">
+                    <span class="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2.5">Input Cepat Harian:</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <button @click="openModal('harian')" class="w-full py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition shadow-md shadow-emerald-600/20">
+                            <i class="fa-solid fa-plus-circle"></i> Catat Harian Kandang
                         </button>
-                        <button @click="openModal('keuangan')" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition shadow-md shadow-slate-800/20">
-                            <i class="fa-solid fa-receipt text-base"></i> Transaksi Keuangan
+                        <button @click="openModal('keuangan')" class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition shadow-md shadow-slate-800/20">
+                            <i class="fa-solid fa-receipt"></i> Transaksi Keuangan
                         </button>
-                        <button @click="openModal('penetasan')" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition shadow-md shadow-blue-600/20">
-                            <i class="fa-solid fa-box-archive text-base"></i> Masukkan Telur Tetas
+                        <button @click="openModal('penetasan')" class="w-full py-2.5 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition shadow-md shadow-blue-600/20">
+                            <i class="fa-solid fa-box-archive"></i> Masukkan Telur Tetas
                         </button>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-                        <h3 class="font-bold text-slate-800 mb-4 flex items-center justify-between text-sm">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                    <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+                        <h3 class="font-bold text-slate-800 mb-3 flex items-center justify-between text-xs sm:text-sm">
                             <span><i class="fa-solid fa-chart-line text-emerald-500 mr-2"></i>Produksi Telur (7 Hari)</span>
                         </h3>
-                        <div class="h-60 relative">
+                        <div class="h-48 sm:h-60 relative">
                             <canvas id="eggChart"></canvas>
                         </div>
                     </div>
 
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-                        <h3 class="font-bold text-slate-800 mb-4 flex items-center justify-between text-sm">
+                    <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+                        <h3 class="font-bold text-slate-800 mb-3 flex items-center justify-between text-xs sm:text-sm">
                             <span><i class="fa-solid fa-chart-pie text-indigo-500 mr-2"></i>Populasi Kelompok</span>
                         </h3>
-                        <div class="h-60 relative">
+                        <div class="h-48 sm:h-60 relative">
                             <canvas id="flockChart"></canvas>
                         </div>
                     </div>
@@ -204,75 +204,74 @@
             </div>
 
             <!-- TAB 2: MANAJEMEN PENETASAN -->
-            <div v-if="activeTab === 'penetasan'" class="space-y-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4.5 rounded-2xl border border-slate-200 shadow-sm">
+            <div v-if="activeTab === 'penetasan'" class="space-y-4 sm:space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 bg-white p-3.5 sm:p-4.5 rounded-2xl border border-slate-200 shadow-sm">
                     <div>
-                        <h3 class="font-bold text-slate-800 text-base">Inkubator & Mesin Tetas (Siklus 21 Hari)</h3>
-                        <p class="text-xs text-slate-500">Otomatisasi estimasi 21 hari pengeraman & pemindahan H+1 ke Kandang Brooding.</p>
+                        <h3 class="font-bold text-slate-800 text-sm sm:text-base">Inkubator & Mesin Tetas (21 Hari)</h3>
+                        <p class="text-xs text-slate-500">Pantau proses pengeraman telur tetas hingga menjadi DOC.</p>
                     </div>
                     <button @click="openModal('penetasan')" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
                         <i class="fa-solid fa-plus"></i> Tambah Inkubasi Baru
                     </button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div v-for="b in penetasanList" :key="b.id" class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-4">
-                        <div class="flex justify-between items-start">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
+                    <div v-for="b in penetasanList" :key="b.id" class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-sm space-y-3 sm:space-y-4">
+                        <div class="flex justify-between items-start gap-2">
                             <div>
-                                <span class="px-2.5 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider mr-1" 
+                                <span class="px-2 py-0.5 text-[9px] sm:text-[10px] font-bold rounded-full uppercase tracking-wider" 
                                     :class="b.status === 'Berjalan' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'">
                                     {{ b.status }}
                                 </span>
-                                <span class="px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider bg-indigo-100 text-indigo-800">
-                                    {{ b.tipeAyam || 'Pedaging' }}
+                                <span class="ml-1.5 px-2 py-0.5 text-[9px] sm:text-[10px] font-bold rounded-full uppercase tracking-wider bg-slate-100 text-slate-700">
+                                    {{ b.tipe || 'Pedaging' }}
                                 </span>
-                                <h4 class="font-bold text-slate-800 text-lg mt-2 leading-tight">{{ b.namaBatch }}</h4>
+                                <h4 class="font-bold text-slate-800 text-base sm:text-lg mt-1.5 leading-tight">{{ b.namaBatch }}</h4>
                                 <p class="text-xs text-slate-400">Mesin: {{ b.mesin }}</p>
                             </div>
-                            <div class="flex items-center gap-1">
-                                <button @click="editPenetasan(b)" class="text-slate-400 hover:text-blue-600 p-1.5 rounded-lg hover:bg-blue-50 transition" title="Edit Batch">
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button @click="editPenetasan(b)" class="text-slate-400 hover:text-blue-600 p-1.5 rounded-lg hover:bg-blue-50 transition">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
-                                <button @click="confirmDeletePenetasan(b.id)" class="text-slate-400 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 transition" title="Hapus Batch">
+                                <button @click="confirmDeletePenetasan(b.id)" class="text-slate-400 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 transition">
                                     <i class="fa-solid fa-trash"></i>
                                 </button>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-xl text-xs">
+                        <div class="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 sm:p-3 rounded-xl text-xs">
                             <div>
-                                <span class="text-slate-400 block text-[10px] uppercase font-bold">Telur Masuk</span>
+                                <span class="text-slate-400 block text-[9px] sm:text-[10px] uppercase font-bold">Tgl Masuk</span>
                                 <span class="font-semibold text-slate-700">{{ formatDate(b.tglMasuk) }}</span>
                             </div>
                             <div>
-                                <span class="text-slate-400 block text-[10px] uppercase font-bold">Est. Tetas (21 Hr)</span>
-                                <span class="font-bold text-emerald-600">{{ formatDate(b.estMenetas) }}</span>
+                                <span class="text-slate-400 block text-[9px] sm:text-[10px] uppercase font-bold">Est. Menetas</span>
+                                <span class="font-semibold text-emerald-600">{{ formatDate(b.estMenetas) }}</span>
                             </div>
-                            <div class="mt-2">
-                                <span class="text-slate-400 block text-[10px] uppercase font-bold">Total Telur</span>
-                                <span class="font-bold text-slate-800 text-sm">{{ b.jumlahTelur }} Butir</span>
+                            <div class="mt-1">
+                                <span class="text-slate-400 block text-[9px] sm:text-[10px] uppercase font-bold">Total Telur</span>
+                                <span class="font-bold text-slate-800 text-xs sm:text-sm">{{ b.jumlahTelur }} Butir</span>
                             </div>
-                            <div class="mt-2">
-                                <span class="text-slate-400 block text-[10px] uppercase font-bold">Daya Tetas</span>
-                                <span class="font-bold text-emerald-600 text-sm">{{ b.status === 'Selesai' ? (b.dayaTetas || 0) + '%' : '-' }}</span>
+                            <div class="mt-1">
+                                <span class="text-slate-400 block text-[9px] sm:text-[10px] uppercase font-bold">Daya Tetas</span>
+                                <span class="font-bold text-emerald-600 text-xs sm:text-sm">{{ b.status === 'Selesai' ? (b.dayaTetas || 0) + '%' : '-' }}</span>
                             </div>
                         </div>
 
-                        <!-- DETAIL FERTILITAS JIKA SUDAH PANEN -->
-                        <div v-if="b.status === 'Selesai'" class="bg-blue-50/60 p-3 rounded-xl text-xs space-y-1.5 border border-blue-100">
-                            <div class="flex justify-between items-center text-[11px]">
+                        <div v-if="b.status === 'Selesai'" class="bg-blue-50/60 p-2.5 rounded-xl text-xs space-y-1 border border-blue-100">
+                            <div class="flex justify-between items-center text-[10px] sm:text-[11px]">
                                 <span class="text-slate-500">Fertilitas Telur:</span>
                                 <span class="font-bold text-blue-700">{{ b.telurFertil || 0 }} Fertil / {{ b.telurInfertil || 0 }} Infertil ({{ b.fertilitasPct || 0 }}%)</span>
                             </div>
-                            <div class="flex justify-between items-center text-[11px]">
+                            <div class="flex justify-between items-center text-[10px] sm:text-[11px]">
                                 <span class="text-slate-500">Hasil Panen DOC:</span>
-                                <span class="font-extrabold text-emerald-700">{{ b.menetasCount || 0 }} Ekor DOC ({{ b.tipeAyam || 'Pedaging' }})</span>
+                                <span class="font-extrabold text-emerald-700">{{ b.menetasCount || 0 }} Ekor DOC</span>
                             </div>
                         </div>
 
-                        <div v-if="b.status === 'Berjalan'" class="pt-1">
+                        <div v-if="b.status === 'Berjalan'" class="pt-0.5">
                             <button @click="openFinishPenetasanModal(b)" class="w-full py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-xl text-xs transition border border-blue-200 flex items-center justify-center gap-1.5">
-                                <i class="fa-solid fa-check-circle"></i> Selesaikan & Panen ke Brooding
+                                <i class="fa-solid fa-check-circle"></i> Selesaikan & Panen DOC
                             </button>
                         </div>
                     </div>
@@ -280,139 +279,116 @@
             </div>
 
             <!-- TAB 3: MANAJEMEN KELOMPOK AYAM & KALKULATOR HPP -->
-            <div v-if="activeTab === 'flock'" class="space-y-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4.5 rounded-2xl border border-slate-200 shadow-sm">
+            <div v-if="activeTab === 'flock'" class="space-y-4 sm:space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 bg-white p-3.5 sm:p-4.5 rounded-2xl border border-slate-200 shadow-sm">
                     <div>
-                        <h3 class="font-bold text-slate-800 text-base">Kelompok Ayam & Analisis HPP</h3>
-                        <p class="text-xs text-slate-500">Bisa memilih fase awal (DOC, Remaja/Grower, Indukan) dan dapat diedit sewaktu-waktu.</p>
+                        <h3 class="font-bold text-slate-800 text-sm sm:text-base">Kelompok Ayam & Analisis HPP</h3>
+                        <p class="text-xs text-slate-500">Manajemen batch pedaging & petelur beserta kalkulasi HPP dan proyeksi laba.</p>
                     </div>
                     <button @click="openModal('flock')" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
                         <i class="fa-solid fa-plus"></i> Tambah Kelompok Baru
                     </button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    <div v-for="f in flockList" :key="f.id" class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-4 flex flex-col justify-between">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                    <div v-for="f in flockList" :key="f.id" class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-sm space-y-3.5 flex flex-col justify-between">
                         <div class="space-y-3">
-                            <div class="flex justify-between items-start">
+                            <div class="flex justify-between items-start gap-2">
                                 <div>
-                                    <span class="px-2.5 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider mr-1"
+                                    <span class="px-2 py-0.5 text-[9px] sm:text-[10px] font-bold rounded-full uppercase tracking-wider mr-1"
                                         :class="f.tipe === 'Pedaging' ? 'bg-amber-100 text-amber-800' : 'bg-purple-100 text-purple-800'">
                                         {{ f.tipe }}
                                     </span>
-                                    
-                                    <!-- BADGE FASE OTOMATIS BERDASARKAN UMUR & FASE AWAL -->
-                                    <span class="px-2.5 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider"
-                                        :class="getFaseStyle(f)">
-                                        {{ getFaseAktif(f) }}
+                                    <span class="px-2 py-0.5 text-[9px] sm:text-[10px] font-bold rounded-full uppercase font-bold"
+                                        :class="getFaseBadgeClass(f)">
+                                        {{ getFaseLabel(f) }}
                                     </span>
-
-                                    <h4 class="font-bold text-slate-800 text-lg mt-2 leading-tight">{{ f.namaFlock }}</h4>
-                                    <p class="text-xs text-slate-500 font-semibold mt-0.5">
-                                        <i class="fa-solid fa-warehouse mr-1 text-slate-400"></i>{{ f.kandang }}
-                                    </p>
-                                    <p class="text-[11px] text-slate-400">Masuk Kandang: {{ formatDate(f.tglMulai) }}</p>
-                                    
-                                    <!-- BADGE UMUR AYAM & HARGA PAKAN DINAMIS -->
-                                    <div class="flex flex-wrap gap-1.5 mt-2">
-                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                                            <i class="fa-regular fa-clock mr-1"></i>Umur: {{ getUmurAyamHari(f.tglMulai, f.umurAwalHari) }} Hari
-                                        </span>
-                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" title="Harga pakan aktif sesuai usia">
-                                            Pakan: {{ formatRupiah(getHargaPakanAktif(f)) }}/kg 
-                                            ({{ getUmurAyamHari(f.tglMulai, f.umurAwalHari) <= 30 ? 'Starter' : 'Grower' }})
-                                        </span>
-                                    </div>
+                                    <h4 class="font-bold text-slate-800 text-base sm:text-lg mt-1.5 leading-tight">{{ f.namaFlock }}</h4>
+                                    <p class="text-xs text-slate-400">Kandang: {{ f.kandang }} | Masuk: {{ formatDate(f.tglMulai) }}</p>
                                 </div>
-                                <div class="flex items-center gap-1">
-                                    <button @click="editFlock(f)" class="text-slate-400 hover:text-blue-600 p-1.5 rounded-lg hover:bg-blue-50 transition" title="Edit Kelompok">
+                                <div class="flex items-center gap-1 shrink-0">
+                                    <button @click="editFlock(f)" class="text-slate-400 hover:text-blue-600 p-1.5 rounded-lg hover:bg-blue-50 transition">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </button>
-                                    <button @click="confirmDeleteFlock(f.id)" class="text-slate-400 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 transition" title="Hapus Kelompok">
+                                    <button @click="confirmDeleteFlock(f.id)" class="text-slate-400 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 transition">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-xl text-center">
+                            <div class="grid grid-cols-3 gap-1.5 bg-slate-50 p-2.5 rounded-xl text-center">
                                 <div>
-                                    <span class="text-[10px] text-slate-400 block uppercase font-bold">Awal</span>
-                                    <span class="font-semibold text-slate-700 text-sm">{{ f.jumlahAwal }}</span>
+                                    <span class="text-[9px] sm:text-[10px] text-slate-400 block uppercase font-bold">Awal</span>
+                                    <span class="font-semibold text-slate-700 text-xs sm:text-sm">{{ f.jumlahAwal }}</span>
                                 </div>
                                 <div>
-                                    <span class="text-[10px] text-slate-400 block uppercase font-bold">Saat Ini</span>
-                                    <span class="font-bold text-emerald-600 text-sm">{{ f.jumlahSaatIni }}</span>
+                                    <span class="text-[9px] sm:text-[10px] text-slate-400 block uppercase font-bold">Saat Ini</span>
+                                    <span class="font-bold text-emerald-600 text-xs sm:text-sm">{{ f.jumlahSaatIni }}</span>
                                 </div>
                                 <div>
-                                    <span class="text-[10px] text-slate-400 block uppercase font-bold">Mati/Afkir</span>
-                                    <span class="font-semibold text-rose-500 text-sm">{{ f.jumlahAwal - f.jumlahSaatIni }}</span>
+                                    <span class="text-[9px] sm:text-[10px] text-slate-400 block uppercase font-bold">Mati/Afkir</span>
+                                    <span class="font-semibold text-rose-500 text-xs sm:text-sm">{{ f.jumlahAwal - f.jumlahSaatIni }}</span>
                                 </div>
                             </div>
 
-                            <!-- RINGKASAN PAKAN & FCR -->
-                            <div class="text-xs space-y-1.5 text-slate-600 border-t pt-3">
-                                <div class="flex justify-between">
+                            <div class="text-xs space-y-1 text-slate-600 border-t pt-2.5">
+                                <div class="flex justify-between items-center text-[11px]">
+                                    <span class="text-slate-400">Umur Akumulasi:</span>
+                                    <span class="font-bold text-slate-800">{{ hitungUmurAyamHari(f) }} Hari</span>
+                                </div>
+                                <div class="flex justify-between items-center text-[11px]">
                                     <span class="text-slate-400">Total Pakan Dikonsumsi:</span>
                                     <span class="font-bold text-slate-800">{{ getPakanTotalByFlock(f.id) }} Kg</span>
                                 </div>
-                                <div class="flex justify-between">
-                                    <span class="text-slate-400">Estimasi FCR Pakan:</span>
-                                    <span class="font-bold text-indigo-600">{{ hitungFCR(f) }}</span>
+                                <div class="flex justify-between items-center text-[11px]">
+                                    <span class="text-slate-400">Tarif Pakan Aktif:</span>
+                                    <span class="font-bold text-emerald-700">{{ formatRupiah(getHargaPakanAktif(f)) }}/Kg</span>
                                 </div>
                             </div>
 
-                            <!-- PANEL KALKULATOR HPP & PROYEKSI LABA -->
-                            <div class="bg-emerald-50/70 border border-emerald-200/60 p-3.5 rounded-xl space-y-2 text-xs">
+                            <!-- PANEL KALKULATOR HPP -->
+                            <div class="bg-emerald-50/70 border border-emerald-200/60 p-3 rounded-xl space-y-2 text-xs">
                                 <div class="flex items-center justify-between font-bold text-emerald-900 border-b border-emerald-200/80 pb-1.5">
-                                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-calculator text-emerald-600"></i> Analisis HPP Batch</span>
-                                    <span class="text-[11px] bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-md">Otomatis</span>
+                                    <span class="flex items-center gap-1.5 text-[11px] sm:text-xs"><i class="fa-solid fa-calculator text-emerald-600"></i> Analisis HPP Batch</span>
+                                    <span class="text-[10px] bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded">Otomatis</span>
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-2 text-[11px] pt-1">
+                                <div class="grid grid-cols-2 gap-2 text-[10px] sm:text-[11px] pt-0.5">
                                     <div>
                                         <span class="text-slate-500 block">HPP / Ekor:</span>
-                                        <span class="font-extrabold text-slate-900 text-xs">{{ formatRupiah(hitungHPP(f).hppPerEkor) }}</span>
+                                        <span class="font-extrabold text-slate-900 text-xs sm:text-sm">{{ formatRupiah(hitungHPP(f).hppPerEkor) }}</span>
                                     </div>
                                     <div>
                                         <span class="text-slate-500 block">HPP / Kg:</span>
-                                        <span class="font-extrabold text-emerald-700 text-xs">{{ formatRupiah(hitungHPP(f).hppPerKg) }}</span>
+                                        <span class="font-extrabold text-emerald-700 text-xs sm:text-sm">{{ formatRupiah(hitungHPP(f).hppPerKg) }}</span>
                                     </div>
                                 </div>
 
-                                <!-- Input Simulasi Panen & Harga Jual -->
-                                <div class="grid grid-cols-2 gap-2 pt-2 border-t border-emerald-200/60">
+                                <div class="grid grid-cols-2 gap-2 pt-1.5 border-t border-emerald-200/60">
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-600">Avg Bobot (Kg):</label>
-                                        <input v-model.number="f.avgBobotKg" type="number" step="0.1" min="0.1" class="w-full p-1.5 rounded-lg border border-emerald-300 bg-white text-xs font-bold outline-none focus:ring-1 focus:ring-emerald-500">
+                                        <input v-model.number="f.avgBobotKg" type="number" step="0.1" min="0.1" class="w-full p-1 rounded-lg border border-emerald-300 bg-white text-xs font-bold outline-none focus:ring-1 focus:ring-emerald-500">
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-600">Harga Jual/Kg:</label>
-                                        <input v-model.number="f.hargaJualPerKg" type="number" step="1000" min="0" class="w-full p-1.5 rounded-lg border border-emerald-300 bg-white text-xs font-bold outline-none focus:ring-1 focus:ring-emerald-500">
+                                        <input v-model.number="f.hargaJualPerKg" type="number" step="1000" min="0" class="w-full p-1 rounded-lg border border-emerald-300 bg-white text-xs font-bold outline-none focus:ring-1 focus:ring-emerald-500">
                                     </div>
                                 </div>
 
-                                <!-- Hasil Estimasi Keuntungan -->
-                                <div class="bg-white p-2.5 rounded-lg border border-emerald-200 mt-2 space-y-1">
-                                    <div class="flex justify-between items-center text-[11px]">
+                                <div class="bg-white p-2 rounded-lg border border-emerald-200 mt-1 space-y-0.5">
+                                    <div class="flex justify-between items-center text-[10px]">
                                         <span class="text-slate-500">Est. Omzet Total:</span>
                                         <span class="font-bold text-slate-800">{{ formatRupiah(hitungProyeksiLaba(f).estOmzet) }}</span>
                                     </div>
-                                    <div class="flex justify-between items-center text-xs font-extrabold">
+                                    <div class="flex justify-between items-center text-[11px] font-extrabold">
                                         <span>Proyeksi Laba Bersih:</span>
                                         <span :class="hitungProyeksiLaba(f).labaBersih >= 0 ? 'text-emerald-600' : 'text-rose-600'">
                                             {{ formatRupiah(hitungProyeksiLaba(f).labaBersih) }}
                                         </span>
                                     </div>
-                                    <div class="flex justify-between items-center text-[10px] text-slate-500 pt-0.5">
-                                        <span>Margin Keuntungan:</span>
-                                        <span class="font-bold" :class="hitungProyeksiLaba(f).marginPct >= 0 ? 'text-emerald-600' : 'text-rose-600'">
-                                            {{ hitungProyeksiLaba(f).marginPct }}%
-                                        </span>
-                                    </div>
                                 </div>
 
-                                <!-- Tombol Ekspor HPP (PDF) -->
-                                <button @click="exportHppPdf(f)" class="w-full mt-2 py-2 px-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm">
+                                <button @click="exportHppPdf(f)" class="w-full mt-1 py-2 px-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm">
                                     <i class="fa-solid fa-file-pdf"></i> Ekspor Laporan HPP (PDF)
                                 </button>
                             </div>
@@ -421,145 +397,137 @@
                 </div>
             </div>
 
-            <!-- TAB 4: FORMULASI & KALKULATOR PAKAN PER FASE (DAPAT DIEDIT & DISIMPAN) -->
-            <div v-if="activeTab === 'pakan'" class="space-y-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4.5 rounded-2xl border border-slate-200 shadow-sm">
-                    <div>
-                        <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
-                            <i class="fa-solid fa-wheat-awn text-amber-500"></i> Formulasi & Preset Pakan Per Fase
-                        </h3>
-                        <p class="text-xs text-slate-500">Pilih, edit bahan baku/persentase/harga, dan simpan preset pakan per fase pertumbuhan.</p>
-                    </div>
-                    
-                    <!-- TOMBOL PILIHAN PRESET FASE PAKAN -->
-                    <div class="flex flex-wrap gap-2 w-full sm:w-auto">
-                        <button @click="pilihPresetPakan('starter')" 
-                            :class="selectedPresetKey === 'starter' ? 'bg-amber-600 text-white shadow-md' : 'bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100'"
-                            class="flex-1 sm:flex-none px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
-                            <i class="fa-solid fa-feather"></i> Starter (0-30 Hari)
-                        </button>
-                        <button @click="pilihPresetPakan('grower')" 
-                            :class="selectedPresetKey === 'grower' ? 'bg-emerald-600 text-white shadow-md' : 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100'"
-                            class="flex-1 sm:flex-none px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
-                            <i class="fa-solid fa-drumstick-bite"></i> Grower (31-120 Hari)
-                        </button>
-                        <button @click="pilihPresetPakan('layer')" 
-                            :class="selectedPresetKey === 'layer' ? 'bg-purple-600 text-white shadow-md' : 'bg-purple-50 text-purple-800 border border-purple-300 hover:bg-purple-100'"
-                            class="flex-1 sm:flex-none px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
-                            <i class="fa-solid fa-egg"></i> Indukan / Layer (>120 Hari)
-                        </button>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- PANEL FORMULASI BAHAN BAKU EDITABLE -->
-                    <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-3">
-                            <div>
-                                <h4 class="font-bold text-slate-800 text-sm">
-                                    Bahan Baku Preset: <span class="text-emerald-700 capitalize font-extrabold">{{ getNamaPresetAktif() }}</span>
-                                </h4>
-                                <p class="text-[11px] text-slate-400">Ubah porsi %, harga, atau protein lalu simpan preset ini.</p>
-                            </div>
-                            <div class="flex items-center gap-2 w-full sm:w-auto">
-                                <button @click="tambahBahanBaku" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-lg text-xs flex items-center gap-1">
-                                    <i class="fa-solid fa-plus"></i> Tambah Bahan
-                                </button>
-                                <button @click="simpanPresetAktif" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs flex items-center gap-1 shadow-sm">
-                                    <i class="fa-solid fa-floppy-disk"></i> Simpan Preset Fase
-                                </button>
-                            </div>
+            <!-- TAB 4: FORMULASI PAKAN -->
+            <div v-if="activeTab === 'pakan'" class="space-y-4 sm:space-y-6">
+                <div class="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b pb-3">
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
+                                <i class="fa-solid fa-wheat-awn text-amber-500"></i> Formulasi & Racikan Pakan Custom
+                            </h3>
+                            <p class="text-xs text-slate-500">Hitung estimasi harga pakan campuran per kg & kadar protein kasar.</p>
                         </div>
 
-                        <div class="space-y-3">
-                            <div v-for="(b, idx) in activeFormula.bahanList" :key="idx" class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-                                <div class="flex items-center justify-between gap-2">
-                                    <input v-model="b.nama" type="text" placeholder="Nama Bahan Baku" class="font-bold text-xs text-slate-800 bg-white p-2 rounded-lg border border-slate-300 flex-1 outline-none focus:ring-1 focus:ring-emerald-500">
-                                    <button @click="hapusBahanBaku(idx)" class="text-rose-500 p-1.5 hover:bg-rose-50 rounded-lg" title="Hapus Bahan"><i class="fa-solid fa-trash"></i></button>
-                                </div>
-                                <div class="grid grid-cols-3 gap-2 text-xs">
-                                    <div>
-                                        <label class="block text-[10px] text-slate-500 font-bold">Proporsi (%)</label>
-                                        <input v-model.number="b.porsiPct" type="number" step="1" min="0" max="100" class="w-full p-2 bg-white rounded-lg border border-slate-300 font-bold outline-none focus:ring-1 focus:ring-emerald-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] text-slate-500 font-bold">Harga/Kg (Rp)</label>
-                                        <input v-model.number="b.hargaPerKg" type="number" step="500" min="0" class="w-full p-2 bg-white rounded-lg border border-slate-300 font-bold text-emerald-700 outline-none focus:ring-1 focus:ring-emerald-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] text-slate-500 font-bold">Protein (%)</label>
-                                        <input v-model.number="b.proteinPct" type="number" step="0.5" min="0" class="w-full p-2 bg-white rounded-lg border border-slate-300 font-bold text-indigo-700 outline-none focus:ring-1 focus:ring-emerald-500">
-                                    </div>
-                                </div>
-                            </div>
+                        <!-- TOMBOL PRESET FASE PAKAN (RESPONSIF DENGAN "Layer (>120 Hari)") -->
+                        <div class="grid grid-cols-3 gap-1.5 w-full sm:w-auto">
+                            <button @click="loadPakanPreset('starter')" 
+                                :class="activePakanPreset === 'starter' ? 'bg-amber-600 text-white shadow' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                class="py-2 px-2 rounded-xl text-[11px] font-bold text-center transition truncate">
+                                Starter (0-30 Hari)
+                            </button>
+                            <button @click="loadPakanPreset('grower')" 
+                                :class="activePakanPreset === 'grower' ? 'bg-emerald-600 text-white shadow' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                class="py-2 px-2 rounded-xl text-[11px] font-bold text-center transition truncate">
+                                Grower (31-120 Hari)
+                            </button>
+                            <button @click="loadPakanPreset('layer')" 
+                                :class="activePakanPreset === 'layer' ? 'bg-purple-600 text-white shadow' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                class="py-2 px-2 rounded-xl text-[11px] font-bold text-center transition truncate">
+                                Layer (>120 Hari)
+                            </button>
                         </div>
                     </div>
 
-                    <!-- PANEL RINGKASAN & INTEGRASI HARGA KE KELOMPOK -->
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-5 flex flex-col justify-between">
-                        <div class="space-y-4">
-                            <h4 class="font-bold text-slate-800 text-sm border-b pb-2">Analisis & Penerapan Preset</h4>
+                    <!-- TABEL FORMULASI BAHAN BAKU -->
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Komponen Bahan Baku Racikan:</span>
+                            <button @click="addBahanPakan" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 transition">
+                                <i class="fa-solid fa-plus text-[10px]"></i> Tambah Bahan
+                            </button>
+                        </div>
 
-                            <!-- STATUS PROPORSI 100% -->
-                            <div class="p-3.5 rounded-xl text-xs space-y-1" :class="totalPersenFormulasi === 100 ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-rose-50 border border-rose-200 text-rose-900'">
-                                <div class="flex justify-between items-center font-bold">
-                                    <span>Total Proporsi Mix:</span>
-                                    <span class="text-sm font-extrabold">{{ totalPersenFormulasi }}%</span>
-                                </div>
-                                <p v-if="totalPersenFormulasi !== 100" class="text-[10px] text-rose-600 font-semibold">
-                                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Total persentase harus genap 100%!
-                                </p>
-                                <p v-else class="text-[10px] text-emerald-600 font-semibold">
-                                    <i class="fa-solid fa-circle-check mr-1"></i> Proporsi formulasi seimbang (100%).
-                                </p>
+                        <div class="overflow-x-auto border rounded-xl">
+                            <table class="w-full text-left text-xs text-slate-600">
+                                <thead class="bg-slate-50 text-slate-700 font-bold border-b">
+                                    <tr>
+                                        <th class="p-2.5">Nama Bahan</th>
+                                        <th class="p-2.5 w-24">Proporsi (%)</th>
+                                        <th class="p-2.5 w-28">Harga/Kg (Rp)</th>
+                                        <th class="p-2.5 w-24">Protein (%)</th>
+                                        <th class="p-2.5 w-12 text-center">Hapus</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <tr v-for="(b, idx) in currentFormulasiPakan" :key="idx" class="hover:bg-slate-50">
+                                        <td class="p-2">
+                                            <input v-model="b.nama" type="text" class="w-full p-2 border border-slate-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-emerald-500 font-semibold">
+                                        </td>
+                                        <td class="p-2">
+                                            <input v-model.number="b.rasio" type="number" min="0" max="100" class="w-full p-2 border border-slate-200 rounded-lg text-xs font-bold outline-none focus:ring-1 focus:ring-emerald-500">
+                                        </td>
+                                        <td class="p-2">
+                                            <input v-model.number="b.harga" type="number" min="0" step="500" class="w-full p-2 border border-slate-200 rounded-lg text-xs font-bold outline-none focus:ring-1 focus:ring-emerald-500">
+                                        </td>
+                                        <td class="p-2">
+                                            <input v-model.number="b.protein" type="number" min="0" step="0.1" class="w-full p-2 border border-slate-200 rounded-lg text-xs font-bold outline-none focus:ring-1 focus:ring-emerald-500">
+                                        </td>
+                                        <td class="p-2 text-center">
+                                            <button @click="removeBahanPakan(idx)" class="text-slate-300 hover:text-rose-500 p-1"><i class="fa-solid fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <button @click="savePakanPreset" class="py-2.5 px-4 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm">
+                                <i class="fa-solid fa-floppy-disk"></i> Simpan Preset {{ activePakanPreset.toUpperCase() }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- RINGKASAN RACIKAN & PENERAPAN PADA KELOMPOK AYAM -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 border-t pt-4">
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 text-xs">
+                            <span class="font-bold text-slate-800 block text-xs border-b pb-1">Hasil Formula Racikan:</span>
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-500">Total Proporsi Mix:</span>
+                                <span class="font-bold" :class="totalPakanRasio === 100 ? 'text-emerald-600' : 'text-rose-600'">
+                                    {{ totalPakanRasio }}% {{ totalPakanRasio !== 100 ? '(Harus 100%)' : '' }}
+                                </span>
                             </div>
-
-                            <!-- ESTIMASI HARGA PAKAN PER KG -->
-                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-1">
-                                <span class="text-[10px] font-bold uppercase text-slate-400">Hasil Harga Racikan</span>
-                                <div class="text-2xl font-black text-emerald-700">{{ formatRupiah(hargaTotalPakanCampuran) }} <span class="text-xs font-semibold text-slate-500">/ Kg</span></div>
+                            <div class="flex justify-between items-center text-sm font-extrabold">
+                                <span>Estimasi Harga Pakan:</span>
+                                <span class="text-emerald-700">{{ formatRupiah(hasilPakanPerKg) }} / Kg</span>
                             </div>
-
-                            <!-- ESTIMASI KANDUNGAN PROTEIN -->
-                            <div class="bg-indigo-50/70 p-4 rounded-2xl border border-indigo-100 space-y-1">
-                                <span class="text-[10px] font-bold uppercase text-indigo-400">Estimasi Protein Kasar</span>
-                                <div class="text-2xl font-black text-indigo-800">{{ proteinTotalPakanCampuran }}%</div>
-                                <p class="text-[10px] font-semibold text-indigo-600 mt-1">
-                                    Rekomendasi: Starter (19-21%), Grower (15-17%), Layer (16-18%)
-                                </p>
+                            <div class="flex justify-between items-center text-xs font-bold text-indigo-700">
+                                <span>Estimasi Protein Kasar:</span>
+                                <span>{{ hasilProteinPakan }}%</span>
                             </div>
+                        </div>
 
-                            <!-- FORM INTEGRASI KE KELOMPOK AYAM -->
-                            <div class="border-t pt-4 space-y-3">
-                                <h5 class="font-bold text-slate-800 text-xs">Terapkan Harga Ke Kelompok Ayam:</h5>
+                        <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 space-y-2.5 text-xs">
+                            <span class="font-bold text-emerald-900 block text-xs border-b border-emerald-200 pb-1">Terapkan Harga Ke HPP Kelompok Ayam:</span>
+                            <div class="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-600 mb-1">Pilih Kelompok Ayam Target</label>
-                                    <select v-model="pakanApplyForm.flockId" class="w-full p-2.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none">
+                                    <label class="block text-[10px] font-bold text-slate-700 mb-1">Target Kelompok:</label>
+                                    <select v-model="targetFlockPakanId" class="w-full p-2 rounded-lg border border-emerald-300 bg-white font-semibold text-xs outline-none">
                                         <option value="" disabled>-- Pilih Kelompok --</option>
-                                        <option v-for="f in flockList" :key="f.id" :value="f.id">{{ f.namaFlock }} ({{ f.kandang }})</option>
+                                        <option v-for="f in flockList" :key="f.id" :value="f.id">{{ f.namaFlock }}</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-600 mb-1">Target Pakan Usia</label>
-                                    <select v-model="pakanApplyForm.targetAge" class="w-full p-2.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none">
-                                        <option value="doc">Pakan Starter (Usia 0 - 30 Hari)</option>
-                                        <option value="grower">Pakan Grower (Usia > 30 Hari)</option>
+                                    <label class="block text-[10px] font-bold text-slate-700 mb-1">Fase Target:</label>
+                                    <select v-model="targetFasePakanType" class="w-full p-2 rounded-lg border border-emerald-300 bg-white font-semibold text-xs outline-none">
+                                        <option value="starter">Pakan Starter (0-30 Hari)</option>
+                                        <option value="grower">Pakan Grower (>30 Hari)</option>
                                     </select>
                                 </div>
-                                <button @click="terapkanHargaPakanKeFlock" :disabled="!pakanApplyForm.flockId || totalPersenFormulasi !== 100" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white font-bold rounded-xl text-xs transition shadow-md shadow-emerald-600/20">
-                                    <i class="fa-solid fa-check"></i> Terapkan Ke HPP Batch
-                                </button>
                             </div>
+                            <button @click="applyPakanToFlock" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-emerald-600/20">
+                                <i class="fa-solid fa-check"></i> Terapkan Ke HPP Batch
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- TAB 5: CATATAN HARIAN -->
-            <div v-if="activeTab === 'harian'" class="space-y-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4.5 rounded-2xl border border-slate-200 shadow-sm">
+            <div v-if="activeTab === 'harian'" class="space-y-4 sm:space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 bg-white p-3.5 sm:p-4.5 rounded-2xl border border-slate-200 shadow-sm">
                     <div>
-                        <h3 class="font-bold text-slate-800 text-base">Jurnal Record Harian Kandang</h3>
+                        <h3 class="font-bold text-slate-800 text-sm sm:text-base">Jurnal Record Harian Kandang</h3>
                         <p class="text-xs text-slate-500">Log pakan, produksi telur, dan kematian harian.</p>
                     </div>
                     <button @click="openModal('harian')" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
@@ -572,26 +540,26 @@
                         <table class="w-full text-left text-xs text-slate-600">
                             <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
                                 <tr>
-                                    <th class="p-3.5">Tanggal</th>
-                                    <th class="p-3.5">Kelompok / Kandang</th>
-                                    <th class="p-3.5">Pakan (Kg)</th>
-                                    <th class="p-3.5">Telur Bagus</th>
-                                    <th class="p-3.5">Telur Rusak</th>
-                                    <th class="p-3.5">Kematian</th>
-                                    <th class="p-3.5">Catatan</th>
-                                    <th class="p-3.5 text-center">Aksi</th>
+                                    <th class="p-3">Tanggal</th>
+                                    <th class="p-3">Kelompok / Kandang</th>
+                                    <th class="p-3">Pakan (Kg)</th>
+                                    <th class="p-3">Telur Bagus</th>
+                                    <th class="p-3">Telur Rusak</th>
+                                    <th class="p-3">Kematian</th>
+                                    <th class="p-3">Catatan</th>
+                                    <th class="p-3 text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
-                                <tr v-for="h in sortedHarianList" :key="h.id" class="hover:bg-slate-50/80 transition">
-                                    <td class="p-3.5 font-semibold text-slate-800 whitespace-nowrap">{{ formatDate(h.tanggal) }}</td>
-                                    <td class="p-3.5"><span class="font-bold text-emerald-700">{{ getFlockName(h.flockId) }}</span></td>
-                                    <td class="p-3.5 font-bold text-slate-800">{{ h.pakanKg }} Kg</td>
-                                    <td class="p-3.5"><span class="text-emerald-600 font-bold">{{ h.telurBagus }}</span> Butir</td>
-                                    <td class="p-3.5"><span class="text-amber-600 font-bold">{{ h.telurRusak }}</span> Butir</td>
-                                    <td class="p-3.5"><span class="text-rose-600 font-bold">{{ h.kematian }}</span> Ekor</td>
-                                    <td class="p-3.5 text-slate-400 italic max-w-xs truncate">{{ h.catatan || '-' }}</td>
-                                    <td class="p-3.5 text-center">
+                                <tr v-for="h in sortedHarianList" :key="h.id" class="hover:bg-slate-50 transition">
+                                    <td class="p-3 font-semibold text-slate-800 whitespace-nowrap">{{ formatDate(h.tanggal) }}</td>
+                                    <td class="p-3"><span class="font-bold text-emerald-700">{{ getFlockName(h.flockId) }}</span></td>
+                                    <td class="p-3 font-bold text-slate-800">{{ h.pakanKg }} Kg</td>
+                                    <td class="p-3"><span class="text-emerald-600 font-bold">{{ h.telurBagus }}</span> Butir</td>
+                                    <td class="p-3"><span class="text-amber-600 font-bold">{{ h.telurRusak }}</span> Butir</td>
+                                    <td class="p-3"><span class="text-rose-600 font-bold">{{ h.kematian }}</span> Ekor</td>
+                                    <td class="p-3 text-slate-400 italic max-w-xs truncate">{{ h.catatan || '-' }}</td>
+                                    <td class="p-3 text-center">
                                         <button @click="confirmDeleteHarian(h.id)" class="text-slate-300 hover:text-rose-500 p-1"><i class="fa-solid fa-trash"></i></button>
                                     </td>
                                 </tr>
@@ -605,10 +573,10 @@
             </div>
 
             <!-- TAB 6: KEUANGAN -->
-            <div v-if="activeTab === 'keuangan'" class="space-y-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4.5 rounded-2xl border border-slate-200 shadow-sm no-print">
+            <div v-if="activeTab === 'keuangan'" class="space-y-4 sm:space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 bg-white p-3.5 sm:p-4.5 rounded-2xl border border-slate-200 shadow-sm no-print">
                     <div>
-                        <h3 class="font-bold text-slate-800 text-base">Arus Kas & Laporan Keuangan</h3>
+                        <h3 class="font-bold text-slate-800 text-sm sm:text-base">Arus Kas & Laporan Keuangan</h3>
                         <p class="text-xs text-slate-500">Pencatatan pemasukan penjualan dan pengeluaran operasional.</p>
                     </div>
                     <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -621,18 +589,18 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Pemasukan</span>
-                        <div class="text-2xl font-extrabold text-emerald-600 mt-1">{{ formatRupiah(totalPemasukan) }}</div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Pemasukan</span>
+                        <div class="text-xl sm:text-2xl font-extrabold text-emerald-600 mt-0.5 truncate">{{ formatRupiah(totalPemasukan) }}</div>
                     </div>
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Pengeluaran</span>
-                        <div class="text-2xl font-extrabold text-rose-600 mt-1">{{ formatRupiah(totalPengeluaran) }}</div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Pengeluaran</span>
+                        <div class="text-xl sm:text-2xl font-extrabold text-rose-600 mt-0.5 truncate">{{ formatRupiah(totalPengeluaran) }}</div>
                     </div>
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Laba / Rugi Bersih</span>
-                        <div class="text-2xl font-extrabold mt-1" :class="saldoKas >= 0 ? 'text-emerald-700' : 'text-rose-700'">{{ formatRupiah(saldoKas) }}</div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Laba / Rugi Bersih</span>
+                        <div class="text-xl sm:text-2xl font-extrabold mt-0.5 truncate" :class="saldoKas >= 0 ? 'text-emerald-700' : 'text-rose-700'">{{ formatRupiah(saldoKas) }}</div>
                     </div>
                 </div>
 
@@ -641,28 +609,28 @@
                         <table class="w-full text-left text-xs text-slate-600">
                             <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
                                 <tr>
-                                    <th class="p-3.5">Tanggal</th>
-                                    <th class="p-3.5">Jenis</th>
-                                    <th class="p-3.5">Kategori</th>
-                                    <th class="p-3.5">Keterangan</th>
-                                    <th class="p-3.5 text-right">Nominal</th>
-                                    <th class="p-3.5 text-center no-print">Aksi</th>
+                                    <th class="p-3">Tanggal</th>
+                                    <th class="p-3">Jenis</th>
+                                    <th class="p-3">Kategori</th>
+                                    <th class="p-3">Keterangan</th>
+                                    <th class="p-3 text-right">Nominal</th>
+                                    <th class="p-3 text-center no-print">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
-                                <tr v-for="k in sortedKeuanganList" :key="k.id" class="hover:bg-slate-50/80 transition">
-                                    <td class="p-3.5 font-semibold text-slate-800 whitespace-nowrap">{{ formatDate(k.tanggal) }}</td>
-                                    <td class="p-3.5">
-                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase" :class="k.jenis === 'Pemasukan' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'">
+                                <tr v-for="k in sortedKeuanganList" :key="k.id" class="hover:bg-slate-50 transition">
+                                    <td class="p-3 font-semibold text-slate-800 whitespace-nowrap">{{ formatDate(k.tanggal) }}</td>
+                                    <td class="p-3">
+                                        <span class="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase" :class="k.jenis === 'Pemasukan' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'">
                                             {{ k.jenis }}
                                         </span>
                                     </td>
-                                    <td class="p-3.5 font-bold text-slate-700">{{ k.kategori }}</td>
-                                    <td class="p-3.5 text-slate-500 max-w-xs truncate">{{ k.keterangan || '-' }}</td>
-                                    <td class="p-3.5 text-right font-extrabold" :class="k.jenis === 'Pemasukan' ? 'text-emerald-600' : 'text-rose-600'">
+                                    <td class="p-3 font-bold text-slate-700">{{ k.kategori }}</td>
+                                    <td class="p-3 text-slate-500 max-w-xs truncate">{{ k.keterangan || '-' }}</td>
+                                    <td class="p-3 text-right font-extrabold" :class="k.jenis === 'Pemasukan' ? 'text-emerald-600' : 'text-rose-600'">
                                         {{ k.jenis === 'Pemasukan' ? '+' : '-' }} {{ formatRupiah(k.nominal) }}
                                     </td>
-                                    <td class="p-3.5 text-center no-print">
+                                    <td class="p-3 text-center no-print">
                                         <button @click="confirmDeleteKeuangan(k.id)" class="text-slate-300 hover:text-rose-500 p-1"><i class="fa-solid fa-trash"></i></button>
                                     </td>
                                 </tr>
@@ -675,398 +643,316 @@
                 </div>
             </div>
 
-            <!-- TAB 7: PENGATURAN & SINKRONISASI & BACKUP RESTORE -->
-            <div v-if="activeTab === 'pengaturan'" class="space-y-6">
-                <!-- FITUR BACKUP & RESTORE DATA (MANUAL JSON) -->
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <!-- TAB 7: PENGATURAN & SINKRONISASI -->
+            <div v-if="activeTab === 'pengaturan'" class="space-y-4 sm:space-y-6">
+                <div class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                     <div>
-                        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                            <i class="fa-solid fa-database text-blue-600"></i> Cadangkan & Pulihkan Data (Backup & Restore)
+                        <h3 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-database text-blue-600"></i> Cadangkan & Pulihkan Data (JSON Backup)
                         </h3>
                         <p class="text-xs text-slate-500 mt-1">
                             Simpan seluruh data peternakan ke dalam file komputer/HP Anda atau pulihkan data dari file cadangan JSON.
                         </p>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                        <!-- Ekspor Backup -->
-                        <button @click="exportBackupFile" class="py-3.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-md shadow-blue-600/20">
-                            <i class="fa-solid fa-download text-sm"></i> Unduh File Backup (JSON)
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                        <button @click="exportBackupFile" class="py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-md shadow-blue-600/20">
+                            <i class="fa-solid fa-download"></i> Unduh File Backup (JSON)
                         </button>
-
-                        <!-- Impor / Restore -->
-                        <label class="py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-md shadow-emerald-600/20 cursor-pointer text-center">
-                            <i class="fa-solid fa-upload text-sm"></i> Restore Data Dari File (JSON)
+                        <label class="py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-md shadow-emerald-600/20 cursor-pointer text-center">
+                            <i class="fa-solid fa-upload"></i> Restore Data Dari File (JSON)
                             <input type="file" accept=".json" @change="importBackupFile" class="hidden">
                         </label>
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                <div class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
                     <div>
-                        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
                             <i class="fa-solid fa-cloud-arrow-up text-emerald-600"></i> Pengaturan Cloud Sync Google Sheets
                         </h3>
                         <p class="text-xs text-slate-500 mt-1">
-                            Aplikasi secara otomatis membaca & menyimpan data dari Google Sheets backend.
+                            Aplikasi membaca & menyimpan data dari Google Sheets backend.
                         </p>
                     </div>
 
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2.5">
                         <label class="block text-xs font-bold text-slate-700">URL Web App Google Apps Script:</label>
                         <div class="flex flex-col sm:flex-row gap-2">
-                            <input v-model="gasApiUrl" type="url" placeholder="https://script.google.com/macros/s/AKfycb.../exec" class="flex-1 p-3 rounded-xl border border-slate-300 text-xs font-mono focus:ring-2 focus:ring-emerald-500 outline-none">
-                            <button @click="saveGasUrl" class="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-md shadow-emerald-600/20">
+                            <input v-model="gasApiUrl" type="url" placeholder="https://script.google.com/macros/s/AKfycb.../exec" class="flex-1 p-2.5 rounded-xl border border-slate-300 text-xs font-mono focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <button @click="saveGasUrl" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-md shadow-emerald-600/20">
                                 <i class="fa-solid fa-floppy-disk"></i> Simpan URL
                             </button>
                         </div>
                     </div>
 
-                    <div class="border-t border-slate-200 pt-5 space-y-3">
-                        <h4 class="font-bold text-slate-800 text-sm">Hapus Semua Data</h4>
-                        <div class="flex flex-wrap gap-3">
-                            <button @click="confirmClearAll" class="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm">
-                                <i class="fa-solid fa-trash-can"></i> Hapus Semua Data Peternakan
-                            </button>
-                        </div>
+                    <div class="border-t border-slate-200 pt-4 space-y-2.5">
+                        <h4 class="font-bold text-slate-800 text-xs sm:text-sm">Hapus Semua Data</h4>
+                        <button @click="confirmClearAll" class="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm">
+                            <i class="fa-solid fa-trash-can"></i> Hapus Semua Data Peternakan
+                        </button>
                     </div>
                 </div>
             </div>
 
         </main>
 
-        <!-- BOTTOM NAVIGATION (Mobile Touch) -->
-        <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 text-white flex justify-around items-center p-1.5 z-40 shadow-2xl no-print">
+        <!-- BOTTOM NAVIGATION (Mobile Touch Bar - Responsif) -->
+        <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 text-white flex justify-around items-center p-1 z-40 shadow-2xl no-print">
             <button v-for="item in navItems" :key="item.id" 
                 @click="activeTab = item.id"
                 :class="activeTab === item.id ? 'text-emerald-400 font-bold' : 'text-slate-400'"
-                class="flex flex-col items-center justify-center p-2 text-center w-full active:scale-95 transition">
-                <i :class="item.icon" class="text-lg mb-0.5"></i>
-                <span class="text-[10px] tracking-tight">{{ item.label }}</span>
+                class="flex flex-col items-center justify-center py-1.5 px-1 text-center w-full active:scale-95 transition">
+                <i :class="item.icon" class="text-base mb-0.5"></i>
+                <span class="text-[9px] tracking-tight truncate max-w-[55px]">{{ item.label }}</span>
             </button>
         </nav>
 
-        <!-- MODAL DIALOGS & FORMS -->
+        <!-- MODAL CONFIRMATION -->
         <div v-if="confirmModal.show" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
-            <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="bg-white rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl space-y-4">
                 <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl font-bold">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold text-slate-900">{{ confirmModal.title }}</h3>
+                    <h3 class="text-base sm:text-lg font-bold text-slate-900">{{ confirmModal.title }}</h3>
                     <p class="text-xs text-slate-500 mt-1 leading-relaxed">{{ confirmModal.message }}</p>
                 </div>
-                <div class="flex gap-2 pt-2">
-                    <button @click="confirmModal.show = false" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">Batal</button>
-                    <button @click="executeConfirm" class="flex-1 py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-rose-600/20">Ya, Lanjutkan</button>
+                <div class="flex gap-2 pt-1">
+                    <button @click="confirmModal.show = false" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">Batal</button>
+                    <button @click="executeConfirm" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-rose-600/20">Ya, Lanjutkan</button>
                 </div>
             </div>
         </div>
 
-        <!-- FINISH HATCHING MODAL -->
+        <!-- FINISH HATCHING MODAL (PANEN DOC) -->
         <div v-if="finishHatchingModal.show" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
-            <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
-                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl font-bold">
+            <div class="bg-white rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl space-y-4">
+                <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg font-bold">
                     <i class="fa-solid fa-egg"></i>
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold text-slate-900">Panen DOC Ke Kandang Brooding</h3>
-                    <p class="text-xs text-slate-500 mt-1">Batch: <span class="font-bold text-slate-700">{{ finishHatchingModal.batch?.namaBatch }}</span> (Total Telur Masuk: <strong>{{ finishHatchingModal.batch?.jumlahTelur }}</strong> Butir)</p>
+                    <h3 class="text-base sm:text-lg font-bold text-slate-900">Panen DOC & Fertilitas Telur</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Batch: <strong>{{ finishHatchingModal.batch?.namaBatch }}</strong> (Total: {{ finishHatchingModal.batch?.jumlahTelur }} Butir)</p>
                 </div>
 
-                <div class="space-y-3 text-xs bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                    <div>
-                        <label class="block font-bold mb-1 text-slate-700">Jenis Ayam</label>
-                        <select v-model="finishHatchingModal.tipeAyam" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 outline-none">
-                            <option value="Pedaging">Pedaging (Meat)</option>
-                            <option value="Petelur">Petelur (Egg Layer)</option>
-                        </select>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-3 text-xs bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                    <div class="grid grid-cols-2 gap-2.5">
                         <div>
-                            <label class="block font-bold mb-1 text-blue-800 flex items-center gap-1">
-                                <i class="fa-solid fa-circle-check text-blue-600"></i> Telur Fertil (Butir)
-                            </label>
-                            <input v-model.number="finishHatchingModal.telurFertilCount" @input="onFertilInput" type="number" min="0" :max="finishHatchingModal.batch?.jumlahTelur" class="w-full p-2.5 rounded-xl border border-blue-300 bg-white font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500">
+                            <label class="block font-bold mb-1 text-blue-800">Telur Fertil (Butir)</label>
+                            <input v-model.number="finishHatchingModal.telurFertilCount" @input="onFertilInput" type="number" min="0" :max="finishHatchingModal.batch?.jumlahTelur" class="w-full p-2 rounded-xl border border-blue-300 bg-white font-bold text-slate-800 outline-none">
                         </div>
                         <div>
-                            <label class="block font-bold mb-1 text-amber-800 flex items-center gap-1">
-                                <i class="fa-solid fa-circle-xmark text-amber-600"></i> Telur Infertil (Butir)
-                            </label>
-                            <input v-model.number="finishHatchingModal.telurInfertilCount" @input="onInfertilInput" type="number" min="0" :max="finishHatchingModal.batch?.jumlahTelur" class="w-full p-2.5 rounded-xl border border-amber-300 bg-white font-bold text-slate-800 outline-none focus:ring-2 focus:ring-amber-500">
+                            <label class="block font-bold mb-1 text-amber-800">Telur Infertil (Butir)</label>
+                            <input v-model.number="finishHatchingModal.telurInfertilCount" @input="onInfertilInput" type="number" min="0" :max="finishHatchingModal.batch?.jumlahTelur" class="w-full p-2 rounded-xl border border-amber-300 bg-white font-bold text-slate-800 outline-none">
                         </div>
                     </div>
 
-                    <div class="flex justify-between items-center bg-white p-2.5 rounded-xl border border-slate-200 text-[11px]">
-                        <span class="text-slate-500">Tingkat Fertilitas Telur:</span>
+                    <div class="flex justify-between items-center bg-white p-2 rounded-xl border border-slate-200 text-[11px]">
+                        <span class="text-slate-500">Tingkat Fertilitas:</span>
                         <span class="font-bold text-blue-700">{{ hitungModalFertilitasPct() }}%</span>
                     </div>
 
-                    <div class="pt-1">
-                        <label class="block font-bold mb-1 text-emerald-800 flex items-center gap-1">
-                            <i class="fa-solid fa-crow text-emerald-600"></i> DOC Menetas Hidup (Ekor)
-                        </label>
-                        <input v-model.number="finishHatchingModal.menetasCount" type="number" min="0" :max="finishHatchingModal.telurFertilCount" class="w-full p-3 rounded-xl border border-emerald-300 bg-white font-extrabold text-emerald-700 text-base outline-none focus:ring-2 focus:ring-emerald-500">
+                    <div>
+                        <label class="block font-bold mb-1 text-emerald-800">DOC Menetas Hidup (Ekor)</label>
+                        <input v-model.number="finishHatchingModal.menetasCount" type="number" min="0" :max="finishHatchingModal.telurFertilCount" class="w-full p-2.5 rounded-xl border border-emerald-300 bg-white font-extrabold text-emerald-700 text-sm outline-none">
                     </div>
 
-                    <div class="flex justify-between items-center bg-emerald-50 p-2.5 rounded-xl border border-emerald-200 text-[11px]">
+                    <div class="flex justify-between items-center bg-emerald-50 p-2 rounded-xl border border-emerald-200 text-[11px]">
                         <span class="text-slate-600">Daya Tetas (Hatchability):</span>
-                        <span class="font-extrabold text-emerald-700 text-xs">{{ hitungModalDayaTetasPct() }}% (dari Fertil)</span>
+                        <span class="font-extrabold text-emerald-700">{{ hitungModalDayaTetasPct() }}% (dari Fertil)</span>
                     </div>
 
-                    <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 text-[11px] space-y-1">
-                        <div class="font-bold text-amber-900 flex items-center gap-1">
-                            <i class="fa-solid fa-calendar-check text-amber-600"></i> Otomatis Masuk Kandang Brooding (H+1)
-                        </div>
-                        <p class="text-slate-600 leading-tight">
-                            Akan dimasukkan ke <strong>Kandang Brooding</strong> pada tanggal: <strong>{{ getFormattedHPlus1(finishHatchingModal.batch?.estMenetas) }}</strong> (1 Hari setelah menetas).
-                        </p>
-                    </div>
-
-                    <div class="flex items-center gap-2 pt-1">
+                    <div class="flex items-center gap-2 pt-1 border-t border-slate-200">
                         <input type="checkbox" id="createDocBatch" v-model="finishHatchingModal.createDocFlock" class="w-4 h-4 text-emerald-600 rounded">
-                        <label for="createDocBatch" class="font-semibold text-slate-700 cursor-pointer">
-                            Otomatis Buat Data Kelompok Ayam Brooding Baru
-                        </label>
+                        <label for="createDocBatch" class="font-semibold text-slate-700 cursor-pointer text-[11px]">Auto Masuk Kandang Brooding (H+1)</label>
                     </div>
                 </div>
 
-                <div class="flex gap-2 pt-2">
-                    <button @click="finishHatchingModal.show = false" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">Batal</button>
-                    <button @click="saveFinishPenetasan" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-blue-600/20">Simpan Panen Brooding</button>
+                <div class="flex gap-2 pt-1">
+                    <button @click="finishHatchingModal.show = false" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">Batal</button>
+                    <button @click="saveFinishPenetasan" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-blue-600/20">Simpan Hasil Panen</button>
                 </div>
             </div>
         </div>
 
         <!-- INPUT / EDIT MODALS -->
-        <div v-if="showModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
-            <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative overflow-y-auto max-h-[90vh]">
-                <button @click="closeModal" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-lg w-8 h-8 flex items-center justify-center rounded-full bg-slate-100">
+        <div v-if="showModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3.5 no-print">
+            <div class="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative overflow-y-auto max-h-[90vh]">
+                <button @click="closeModal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-base w-8 h-8 flex items-center justify-center rounded-full bg-slate-100">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
 
                 <!-- Form Penetasan -->
                 <div v-if="modalType === 'penetasan'">
-                    <h3 class="text-lg font-extrabold text-slate-900 mb-4">{{ editingPenetasanId ? 'Edit Batch Penetasan' : 'Inkubasi Telur Tetas Baru' }}</h3>
-                    <form @submit.prevent="savePenetasan" class="space-y-4 text-xs">
+                    <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mb-3.5">{{ editingPenetasanId ? 'Edit Batch Penetasan' : 'Inkubasi Telur Tetas Baru' }}</h3>
+                    <form @submit.prevent="savePenetasan" class="space-y-3 text-xs">
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Nama Batch / Label</label>
-                            <input v-model="formPenetasan.namaBatch" type="text" required placeholder="Misal: Penetasan Batch #01" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <input v-model="formPenetasan.namaBatch" type="text" required placeholder="Misal: Penetasan Batch #01" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-2 gap-2.5">
                             <div>
-                                <label class="block font-bold mb-1 text-slate-700">Nama / Kode Mesin Tetas</label>
-                                <input v-model="formPenetasan.mesin" type="text" required placeholder="Mesin A" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <label class="block font-bold mb-1 text-slate-700">Nama Mesin Tetas</label>
+                                <input v-model="formPenetasan.mesin" type="text" required placeholder="Mesin A" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
                             <div>
-                                <label class="block font-bold mb-1 text-slate-700">Jenis Ayam</label>
-                                <select v-model="formPenetasan.tipeAyam" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
-                                    <option value="Pedaging">Pedaging (Meat)</option>
-                                    <option value="Petelur">Petelur (Egg Layer)</option>
+                                <label class="block font-bold mb-1 text-slate-700">Tipe Ayam</label>
+                                <select v-model="formPenetasan.tipe" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+                                    <option value="Pedaging">Pedaging</option>
+                                    <option value="Petelur">Petelur</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-2 gap-2.5">
                             <div>
-                                <label class="block font-bold mb-1 text-slate-700">Tanggal Masuk Mesin</label>
-                                <input v-model="formPenetasan.tglMasuk" type="date" required class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <label class="block font-bold mb-1 text-slate-700">Tanggal Masuk</label>
+                                <input v-model="formPenetasan.tglMasuk" type="date" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Jumlah Telur (Butir)</label>
-                                <input v-model.number="formPenetasan.jumlahTelur" type="number" required min="1" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <input v-model.number="formPenetasan.jumlahTelur" type="number" required min="1" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
                         </div>
 
-                        <div class="bg-blue-50 p-3 rounded-xl text-[11px] text-blue-900 border border-blue-200 flex items-center gap-2">
-                            <i class="fa-solid fa-clock text-blue-600 text-sm"></i>
-                            <span>Estimasi tanggal menetas dihitung otomatis <strong>21 hari</strong> dari tanggal telur masuk.</span>
-                        </div>
-
-                        <div v-if="editingPenetasanId" class="space-y-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block font-bold mb-1 text-slate-700">Status Batch</label>
-                                    <select v-model="formPenetasan.status" class="w-full p-2.5 rounded-lg border border-slate-300 bg-white font-semibold">
-                                        <option value="Berjalan">Berjalan</option>
-                                        <option value="Selesai">Selesai</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block font-bold mb-1 text-slate-700">Daya Tetas (%)</label>
-                                    <input v-model.number="formPenetasan.dayaTetas" type="number" min="0" max="100" class="w-full p-2.5 rounded-lg border border-slate-300 bg-white font-bold">
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block font-bold mb-1 text-slate-700">Telur Fertil (Butir)</label>
-                                    <input v-model.number="formPenetasan.telurFertil" type="number" min="0" class="w-full p-2.5 rounded-lg border border-slate-300 bg-white font-bold">
-                                </div>
-                                <div>
-                                    <label class="block font-bold mb-1 text-slate-700">Telur Infertil (Butir)</label>
-                                    <input v-model.number="formPenetasan.telurInfertil" type="number" min="0" class="w-full p-2.5 rounded-lg border border-slate-300 bg-white font-bold">
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="w-full py-3.5 bg-emerald-600 text-white font-bold rounded-xl text-sm hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">
-                            {{ editingPenetasanId ? 'Simpan Perubahan Batch' : 'Simpan Inkubasi (21 Hari)' }}
+                        <button type="submit" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">
+                            {{ editingPenetasanId ? 'Simpan Perubahan' : 'Simpan Inkubasi (21 Hari)' }}
                         </button>
                     </form>
                 </div>
 
-                <!-- Form Kelompok Ayam -->
+                <!-- Form Kelompok Ayam (Brooding, Grower, Indukan/Layer) -->
                 <div v-if="modalType === 'flock'">
-                    <h3 class="text-lg font-extrabold text-slate-900 mb-4">{{ editingFlockId ? 'Edit Kelompok Ayam' : 'Tambah Kelompok Ayam Baru' }}</h3>
-                    <form @submit.prevent="saveFlock" class="space-y-4 text-xs">
+                    <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mb-3.5">{{ editingFlockId ? 'Edit Kelompok Ayam' : 'Tambah Kelompok Ayam Baru' }}</h3>
+                    <form @submit.prevent="saveFlock" class="space-y-3 text-xs">
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Nama Kelompok / Batch</label>
-                            <input v-model="formFlock.namaFlock" type="text" required placeholder="Misal: Kampung Pedaging Batch A" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <input v-model="formFlock.namaFlock" type="text" required placeholder="Misal: Kampung Pedaging Batch A" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
-
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-2 gap-2.5">
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Tipe Ayam</label>
-                                <select v-model="formFlock.tipe" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
-                                    <option value="Pedaging">Pedaging (Meat)</option>
-                                    <option value="Petelur">Petelur (Egg Layer)</option>
+                                <select v-model="formFlock.tipe" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+                                    <option value="Pedaging">Pedaging</option>
+                                    <option value="Petelur">Petelur</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Fase Awal Ayam</label>
-                                <select v-model="formFlock.fase" @change="onFaseChangeInForm" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold text-xs">
-                                    <option value="DOC / Brooding">DOC / Brooding (Starter)</option>
-                                    <option value="Pembesaran / Grower">Pembesaran / Grower (Remaja)</option>
-                                    <option value="Produksi / Indukan">Produksi / Indukan (Dewasa)</option>
+                                <select v-model="formFlock.faseAwal" @change="onFaseAwalChange" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+                                    <option value="DOC">DOC / Brooding (Starter)</option>
+                                    <option value="Grower">Pembesaran / Grower (Remaja)</option>
+                                    <option value="Layer">Produksi / Indukan (Dewasa)</option>
                                 </select>
                             </div>
                         </div>
 
-                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1.5">
-                            <div class="flex justify-between items-center">
-                                <label class="block font-bold text-slate-700 text-xs">Umur Ayam Saat Dibeli / Masuk (Hari)</label>
-                                <span class="text-[10px] text-slate-500 font-bold">Total: {{ (getUmurAyamHari(formFlock.tglMulai, formFlock.umurAwalHari)) }} Hari</span>
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block font-bold mb-1 text-slate-700">Pilih Kandang</label>
+                                <select v-model="formFlock.kandang" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+                                    <option value="Kandang Brooding">Kandang Brooding</option>
+                                    <option value="Kandang Grower">Kandang Grower</option>
+                                    <option value="Kandang Indukan/Layer">Kandang Indukan/Layer</option>
+                                </select>
                             </div>
-                            <input v-model.number="formFlock.umurAwalHari" type="number" min="0" placeholder="0" class="w-full p-2.5 rounded-lg border border-slate-300 bg-white font-bold text-xs outline-none focus:ring-1 focus:ring-emerald-500">
-                            <p class="text-[10px] text-slate-400">DOC = 0 Hari, Ayam Remaja = 30-45 Hari, Ayam Indukan = 120+ Hari</p>
+                            <div>
+                                <label class="block font-bold mb-1 text-slate-700">Umur Beli (Hari)</label>
+                                <input v-model.number="formFlock.umurAwalHari" type="number" min="0" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold">
+                            </div>
                         </div>
 
-                        <div>
-                            <label class="block font-bold mb-1 text-slate-700">Pilih / Nama Kandang</label>
-                            <div class="grid grid-cols-3 gap-2 mb-2">
-                                <button type="button" @click="formFlock.kandang = 'Kandang Brooding 1'" class="py-2 px-2 border rounded-xl font-bold text-[10px]" :class="formFlock.kandang.includes('Brooding') ? 'bg-amber-100 border-amber-400 text-amber-900' : 'bg-slate-50 border-slate-200 text-slate-600'">
-                                    Brooding
-                                </button>
-                                <button type="button" @click="formFlock.kandang = 'Kandang Grower 1'" class="py-2 px-2 border rounded-xl font-bold text-[10px]" :class="formFlock.kandang.includes('Grower') ? 'bg-emerald-100 border-emerald-400 text-emerald-900' : 'bg-slate-50 border-slate-200 text-slate-600'">
-                                    Grower
-                                </button>
-                                <button type="button" @click="formFlock.kandang = 'Kandang Indukan 1'" class="py-2 px-2 border rounded-xl font-bold text-[10px]" :class="formFlock.kandang.includes('Indukan') || formFlock.kandang.includes('Layer') ? 'bg-purple-100 border-purple-400 text-purple-900' : 'bg-slate-50 border-slate-200 text-slate-600'">
-                                    Indukan/Layer
-                                </button>
-                            </div>
-                            <input v-model="formFlock.kandang" type="text" required placeholder="Misal: Kandang Brooding 1" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-2 gap-2.5">
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Populasi Awal (Ekor)</label>
-                                <input v-model.number="formFlock.jumlahAwal" type="number" required min="1" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <input v-model.number="formFlock.jumlahAwal" type="number" required min="1" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
-                            <div v-if="editingFlockId">
-                                <label class="block font-bold mb-1 text-slate-700">Populasi Saat Ini (Ekor)</label>
-                                <input v-model.number="formFlock.jumlahSaatIni" type="number" required min="0" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-emerald-700">
+                            <div>
+                                <label class="block font-bold mb-1 text-slate-700">Populasi Saat Ini</label>
+                                <input v-model.number="formFlock.jumlahSaatIni" type="number" required min="0" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-emerald-700">
                             </div>
                         </div>
 
-                        <div class="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                            <span class="block font-bold text-slate-700 text-[11px] uppercase tracking-wider">Pengaturan Harga Pakan & Biaya Modal:</span>
-                            
+                        <div class="grid grid-cols-2 gap-2.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
                             <div>
-                                <label class="block font-bold text-slate-600 mb-0.5">Biaya Modal Pembelian Ayam (Rp)</label>
-                                <input v-model.number="formFlock.biayaDoc" type="number" min="0" placeholder="0" class="w-full p-2.5 rounded-lg border border-slate-300 bg-white font-bold text-xs">
+                                <label class="block font-bold mb-1 text-slate-700">Pakan Starter (0-30 Hari)</label>
+                                <input v-model.number="formFlock.hargaPakanStarter" type="number" min="0" placeholder="10000" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-bold text-xs">
                             </div>
-
-                            <div class="grid grid-cols-2 gap-2 pt-1">
-                                <div>
-                                    <label class="block font-bold text-slate-600 mb-0.5">Pakan Starter (0-30 Hari) /kg</label>
-                                    <input v-model.number="formFlock.hargaPakanDocPerKg" type="number" min="0" placeholder="10000" class="w-full p-2.5 rounded-lg border border-emerald-300 bg-white font-bold text-xs text-emerald-700">
-                                </div>
-                                <div>
-                                    <label class="block font-bold text-slate-600 mb-0.5">Pakan Grower (>30 Hari) /kg</label>
-                                    <input v-model.number="formFlock.hargaPakanGrowerPerKg" type="number" min="0" placeholder="4000" class="w-full p-2.5 rounded-lg border border-emerald-300 bg-white font-bold text-xs text-emerald-700">
-                                </div>
+                            <div>
+                                <label class="block font-bold mb-1 text-slate-700">Pakan Grower (>30 Hari)</label>
+                                <input v-model.number="formFlock.hargaPakanGrower" type="number" min="0" placeholder="4000" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-bold text-xs">
                             </div>
                         </div>
 
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Tanggal Masuk Kandang</label>
-                            <input v-model="formFlock.tglMulai" type="date" required class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <input v-model="formFlock.tglMulai" type="date" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
-                        <button type="submit" class="w-full py-3.5 bg-emerald-600 text-white font-bold rounded-xl text-sm hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">
-                            {{ editingFlockId ? 'Simpan Perubahan Kelompok' : 'Simpan Kelompok Ayam' }}
+
+                        <button type="submit" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">
+                            {{ editingFlockId ? 'Simpan Perubahan' : 'Simpan Kelompok Ayam' }}
                         </button>
                     </form>
                 </div>
 
                 <!-- Form Pencatatan Harian -->
                 <div v-if="modalType === 'harian'">
-                    <h3 class="text-lg font-extrabold text-slate-900 mb-4">Catat Perkembangan Harian</h3>
-                    <form @submit.prevent="saveHarian" class="space-y-4 text-xs">
+                    <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mb-3.5">Catat Log Harian Kandang</h3>
+                    <form @submit.prevent="saveHarian" class="space-y-3 text-xs">
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Pilih Kelompok Ayam</label>
-                            <select v-model="formHarian.flockId" required class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+                            <select v-model="formHarian.flockId" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
                                 <option value="" disabled>-- Pilih Kelompok --</option>
                                 <option v-for="f in flockList" :key="f.id" :value="f.id">{{ f.namaFlock }} ({{ f.kandang }})</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block font-bold mb-1 text-slate-700">Tanggal Tangkapan</label>
-                            <input v-model="formHarian.tanggal" type="date" required class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <label class="block font-bold mb-1 text-slate-700">Tanggal Record</label>
+                            <input v-model="formHarian.tanggal" type="date" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-2 gap-2.5">
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Pakan Dikonsumsi (Kg)</label>
-                                <input v-model.number="formHarian.pakanKg" type="number" step="0.1" min="0" required class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <input v-model.number="formHarian.pakanKg" type="number" step="0.1" min="0" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Mati / Afkir (Ekor)</label>
-                                <input v-model.number="formHarian.kematian" type="number" min="0" required class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <input v-model.number="formHarian.kematian" type="number" min="0" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-2 gap-2.5">
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Telur Utuh / Bagus (Butir)</label>
-                                <input v-model.number="formHarian.telurBagus" type="number" min="0" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <input v-model.number="formHarian.telurBagus" type="number" min="0" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
                             <div>
-                                <label class="block font-bold mb-1 text-slate-700">Telur Retak/Rusak (Butir)</label>
-                                <input v-model.number="formHarian.telurRusak" type="number" min="0" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <label class="block font-bold mb-1 text-slate-700">Telur Retak / Rusak (Butir)</label>
+                                <input v-model.number="formHarian.telurRusak" type="number" min="0" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
                         </div>
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Catatan Kesehatan / Aktivitas</label>
-                            <input v-model="formHarian.catatan" type="text" placeholder="Misal: Pemberian Vitamin Vita Stress" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <input v-model="formHarian.catatan" type="text" placeholder="Vaksin / Vitamin Vita Stress" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
-                        <button type="submit" class="w-full py-3.5 bg-emerald-600 text-white font-bold rounded-xl text-sm hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">Simpan Log Harian</button>
+                        <button type="submit" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">Simpan Log Harian</button>
                     </form>
                 </div>
 
                 <!-- Form Transaksi Keuangan -->
                 <div v-if="modalType === 'keuangan'">
-                    <h3 class="text-lg font-extrabold text-slate-900 mb-4">Catat Transaksi Keuangan</h3>
-                    <form @submit.prevent="saveKeuangan" class="space-y-4 text-xs">
-                        <div class="grid grid-cols-2 gap-3">
+                    <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mb-3.5">Catat Transaksi Keuangan</h3>
+                    <form @submit.prevent="saveKeuangan" class="space-y-3 text-xs">
+                        <div class="grid grid-cols-2 gap-2.5">
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Jenis Transaksi</label>
-                                <select v-model="formKeuangan.jenis" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+                                <select v-model="formKeuangan.jenis" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
                                     <option value="Pemasukan">Pemasukan (+)</option>
                                     <option value="Pengeluaran">Pengeluaran (-)</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Kategori</label>
-                                <select v-model="formKeuangan.kategori" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+                                <select v-model="formKeuangan.kategori" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
                                     <template v-if="formKeuangan.jenis === 'Pemasukan'">
                                         <option value="Penjualan Telur">Penjualan Telur</option>
                                         <option value="Penjualan Ayam Kiloan/Ekor">Penjualan Ayam Kiloan/Ekor</option>
@@ -1087,17 +973,17 @@
                         </div>
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Nominal Rp</label>
-                            <input v-model.number="formKeuangan.nominal" type="number" min="0" required placeholder="500000" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-sm">
+                            <input v-model.number="formKeuangan.nominal" type="number" min="0" required placeholder="500000" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-sm">
                         </div>
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Tanggal Transaksi</label>
-                            <input v-model="formKeuangan.tanggal" type="date" required class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <input v-model="formKeuangan.tanggal" type="date" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Keterangan Tambahan</label>
-                            <input v-model="formKeuangan.keterangan" type="text" placeholder="Misal: Beli Pakan Konsentrat 2 Karung" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <input v-model="formKeuangan.keterangan" type="text" placeholder="Keterangan transaksi" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
-                        <button type="submit" class="w-full py-3.5 bg-emerald-600 text-white font-bold rounded-xl text-sm hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">Simpan Transaksi</button>
+                        <button type="submit" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">Simpan Transaksi</button>
                     </form>
                 </div>
 
@@ -1128,76 +1014,59 @@
                     
                     toast: { show: false, message: '', type: 'info' },
                     confirmModal: { show: false, title: '', message: '', action: null },
-                    finishHatchingModal: { show: false, batch: null, tipeAyam: 'Pedaging', telurFertilCount: 0, telurInfertilCount: 0, menetasCount: 0, createDocFlock: true },
+                    finishHatchingModal: { show: false, batch: null, telurFertilCount: 0, telurInfertilCount: 0, menetasCount: 0, createDocFlock: true },
 
                     navItems: [
                         { id: 'beranda', label: 'Beranda', icon: 'fa-solid fa-house' },
                         { id: 'penetasan', label: 'Penetasan', icon: 'fa-solid fa-temperature-arrow-up' },
-                        { id: 'flock', label: 'Kelompok Ayam & HPP', icon: 'fa-solid fa-crow' },
+                        { id: 'flock', label: 'Kelompok Ayam', icon: 'fa-solid fa-crow' },
                         { id: 'pakan', label: 'Formulasi Pakan', icon: 'fa-solid fa-wheat-awn' },
-                        { id: 'harian', label: 'Catatan Harian', icon: 'fa-solid fa-clipboard-list' },
+                        { id: 'harian', label: 'Log Harian', icon: 'fa-solid fa-clipboard-list' },
                         { id: 'keuangan', label: 'Keuangan', icon: 'fa-solid fa-wallet' },
-                        { id: 'pengaturan', label: 'Sinkronisasi', icon: 'fa-solid fa-cloud-arrow-up' },
+                        { id: 'pengaturan', label: 'Sync', icon: 'fa-solid fa-cloud-arrow-up' },
                     ],
-
-                    // DATA PRESET PAKAN PER FASE (STARTER, GROWER, LAYER)
-                    selectedPresetKey: 'starter',
-                    pakanPresets: JSON.parse(localStorage.getItem('mandirifarm_pakan_presets')) || {
-                        starter: {
-                            nama: 'Pakan Starter (0-30 Hari)',
-                            bahanList: [
-                                { nama: 'Jagung Giling', porsiPct: 50, hargaPerKg: 6000, proteinPct: 8.5 },
-                                { nama: 'Konsentrat Starter', porsiPct: 35, hargaPerKg: 18000, proteinPct: 36.0 },
-                                { nama: 'Dedak Halus / Katul', porsiPct: 15, hargaPerKg: 3500, proteinPct: 11.0 }
-                            ]
-                        },
-                        grower: {
-                            nama: 'Pakan Grower (31-120 Hari)',
-                            bahanList: [
-                                { nama: 'Jagung Giling', porsiPct: 55, hargaPerKg: 6000, proteinPct: 8.5 },
-                                { nama: 'Konsentrat Grower', porsiPct: 15, hargaPerKg: 16000, proteinPct: 32.0 },
-                                { nama: 'Dedak Halus / Katul', porsiPct: 30, hargaPerKg: 3500, proteinPct: 11.0 }
-                            ]
-                        },
-                        layer: {
-                            nama: 'Pakan Indukan / Layer (>120 Hari)',
-                            bahanList: [
-                                { nama: 'Jagung Giling', porsiPct: 50, hargaPerKg: 6000, proteinPct: 8.5 },
-                                { nama: 'Konsentrat Petelur Layer', porsiPct: 25, hargaPerKg: 17500, proteinPct: 34.0 },
-                                { nama: 'Dedak Halus / Katul', porsiPct: 20, hargaPerKg: 3500, proteinPct: 11.0 },
-                                { nama: 'Tepung Batu / Mineral Calfit', porsiPct: 5, hargaPerKg: 2500, proteinPct: 0.0 }
-                            ]
-                        }
-                    },
-
-                    activeFormula: {
-                        kategori: 'starter',
-                        bahanList: []
-                    },
-
-                    pakanApplyForm: { flockId: '', targetAge: 'doc' },
                     
-                    penetasanList: (JSON.parse(localStorage.getItem('mandirifarm_penetasan')) || []).map(p => ({
-                        tipeAyam: 'Pedaging',
-                        ...p
-                    })),
+                    penetasanList: JSON.parse(localStorage.getItem('mandirifarm_penetasan')) || [],
                     flockList: (JSON.parse(localStorage.getItem('mandirifarm_flock')) || []).map(f => ({
-                        fase: f.fase || 'DOC / Brooding',
-                        umurAwalHari: f.umurAwalHari || 0,
-                        biayaDoc: f.biayaDoc || 0,
-                        hargaPakanDocPerKg: f.hargaPakanDocPerKg || 10000,
-                        hargaPakanGrowerPerKg: f.hargaPakanGrowerPerKg || 4000,
-                        hargaPakanPerKg: f.hargaPakanPerKg || 10000,
-                        biayaLainnya: f.biayaLainnya || 100000,
-                        avgBobotKg: f.avgBobotKg || 1.2,
-                        hargaJualPerKg: f.hargaJualPerKg || 45000,
+                        biayaDoc: 750000,
+                        hargaPakanStarter: 10000,
+                        hargaPakanGrower: 4000,
+                        hargaPakanPerKg: 10000,
+                        biayaLainnya: 100000,
+                        avgBobotKg: 1.2,
+                        hargaJualPerKg: 45000,
+                        umurAwalHari: 0,
                         ...f
                     })),
                     harianList: JSON.parse(localStorage.getItem('mandirifarm_harian')) || [],
                     keuanganList: JSON.parse(localStorage.getItem('mandirifarm_keuangan')) || [],
 
-                    formPenetasan: { namaBatch: '', mesin: '', tipeAyam: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 50, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0 },
-                    formFlock: { namaFlock: '', tipe: 'Pedaging', fase: 'DOC / Brooding', umurAwalHari: 0, kandang: 'Kandang Brooding 1', jumlahAwal: 100, jumlahSaatIni: 100, biayaDoc: 0, hargaPakanDocPerKg: 10000, hargaPakanGrowerPerKg: 4000, tglMulai: new Date().toISOString().substr(0, 10) },
+                    // FORMULASI & PRESET PAKAN
+                    activePakanPreset: 'starter',
+                    pakanPresets: JSON.parse(localStorage.getItem('mandirifarm_pakan_presets')) || {
+                        starter: [
+                            { nama: 'Jagung Giling', rasio: 50, harga: 5500, protein: 8.5 },
+                            { nama: 'Konsentrat Broiler/Starter', rasio: 35, harga: 14000, protein: 36 },
+                            { nama: 'Dedak Halus', rasio: 15, harga: 3800, protein: 11 }
+                        ],
+                        grower: [
+                            { nama: 'Jagung Giling', rasio: 55, harga: 5500, protein: 8.5 },
+                            { nama: 'Konsentrat Grower', rasio: 15, harga: 11000, protein: 32 },
+                            { nama: 'Dedak Halus', rasio: 30, harga: 3800, protein: 11 }
+                        ],
+                        layer: [
+                            { nama: 'Jagung Giling', rasio: 50, harga: 5500, protein: 8.5 },
+                            { nama: 'Konsentrat Layer', rasio: 30, harga: 12500, protein: 34 },
+                            { nama: 'Dedak Halus', rasio: 15, harga: 3800, protein: 11 },
+                            { nama: 'Tepung Kerang/Kalsium', rasio: 5, harga: 3000, protein: 0 }
+                        ]
+                    },
+                    currentFormulasiPakan: [],
+                    targetFlockPakanId: '',
+                    targetFasePakanType: 'starter',
+
+                    formPenetasan: { namaBatch: '', mesin: '', tipe: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 50, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0 },
+                    formFlock: { namaFlock: '', tipe: 'Pedaging', faseAwal: 'DOC', kandang: 'Kandang Brooding', jumlahAwal: 100, jumlahSaatIni: 100, biayaDoc: 750000, hargaPakanStarter: 10000, hargaPakanGrower: 4000, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) },
                     formHarian: { flockId: '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' },
                     formKeuangan: { jenis: 'Pemasukan', kategori: 'Penjualan Telur', nominal: 0, tanggal: new Date().toISOString().substr(0, 10), keterangan: '' },
 
@@ -1246,27 +1115,24 @@
                 sortedKeuanganList() {
                     return [...this.keuanganList].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
                 },
-
-                // KALKULASI FORMULASI PAKAN
-                totalPersenFormulasi() {
-                    if (!this.activeFormula || !this.activeFormula.bahanList) return 0;
-                    return this.activeFormula.bahanList.reduce((acc, b) => acc + (parseFloat(b.porsiPct) || 0), 0);
+                totalPakanRasio() {
+                    return this.currentFormulasiPakan.reduce((acc, curr) => acc + (parseFloat(curr.rasio) || 0), 0);
                 },
-                hargaTotalPakanCampuran() {
-                    if (!this.activeFormula || !this.activeFormula.bahanList || this.totalPersenFormulasi === 0) return 0;
-                    const totalHarga = this.activeFormula.bahanList.reduce((acc, b) => {
-                        const porsi = (parseFloat(b.porsiPct) || 0) / 100;
-                        const harga = parseFloat(b.hargaPerKg) || 0;
-                        return acc + (porsi * harga);
+                hasilPakanPerKg() {
+                    if (!this.currentFormulasiPakan.length) return 0;
+                    const totalCost = this.currentFormulasiPakan.reduce((acc, curr) => {
+                        const r = parseFloat(curr.rasio) || 0;
+                        const h = parseFloat(curr.harga) || 0;
+                        return acc + ((r / 100) * h);
                     }, 0);
-                    return Math.round(totalHarga);
+                    return Math.round(totalCost);
                 },
-                proteinTotalPakanCampuran() {
-                    if (!this.activeFormula || !this.activeFormula.bahanList || this.totalPersenFormulasi === 0) return 0;
-                    const totalProtein = this.activeFormula.bahanList.reduce((acc, b) => {
-                        const porsi = (parseFloat(b.porsiPct) || 0) / 100;
-                        const protein = parseFloat(b.proteinPct) || 0;
-                        return acc + (porsi * protein);
+                hasilProteinPakan() {
+                    if (!this.currentFormulasiPakan.length) return 0;
+                    const totalProtein = this.currentFormulasiPakan.reduce((acc, curr) => {
+                        const r = parseFloat(curr.rasio) || 0;
+                        const p = parseFloat(curr.protein) || 0;
+                        return acc + ((r / 100) * p);
                     }, 0);
                     return totalProtein.toFixed(1);
                 }
@@ -1277,21 +1143,13 @@
                         this.$nextTick(() => this.renderCharts());
                     }
                 },
-                pakanPresets: {
-                    handler(val) {
-                        localStorage.setItem('mandirifarm_pakan_presets', JSON.stringify(val));
-                    },
-                    deep: true
-                },
                 penetasanList: { handler(val) { localStorage.setItem('mandirifarm_penetasan', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true },
                 flockList: { handler(val) { localStorage.setItem('mandirifarm_flock', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true },
                 harianList: { handler(val) { localStorage.setItem('mandirifarm_harian', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true },
                 keuanganList: { handler(val) { localStorage.setItem('mandirifarm_keuangan', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true }
             },
             mounted() {
-                // Inisialisasi formula aktif dengan preset starter
-                this.pilihPresetPakan('starter');
-
+                this.loadPakanPreset('starter');
                 if (this.gasApiUrl) {
                     this.fetchFromGas();
                     this.autoSyncTimer = setInterval(() => {
@@ -1306,125 +1164,76 @@
                 if (this.pushTimer) clearTimeout(this.pushTimer);
             },
             methods: {
-                // PENENTUAN FASE SIKLUS OTOMATIS BERDASARKAN UMUR AYAM & FASE AWAL
-                getFaseAktif(flock) {
-                    const umur = this.getUmurAyamHari(flock.tglMulai, flock.umurAwalHari);
-                    if (umur <= 30) {
-                        return 'DOC / Brooding';
-                    } else if (umur <= 120) {
-                        return 'Pembesaran / Grower';
-                    } else {
-                        return flock.tipe === 'Petelur' ? 'Produksi / Indukan' : 'Siap Panen / Layer';
-                    }
+                // MANAGEMENT FORMULASI PAKAN
+                loadPakanPreset(type) {
+                    this.activePakanPreset = type;
+                    this.currentFormulasiPakan = JSON.parse(JSON.stringify(this.pakanPresets[type] || []));
                 },
-                getFaseStyle(flock) {
-                    const umur = this.getUmurAyamHari(flock.tglMulai, flock.umurAwalHari);
-                    if (umur <= 30) {
-                        return 'bg-amber-100 text-amber-900 border border-amber-300';
-                    } else if (umur <= 120) {
-                        return 'bg-emerald-100 text-emerald-900 border border-emerald-300';
-                    } else {
-                        return 'bg-purple-100 text-purple-900 border border-purple-300';
-                    }
+                addBahanPakan() {
+                    this.currentFormulasiPakan.push({ nama: 'Bahan Baru', rasio: 10, harga: 4000, protein: 10 });
                 },
-                onFaseChangeInForm() {
-                    if (this.formFlock.fase === 'DOC / Brooding') {
-                        this.formFlock.umurAwalHari = 0;
-                        if (!this.editingFlockId) this.formFlock.kandang = 'Kandang Brooding 1';
-                    } else if (this.formFlock.fase === 'Pembesaran / Grower') {
-                        this.formFlock.umurAwalHari = 31;
-                        if (!this.editingFlockId) this.formFlock.kandang = 'Kandang Grower 1';
-                    } else if (this.formFlock.fase === 'Produksi / Indukan') {
-                        this.formFlock.umurAwalHari = 121;
-                        if (!this.editingFlockId) this.formFlock.kandang = 'Kandang Indukan 1';
-                    }
+                removeBahanPakan(idx) {
+                    this.currentFormulasiPakan.splice(idx, 1);
                 },
-
-                // METHOD FITUR EDIT & MEMILIH PRESET PAKAN PER FASE
-                pilihPresetPakan(key) {
-                    this.selectedPresetKey = key;
-                    const p = this.pakanPresets[key];
-                    if (p) {
-                        this.activeFormula = {
-                            kategori: key,
-                            bahanList: JSON.parse(JSON.stringify(p.bahanList))
-                        };
-                    }
-                    if (key === 'starter') this.pakanApplyForm.targetAge = 'doc';
-                    if (key === 'grower' || key === 'layer') this.pakanApplyForm.targetAge = 'grower';
-                },
-                getNamaPresetAktif() {
-                    const p = this.pakanPresets[this.selectedPresetKey];
-                    return p ? p.nama : this.selectedPresetKey;
-                },
-                simpanPresetAktif() {
-                    if (this.totalPersenFormulasi !== 100) {
-                        this.showToast('Gagal menyimpan: Total persentase porsi harus 100%!', 'error');
+                savePakanPreset() {
+                    if (this.totalPakanRasio !== 100) {
+                        this.showToast('Total rasio pakan harus tepat 100%.', 'error');
                         return;
                     }
-
-                    const key = this.selectedPresetKey;
-                    if (this.pakanPresets[key]) {
-                        this.pakanPresets[key].bahanList = JSON.parse(JSON.stringify(this.activeFormula.bahanList));
-                        localStorage.setItem('mandirifarm_pakan_presets', JSON.stringify(this.pakanPresets));
-                        this.showToast(`Preset ${this.getNamaPresetAktif()} berhasil diperbarui & disimpan!`, 'info');
-                    }
+                    this.pakanPresets[this.activePakanPreset] = JSON.parse(JSON.stringify(this.currentFormulasiPakan));
+                    localStorage.setItem('mandirifarm_pakan_presets', JSON.stringify(this.pakanPresets));
+                    this.showToast(`Preset pakan ${this.activePakanPreset.toUpperCase()} berhasil disimpan.`, 'info');
                 },
-                tambahBahanBaku() {
-                    this.activeFormula.bahanList.push({
-                        nama: 'Bahan Baku Baru',
-                        porsiPct: 0,
-                        hargaPerKg: 5000,
-                        proteinPct: 10.0
-                    });
-                },
-                hapusBahanBaku(idx) {
-                    if (this.activeFormula.bahanList.length <= 1) {
-                        this.showToast('Minimal harus ada 1 bahan baku!', 'error');
+                applyPakanToFlock() {
+                    if (!this.targetFlockPakanId) {
+                        this.showToast('Pilih kelompok ayam target.', 'error');
                         return;
                     }
-                    this.activeFormula.bahanList.splice(idx, 1);
-                },
-                terapkanHargaPakanKeFlock() {
-                    const flockId = this.pakanApplyForm.flockId;
-                    if (!flockId) return;
-
-                    const targetFlock = this.flockList.find(f => f.id === flockId);
-                    if (!targetFlock) return;
-
-                    const hargaHasil = this.hargaTotalPakanCampuran;
-                    if (this.pakanApplyForm.targetAge === 'doc') {
-                        targetFlock.hargaPakanDocPerKg = hargaHasil;
-                        this.showToast(`Harga Pakan Starter (${this.formatRupiah(hargaHasil)}/kg) diterapkan ke ${targetFlock.namaFlock}.`, 'info');
-                    } else {
-                        targetFlock.hargaPakanGrowerPerKg = hargaHasil;
-                        this.showToast(`Harga Pakan Grower (${this.formatRupiah(hargaHasil)}/kg) diterapkan ke ${targetFlock.namaFlock}.`, 'info');
+                    const target = this.flockList.find(f => f.id === this.targetFlockPakanId);
+                    if (target) {
+                        if (this.targetFasePakanType === 'starter') {
+                            target.hargaPakanStarter = this.hasilPakanPerKg;
+                        } else {
+                            target.hargaPakanGrower = this.hasilPakanPerKg;
+                        }
+                        this.showToast(`Harga pakan ${this.hasilPakanPerKg}/kg diterapkan ke ${target.namaFlock}`, 'info');
                     }
                 },
 
-                // HITUNG UMUR AYAM (HARI) TERMASUK UMUR AWAL PEMBELIAN
-                getUmurAyamHari(tglMulai, umurAwalHari = 0) {
-                    if (!tglMulai) return parseInt(umurAwalHari) || 0;
-                    const diffTime = Math.abs(new Date() - new Date(tglMulai));
-                    const hariDiFarm = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                    return hariDiFarm + (parseInt(umurAwalHari) || 0);
+                // ATURAN UMUR & FASE OTOMATIS
+                hitungUmurAyamHari(flock) {
+                    if (!flock.tglMulai) return flock.umurAwalHari || 0;
+                    const start = new Date(flock.tglMulai);
+                    const now = new Date();
+                    const diffTime = Math.abs(now - start);
+                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                    return diffDays + (parseInt(flock.umurAwalHari) || 0);
                 },
-
-                // HARGA PAKAN DINAMIS BERDASARKAN USIA (0-30 Hari vs >30 Hari)
+                getFaseLabel(flock) {
+                    const umur = this.hitungUmurAyamHari(flock);
+                    if (umur <= 30) return 'DOC / Brooding';
+                    if (umur <= 120) return 'Pembesaran / Grower';
+                    return 'Produksi / Indukan';
+                },
+                getFaseBadgeClass(flock) {
+                    const umur = this.hitungUmurAyamHari(flock);
+                    if (umur <= 30) return 'bg-amber-100 text-amber-800';
+                    if (umur <= 120) return 'bg-emerald-100 text-emerald-800';
+                    return 'bg-purple-100 text-purple-800';
+                },
                 getHargaPakanAktif(flock) {
-                    const umur = this.getUmurAyamHari(flock.tglMulai, flock.umurAwalHari);
+                    const umur = this.hitungUmurAyamHari(flock);
                     if (umur <= 30) {
-                        return flock.hargaPakanDocPerKg !== undefined ? flock.hargaPakanDocPerKg : 10000;
-                    } else {
-                        return flock.hargaPakanGrowerPerKg !== undefined ? flock.hargaPakanGrowerPerKg : 4000;
+                        return parseFloat(flock.hargaPakanStarter) || 10000;
                     }
+                    return parseFloat(flock.hargaPakanGrower) || 4000;
                 },
 
                 // SYSTEM BACKUP & RESTORE
                 exportBackupFile() {
                     const backupData = {
                         app: 'MandiriFarm',
-                        version: '1.9.0',
+                        version: '1.4.0',
                         exportedAt: new Date().toISOString(),
                         data: {
                             penetasanList: this.penetasanList,
@@ -1459,22 +1268,25 @@
                             if (imported && imported.data) {
                                 this.showConfirm(
                                     'Pulihkan Data (Restore)?',
-                                    'Tindakan ini akan menggantikan data yang ada dengan data dari berkas backup ini.',
+                                    'Tindakan ini akan menggantikan seluruh data aplikasi dari berkas cadangan ini.',
                                     () => {
                                         this.isSyncingFromGas = true;
                                         this.penetasanList = imported.data.penetasanList || [];
                                         this.flockList = imported.data.flockList || [];
                                         this.harianList = imported.data.harianList || [];
                                         this.keuanganList = imported.data.keuanganList || [];
-                                        if (imported.data.pakanPresets) this.pakanPresets = imported.data.pakanPresets;
+                                        if (imported.data.pakanPresets) {
+                                            this.pakanPresets = imported.data.pakanPresets;
+                                            localStorage.setItem('mandirifarm_pakan_presets', JSON.stringify(this.pakanPresets));
+                                            this.loadPakanPreset('starter');
+                                        }
 
                                         this.$nextTick(() => {
                                             this.isSyncingFromGas = false;
-                                            this.pilihPresetPakan('starter');
                                             this.pushToGas();
                                             this.renderCharts();
                                         });
-                                        this.showToast('Data berhasil dipulihkan dari file backup.', 'info');
+                                        this.showToast('Data berhasil dipulihkan dari backup.', 'info');
                                     }
                                 );
                             } else {
@@ -1493,29 +1305,34 @@
                     this.editingFlockId = null;
                 },
 
-                // FITUR EDIT PENETASAN
+                onFaseAwalChange() {
+                    if (this.formFlock.faseAwal === 'DOC') {
+                        this.formFlock.umurAwalHari = 0;
+                        this.formFlock.kandang = 'Kandang Brooding';
+                    } else if (this.formFlock.faseAwal === 'Grower') {
+                        this.formFlock.umurAwalHari = 31;
+                        this.formFlock.kandang = 'Kandang Grower';
+                    } else if (this.formFlock.faseAwal === 'Layer') {
+                        this.formFlock.umurAwalHari = 121;
+                        this.formFlock.kandang = 'Kandang Indukan/Layer';
+                    }
+                },
+
                 editPenetasan(b) {
                     this.editingPenetasanId = b.id;
                     this.formPenetasan = { 
-                        tipeAyam: 'Pedaging',
                         telurFertil: 0,
                         telurInfertil: 0,
+                        tipe: 'Pedaging',
                         ...b 
                     };
                     this.modalType = 'penetasan';
                     this.showModal = true;
                 },
 
-                // FITUR EDIT KELOMPOK AYAM
                 editFlock(f) {
                     this.editingFlockId = f.id;
-                    this.formFlock = { 
-                        fase: this.getFaseAktif(f),
-                        umurAwalHari: f.umurAwalHari || 0,
-                        hargaPakanDocPerKg: 10000,
-                        hargaPakanGrowerPerKg: 4000,
-                        ...f 
-                    };
+                    this.formFlock = { ...f };
                     this.modalType = 'flock';
                     this.showModal = true;
                 },
@@ -1533,7 +1350,7 @@
                     const hppPerEkor = Math.round(totalBiayaModal / populasiHidup);
                     const hppPerKg = Math.round(hppPerEkor / avgBobot);
 
-                    return { totalBiayaModal, hppPerEkor, hppPerKg, hargaPakanAktif: hargaPakan };
+                    return { totalBiayaModal, hppPerEkor, hppPerKg };
                 },
                 hitungProyeksiLaba(flock) {
                     const populasiHidup = parseInt(flock.jumlahSaatIni) || 0;
@@ -1555,8 +1372,6 @@
                     const pakanTotal = this.getPakanTotalByFlock(flock.id);
                     const fcr = this.hitungFCR(flock);
                     const hargaPakanAktif = this.getHargaPakanAktif(flock);
-                    const umur = this.getUmurAyamHari(flock.tglMulai, flock.umurAwalHari);
-                    const faseAktif = this.getFaseAktif(flock);
                     
                     const htmlContent = `
                         <div style="font-family: Arial, sans-serif; padding: 25px; color: #1e293b; max-width: 700px; margin: 0 auto; background: #ffffff;">
@@ -1588,12 +1403,12 @@
                                     <td style="padding: 6px 10px; border: 1px solid #cbd5e1; font-weight: bold; color: #047857;">${flock.namaFlock}</td>
                                 </tr>
                                 <tr>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Tipe &amp; Fase Pertumbuhan</td>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">${flock.tipe} (${faseAktif}) - Umur ${umur} Hari</td>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Tipe &amp; Umur Ayam</td>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">${flock.tipe} (${this.getFaseLabel(flock)} - ${this.hitungUmurAyamHari(flock)} Hari)</td>
                                 </tr>
                                 <tr>
                                     <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Kandang / Lokasi</td>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1; font-weight: bold;">${flock.kandang}</td>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">${flock.kandang}</td>
                                 </tr>
                                 <tr>
                                     <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Populasi Saat Ini / Awal</td>
@@ -1620,7 +1435,7 @@
                                         <td style="padding: 6px 10px; border: 1px solid #cbd5e1; text-align: right;">${this.formatRupiah(flock.biayaDoc)}</td>
                                     </tr>
                                     <tr>
-                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Biaya Pakan (${pakanTotal} kg @ ${this.formatRupiah(hargaPakanAktif)})</td>
+                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Estimasi Biaya Pakan (${pakanTotal} kg @ ${this.formatRupiah(hargaPakanAktif)})</td>
                                         <td style="padding: 6px 10px; border: 1px solid #cbd5e1; text-align: right;">${this.formatRupiah(pakanTotal * hargaPakanAktif)}</td>
                                     </tr>
                                     <tr>
@@ -1727,7 +1542,6 @@
                             localStorage.removeItem('mandirifarm_flock');
                             localStorage.removeItem('mandirifarm_harian');
                             localStorage.removeItem('mandirifarm_keuangan');
-                            localStorage.removeItem('mandirifarm_pakan_presets');
 
                             this.$nextTick(() => {
                                 this.isSyncingFromGas = false;
@@ -1771,7 +1585,6 @@
                         if (json.status === 'success' && json.data) {
                             if (Array.isArray(json.data.penetasanList)) {
                                 this.penetasanList = json.data.penetasanList.map(p => ({
-                                    tipeAyam: 'Pedaging',
                                     ...p,
                                     jumlahTelur: parseInt(p.jumlahTelur) || 0,
                                     dayaTetas: parseInt(p.dayaTetas) || 0,
@@ -1782,14 +1595,12 @@
                             }
                             if (Array.isArray(json.data.flockList)) {
                                 this.flockList = json.data.flockList.map(f => ({
-                                    fase: f.fase || 'DOC / Brooding',
-                                    umurAwalHari: parseInt(f.umurAwalHari) || 0,
-                                    biayaDoc: parseFloat(f.biayaDoc) || 0,
-                                    hargaPakanDocPerKg: parseFloat(f.hargaPakanDocPerKg) || 10000,
-                                    hargaPakanGrowerPerKg: parseFloat(f.hargaPakanGrowerPerKg) || 4000,
-                                    hargaPakanPerKg: 10000,
+                                    biayaDoc: 750000,
+                                    hargaPakanStarter: 10000,
+                                    hargaPakanGrower: 4000,
                                     avgBobotKg: 1.2,
                                     hargaJualPerKg: 45000,
+                                    umurAwalHari: 0,
                                     ...f,
                                     jumlahAwal: parseInt(f.jumlahAwal) || 0,
                                     jumlahSaatIni: parseInt(f.jumlahSaatIni) || 0
@@ -1844,7 +1655,6 @@
                     }
                 },
 
-                // ATURAN PENETASAN 21 HARI DARI TANGGAL TELUR MASUK
                 savePenetasan() {
                     const tglMasuk = new Date(this.formPenetasan.tglMasuk);
                     const estMenetas = new Date(tglMasuk);
@@ -1857,23 +1667,19 @@
                                 ...this.penetasanList[idx],
                                 namaBatch: this.formPenetasan.namaBatch,
                                 mesin: this.formPenetasan.mesin,
-                                tipeAyam: this.formPenetasan.tipeAyam || 'Pedaging',
+                                tipe: this.formPenetasan.tipe || 'Pedaging',
                                 tglMasuk: this.formPenetasan.tglMasuk,
                                 estMenetas: estMenetas.toISOString().substr(0, 10),
-                                jumlahTelur: parseInt(this.formPenetasan.jumlahTelur) || 0,
-                                status: this.formPenetasan.status || 'Berjalan',
-                                dayaTetas: parseInt(this.formPenetasan.dayaTetas) || 0,
-                                telurFertil: parseInt(this.formPenetasan.telurFertil) || 0,
-                                telurInfertil: parseInt(this.formPenetasan.telurInfertil) || 0
+                                jumlahTelur: parseInt(this.formPenetasan.jumlahTelur) || 0
                             };
                         }
-                        this.showToast('Batch inkubasi diperbarui.', 'info');
+                        this.showToast('Batch penetasan diperbarui.', 'info');
                     } else {
                         const newBatch = {
                             id: 'PEN-' + Date.now(),
                             namaBatch: this.formPenetasan.namaBatch,
                             mesin: this.formPenetasan.mesin,
-                            tipeAyam: this.formPenetasan.tipeAyam || 'Pedaging',
+                            tipe: this.formPenetasan.tipe || 'Pedaging',
                             tglMasuk: this.formPenetasan.tglMasuk,
                             estMenetas: estMenetas.toISOString().substr(0, 10),
                             jumlahTelur: parseInt(this.formPenetasan.jumlahTelur) || 0,
@@ -1884,11 +1690,11 @@
                             menetasCount: 0
                         };
                         this.penetasanList.unshift(newBatch);
-                        this.showToast('Batch inkubasi baru disimpan (Est. Tetas 21 Hari).', 'info');
+                        this.showToast('Batch inkubasi 21 hari disimpan.', 'info');
                     }
 
                     this.closeModal();
-                    this.formPenetasan = { namaBatch: '', mesin: '', tipeAyam: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 50, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0 };
+                    this.formPenetasan = { namaBatch: '', mesin: '', tipe: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 50, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0 };
                 },
 
                 openFinishPenetasanModal(b) {
@@ -1900,7 +1706,6 @@
                     this.finishHatchingModal = {
                         show: true,
                         batch: b,
-                        tipeAyam: b.tipeAyam || 'Pedaging',
                         telurFertilCount: b.telurFertil || fertilDefault,
                         telurInfertilCount: b.telurInfertil || infertilDefault,
                         menetasCount: b.menetasCount || menetasDefault,
@@ -1939,12 +1744,6 @@
                     if (fertil === 0) return 0;
                     return Math.round((menetas / fertil) * 100);
                 },
-                getFormattedHPlus1(estMenetasStr) {
-                    const hatchBase = estMenetasStr ? new Date(estMenetasStr) : new Date();
-                    const hPlus1Date = new Date(hatchBase);
-                    hPlus1Date.setDate(hPlus1Date.getDate() + 1);
-                    return this.formatDate(hPlus1Date.toISOString().substr(0, 10));
-                },
                 saveFinishPenetasan() {
                     const b = this.finishHatchingModal.batch;
                     if (!b) return;
@@ -1953,44 +1752,41 @@
                     const infertil = parseInt(this.finishHatchingModal.telurInfertilCount) || 0;
                     const menetas = parseInt(this.finishHatchingModal.menetasCount) || 0;
                     const totalTelur = parseInt(b.jumlahTelur) || 1;
-                    const tipeAyam = this.finishHatchingModal.tipeAyam || 'Pedaging';
 
                     b.status = 'Selesai';
-                    b.tipeAyam = tipeAyam;
                     b.telurFertil = fertil;
                     b.telurInfertil = infertil;
                     b.menetasCount = menetas;
                     b.fertilitasPct = Math.round((fertil / totalTelur) * 100);
                     b.dayaTetas = fertil > 0 ? Math.round((menetas / fertil) * 100) : 0;
 
+                    // H+1 MASUK KANDANG BROODING OTOMATIS
                     if (this.finishHatchingModal.createDocFlock && menetas > 0) {
-                        const hatchBase = b.estMenetas ? new Date(b.estMenetas) : new Date();
-                        const hPlus1Date = new Date(hatchBase);
-                        hPlus1Date.setDate(hPlus1Date.getDate() + 1);
-                        const tglMulaiKandang = hPlus1Date.toISOString().substr(0, 10);
+                        const tglHatching = new Date(b.estMenetas || new Date());
+                        const tglBrooding = new Date(tglHatching);
+                        tglBrooding.setDate(tglBrooding.getDate() + 1);
 
                         const newFlock = {
                             id: 'FLK-' + Date.now(),
-                            namaFlock: 'Brooding (' + tipeAyam + ') ' + b.namaBatch,
-                            tipe: tipeAyam,
-                            fase: 'DOC / Brooding',
-                            umurAwalHari: 0,
-                            kandang: 'Kandang Brooding 1',
+                            namaFlock: 'DOC Hasil ' + b.namaBatch,
+                            tipe: b.tipe || 'Pedaging',
+                            faseAwal: 'DOC',
+                            kandang: 'Kandang Brooding',
                             jumlahAwal: menetas,
                             jumlahSaatIni: menetas,
                             biayaDoc: 0,
-                            hargaPakanDocPerKg: 10000,
-                            hargaPakanGrowerPerKg: 4000,
-                            hargaPakanPerKg: 10000,
+                            hargaPakanStarter: 10000,
+                            hargaPakanGrower: 4000,
                             avgBobotKg: 1.2,
                             hargaJualPerKg: 45000,
-                            tglMulai: tglMulaiKandang
+                            umurAwalHari: 0,
+                            tglMulai: tglBrooding.toISOString().substr(0, 10)
                         };
                         this.flockList.unshift(newFlock);
                     }
 
                     this.finishHatchingModal.show = false;
-                    this.showToast(`Panen Brooding Berhasil! Total ${menetas} Ekor masuk Kandang Brooding (H+1).`, 'info');
+                    this.showToast(`Panen DOC Berhasil! Total ${menetas} ekor masuk Kandang Brooding (H+1).`, 'info');
                 },
                 confirmDeletePenetasan(id) {
                     this.showConfirm('Hapus Penetasan?', 'Apakah Anda yakin menghapus catatan inkubasi ini?', () => {
@@ -2009,14 +1805,14 @@
                                 ...this.flockList[idx],
                                 namaFlock: this.formFlock.namaFlock,
                                 tipe: this.formFlock.tipe,
-                                fase: this.formFlock.fase,
-                                umurAwalHari: parseInt(this.formFlock.umurAwalHari) || 0,
+                                faseAwal: this.formFlock.faseAwal,
                                 kandang: this.formFlock.kandang,
                                 jumlahAwal: initial,
                                 jumlahSaatIni: parseInt(this.formFlock.jumlahSaatIni) ?? initial,
                                 biayaDoc: parseFloat(this.formFlock.biayaDoc) || 0,
-                                hargaPakanDocPerKg: parseFloat(this.formFlock.hargaPakanDocPerKg) || 10000,
-                                hargaPakanGrowerPerKg: parseFloat(this.formFlock.hargaPakanGrowerPerKg) || 4000,
+                                hargaPakanStarter: parseFloat(this.formFlock.hargaPakanStarter) || 10000,
+                                hargaPakanGrower: parseFloat(this.formFlock.hargaPakanGrower) || 4000,
+                                umurAwalHari: parseInt(this.formFlock.umurAwalHari) || 0,
                                 tglMulai: this.formFlock.tglMulai
                             };
                         }
@@ -2026,17 +1822,16 @@
                             id: 'FLK-' + Date.now(),
                             namaFlock: this.formFlock.namaFlock,
                             tipe: this.formFlock.tipe,
-                            fase: this.formFlock.fase || 'DOC / Brooding',
-                            umurAwalHari: parseInt(this.formFlock.umurAwalHari) || 0,
-                            kandang: this.formFlock.kandang || 'Kandang Brooding 1',
+                            faseAwal: this.formFlock.faseAwal,
+                            kandang: this.formFlock.kandang,
                             jumlahAwal: initial,
                             jumlahSaatIni: initial,
                             biayaDoc: parseFloat(this.formFlock.biayaDoc) || 0,
-                            hargaPakanDocPerKg: parseFloat(this.formFlock.hargaPakanDocPerKg) || 10000,
-                            hargaPakanGrowerPerKg: parseFloat(this.formFlock.hargaPakanGrowerPerKg) || 4000,
-                            hargaPakanPerKg: 10000,
+                            hargaPakanStarter: parseFloat(this.formFlock.hargaPakanStarter) || 10000,
+                            hargaPakanGrower: parseFloat(this.formFlock.hargaPakanGrower) || 4000,
                             avgBobotKg: 1.2,
                             hargaJualPerKg: 45000,
+                            umurAwalHari: parseInt(this.formFlock.umurAwalHari) || 0,
                             tglMulai: this.formFlock.tglMulai
                         };
                         this.flockList.unshift(newFlock);
@@ -2044,7 +1839,7 @@
                     }
 
                     this.closeModal();
-                    this.formFlock = { namaFlock: '', tipe: 'Pedaging', fase: 'DOC / Brooding', umurAwalHari: 0, kandang: 'Kandang Brooding 1', jumlahAwal: 100, jumlahSaatIni: 100, biayaDoc: 0, hargaPakanDocPerKg: 10000, hargaPakanGrowerPerKg: 4000, tglMulai: new Date().toISOString().substr(0, 10) };
+                    this.formFlock = { namaFlock: '', tipe: 'Pedaging', faseAwal: 'DOC', kandang: 'Kandang Brooding', jumlahAwal: 100, jumlahSaatIni: 100, biayaDoc: 750000, hargaPakanStarter: 10000, hargaPakanGrower: 4000, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) };
                 },
                 confirmDeleteFlock(id) {
                     this.showConfirm('Hapus Kelompok Ayam?', 'Apakah Anda yakin ingin menghapus kelompok ayam ini?', () => {
@@ -2108,7 +1903,7 @@
 
                 getFlockName(flockId) {
                     const f = this.flockList.find(x => x.id === flockId);
-                    return f ? `${f.namaFlock} (${f.kandang})` : 'Unknown Flock';
+                    return f ? f.namaFlock : 'Unknown Flock';
                 },
                 getPakanTotalByFlock(flockId) {
                     return this.harianList
@@ -2177,7 +1972,7 @@
                     if (ctxFlock) {
                         if (this.flockChartInstance) this.flockChartInstance.destroy();
 
-                        const labels = this.flockList.map(f => `${f.namaFlock} (${f.kandang})`);
+                        const labels = this.flockList.map(f => f.namaFlock);
                         const counts = this.flockList.map(f => f.jumlahSaatIni);
 
                         this.flockChartInstance = new Chart(ctxFlock, {
@@ -2192,7 +1987,7 @@
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: false,
-                                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }
+                                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 } } } }
                             }
                         });
                     }
