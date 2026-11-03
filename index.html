@@ -55,9 +55,9 @@
         <!-- SIDEBAR NAVIGATION (Desktop) -->
         <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-white min-h-screen sticky top-0 shadow-2xl z-30 no-print">
             <div class="p-5 flex items-center gap-3 border-b border-slate-800">
-                <div class="flex flex-col items-center justify-center mb-4 mt-8">
-                     <img src="Logo-Mandiri-Farm.png" alt="Mandiri Farm" class="w-20 h-20 object-contain mx-auto mb-2">
-                     </div>
+                <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-emerald-500/30">
+                    <i class="fa-solid fa-egg"></i>
+                </div>
                 <div>
                     <h1 class="font-bold text-lg leading-tight text-white tracking-wide">Mandiri Farm</h1>
                     <p class="text-xs text-emerald-400 font-medium">Monitoring Ayam Kampung</p>
@@ -121,7 +121,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 no-print">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-900 tracking-tight">{{ currentNavTitle }}</h2>
-                    <p class="text-slate-500 text-xs md:text-sm">Kelola penetasan, pembesaran, kalkulasi HPP, dan laporan keuangan peternakan.</p>
+                    <p class="text-slate-500 text-xs md:text-sm">Kelola penetasan (21 Hari), pembesaran, kalkulasi HPP, racikan pakan, dan laporan keuangan.</p>
                 </div>
             </div>
 
@@ -134,7 +134,7 @@
                             <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm"><i class="fa-solid fa-crow"></i></div>
                         </div>
                         <div class="text-2xl font-extrabold text-slate-900">{{ totalPopulasi }} <span class="text-xs font-normal text-slate-400">ekor</span></div>
-                        <p class="text-[11px] text-slate-500 mt-1">Pedaging & Petelur</p>
+                        <p class="text-[11px] text-slate-500 mt-1">Brooding, Grower & Indukan</p>
                     </div>
 
                     <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition">
@@ -143,7 +143,7 @@
                             <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm"><i class="fa-solid fa-temperature-arrow-up"></i></div>
                         </div>
                         <div class="text-2xl font-extrabold text-slate-900">{{ totalTelurDiinkubasi }} <span class="text-xs font-normal text-slate-400">butir</span></div>
-                        <p class="text-[11px] text-blue-600 font-medium mt-1">{{ totalBatchPenetasan }} Batch Berjalan</p>
+                        <p class="text-[11px] text-blue-600 font-medium mt-1">{{ totalBatchPenetasan }} Batch (Siklus 21 Hari)</p>
                     </div>
 
                     <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition">
@@ -152,7 +152,7 @@
                             <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm"><i class="fa-solid fa-egg"></i></div>
                         </div>
                         <div class="text-2xl font-extrabold text-slate-900">{{ telurHariIni }} <span class="text-xs font-normal text-slate-400">butir</span></div>
-                        <p class="text-[11px] text-emerald-600 font-medium mt-1">Produksi Harian Layer</p>
+                        <p class="text-[11px] text-emerald-600 font-medium mt-1">Produksi Kandang Indukan</p>
                     </div>
 
                     <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition">
@@ -207,8 +207,8 @@
             <div v-if="activeTab === 'penetasan'" class="space-y-6">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4.5 rounded-2xl border border-slate-200 shadow-sm">
                     <div>
-                        <h3 class="font-bold text-slate-800 text-base">Inkubator & Mesin Tetas (21 Hari)</h3>
-                        <p class="text-xs text-slate-500">Pantau proses pengeraman telur tetas hingga menjadi DOC.</p>
+                        <h3 class="font-bold text-slate-800 text-base">Inkubator & Mesin Tetas (Siklus 21 Hari)</h3>
+                        <p class="text-xs text-slate-500">Otomatisasi estimasi 21 hari pengeraman & pemindahan H+1 ke Kandang Brooding.</p>
                     </div>
                     <button @click="openModal('penetasan')" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
                         <i class="fa-solid fa-plus"></i> Tambah Inkubasi Baru
@@ -219,38 +219,60 @@
                     <div v-for="b in penetasanList" :key="b.id" class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-4">
                         <div class="flex justify-between items-start">
                             <div>
-                                <span class="px-2.5 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider" 
+                                <span class="px-2.5 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider mr-1" 
                                     :class="b.status === 'Berjalan' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'">
                                     {{ b.status }}
+                                </span>
+                                <span class="px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider bg-indigo-100 text-indigo-800">
+                                    {{ b.tipeAyam || 'Pedaging' }}
                                 </span>
                                 <h4 class="font-bold text-slate-800 text-lg mt-2 leading-tight">{{ b.namaBatch }}</h4>
                                 <p class="text-xs text-slate-400">Mesin: {{ b.mesin }}</p>
                             </div>
-                            <button @click="confirmDeletePenetasan(b.id)" class="text-slate-300 hover:text-rose-500 p-1"><i class="fa-solid fa-trash"></i></button>
+                            <div class="flex items-center gap-1">
+                                <button @click="editPenetasan(b)" class="text-slate-400 hover:text-blue-600 p-1.5 rounded-lg hover:bg-blue-50 transition" title="Edit Batch">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button @click="confirmDeletePenetasan(b.id)" class="text-slate-400 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 transition" title="Hapus Batch">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-xl text-xs">
                             <div>
-                                <span class="text-slate-400 block text-[10px] uppercase font-bold">Tgl Masuk</span>
+                                <span class="text-slate-400 block text-[10px] uppercase font-bold">Telur Masuk</span>
                                 <span class="font-semibold text-slate-700">{{ formatDate(b.tglMasuk) }}</span>
                             </div>
                             <div>
-                                <span class="text-slate-400 block text-[10px] uppercase font-bold">Est. Menetas</span>
-                                <span class="font-semibold text-emerald-600">{{ formatDate(b.estMenetas) }}</span>
+                                <span class="text-slate-400 block text-[10px] uppercase font-bold">Est. Tetas (21 Hr)</span>
+                                <span class="font-bold text-emerald-600">{{ formatDate(b.estMenetas) }}</span>
                             </div>
                             <div class="mt-2">
-                                <span class="text-slate-400 block text-[10px] uppercase font-bold">Jumlah Telur</span>
+                                <span class="text-slate-400 block text-[10px] uppercase font-bold">Total Telur</span>
                                 <span class="font-bold text-slate-800 text-sm">{{ b.jumlahTelur }} Butir</span>
                             </div>
                             <div class="mt-2">
                                 <span class="text-slate-400 block text-[10px] uppercase font-bold">Daya Tetas</span>
-                                <span class="font-bold text-blue-600 text-sm">{{ b.status === 'Selesai' ? b.dayaTetas + '%' : '-' }}</span>
+                                <span class="font-bold text-emerald-600 text-sm">{{ b.status === 'Selesai' ? (b.dayaTetas || 0) + '%' : '-' }}</span>
+                            </div>
+                        </div>
+
+                        <!-- DETAIL FERTILITAS JIKA SUDAH PANEN -->
+                        <div v-if="b.status === 'Selesai'" class="bg-blue-50/60 p-3 rounded-xl text-xs space-y-1.5 border border-blue-100">
+                            <div class="flex justify-between items-center text-[11px]">
+                                <span class="text-slate-500">Fertilitas Telur:</span>
+                                <span class="font-bold text-blue-700">{{ b.telurFertil || 0 }} Fertil / {{ b.telurInfertil || 0 }} Infertil ({{ b.fertilitasPct || 0 }}%)</span>
+                            </div>
+                            <div class="flex justify-between items-center text-[11px]">
+                                <span class="text-slate-500">Hasil Panen DOC:</span>
+                                <span class="font-extrabold text-emerald-700">{{ b.menetasCount || 0 }} Ekor DOC ({{ b.tipeAyam || 'Pedaging' }})</span>
                             </div>
                         </div>
 
                         <div v-if="b.status === 'Berjalan'" class="pt-1">
                             <button @click="openFinishPenetasanModal(b)" class="w-full py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-xl text-xs transition border border-blue-200 flex items-center justify-center gap-1.5">
-                                <i class="fa-solid fa-check-circle"></i> Selesaikan & Panen DOC
+                                <i class="fa-solid fa-check-circle"></i> Selesaikan & Panen ke Brooding
                             </button>
                         </div>
                     </div>
@@ -262,7 +284,7 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4.5 rounded-2xl border border-slate-200 shadow-sm">
                     <div>
                         <h3 class="font-bold text-slate-800 text-base">Kelompok Ayam & Analisis HPP</h3>
-                        <p class="text-xs text-slate-500">Manajemen batch pedaging & petelur beserta kalkulasi HPP dan proyeksi keuntungan.</p>
+                        <p class="text-xs text-slate-500">Bisa memilih fase awal (DOC, Remaja/Grower, Indukan) dan dapat diedit sewaktu-waktu.</p>
                     </div>
                     <button @click="openModal('flock')" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
                         <i class="fa-solid fa-plus"></i> Tambah Kelompok Baru
@@ -278,13 +300,38 @@
                                         :class="f.tipe === 'Pedaging' ? 'bg-amber-100 text-amber-800' : 'bg-purple-100 text-purple-800'">
                                         {{ f.tipe }}
                                     </span>
-                                    <span class="px-2.5 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider bg-slate-100 text-slate-700">
-                                        {{ f.fase }}
+                                    
+                                    <!-- BADGE FASE OTOMATIS BERDASARKAN UMUR & FASE AWAL -->
+                                    <span class="px-2.5 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider"
+                                        :class="getFaseStyle(f)">
+                                        {{ getFaseAktif(f) }}
                                     </span>
+
                                     <h4 class="font-bold text-slate-800 text-lg mt-2 leading-tight">{{ f.namaFlock }}</h4>
-                                    <p class="text-xs text-slate-400">Kandang: {{ f.kandang }} | Masuk: {{ formatDate(f.tglMulai) }}</p>
+                                    <p class="text-xs text-slate-500 font-semibold mt-0.5">
+                                        <i class="fa-solid fa-warehouse mr-1 text-slate-400"></i>{{ f.kandang }}
+                                    </p>
+                                    <p class="text-[11px] text-slate-400">Masuk Kandang: {{ formatDate(f.tglMulai) }}</p>
+                                    
+                                    <!-- BADGE UMUR AYAM & HARGA PAKAN DINAMIS -->
+                                    <div class="flex flex-wrap gap-1.5 mt-2">
+                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                            <i class="fa-regular fa-clock mr-1"></i>Umur: {{ getUmurAyamHari(f.tglMulai, f.umurAwalHari) }} Hari
+                                        </span>
+                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" title="Harga pakan aktif sesuai usia">
+                                            Pakan: {{ formatRupiah(getHargaPakanAktif(f)) }}/kg 
+                                            ({{ getUmurAyamHari(f.tglMulai, f.umurAwalHari) <= 30 ? 'Starter' : 'Grower' }})
+                                        </span>
+                                    </div>
                                 </div>
-                                <button @click="confirmDeleteFlock(f.id)" class="text-slate-300 hover:text-rose-500 p-1"><i class="fa-solid fa-trash"></i></button>
+                                <div class="flex items-center gap-1">
+                                    <button @click="editFlock(f)" class="text-slate-400 hover:text-blue-600 p-1.5 rounded-lg hover:bg-blue-50 transition" title="Edit Kelompok">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    <button @click="confirmDeleteFlock(f.id)" class="text-slate-400 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 transition" title="Hapus Kelompok">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-xl text-center">
@@ -374,7 +421,120 @@
                 </div>
             </div>
 
-            <!-- TAB 4: CATATAN HARIAN -->
+            <!-- TAB 4: FORMULASI & KALKULATOR PAKAN -->
+            <div v-if="activeTab === 'pakan'" class="space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4.5 rounded-2xl border border-slate-200 shadow-sm">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                            <i class="fa-solid fa-wheat-awn text-amber-500"></i> Formulasi & Kalkulator Pakan Mandiri
+                        </h3>
+                        <p class="text-xs text-slate-500">Hitung persentase protein & harga pakan olahan per Kg sesuai kebutuhan usia ayam.</p>
+                    </div>
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <button @click="pilihPresetPakan('starter')" class="flex-1 sm:flex-none px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-xl text-xs font-bold">
+                            Preset Starter (0-30 Hari)
+                        </button>
+                        <button @click="pilihPresetPakan('grower')" class="flex-1 sm:flex-none px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold">
+                            Preset Grower (>30 Hari)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- PANEL FORMULASI BAHAN BAKU -->
+                    <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                        <div class="flex justify-between items-center border-b pb-3">
+                            <h4 class="font-bold text-slate-800 text-sm">Komposisi Bahan Baku Pakan (Per 100 Kg / 100%)</h4>
+                            <button @click="tambahBahanBaku" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-lg text-xs flex items-center gap-1">
+                                <i class="fa-solid fa-plus"></i> Tambah Bahan
+                            </button>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div v-for="(b, idx) in activeFormula.bahanList" :key="idx" class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                                <div class="flex items-center justify-between gap-2">
+                                    <input v-model="b.nama" type="text" placeholder="Nama Bahan Baku" class="font-bold text-xs text-slate-800 bg-white p-2 rounded-lg border border-slate-300 flex-1 outline-none">
+                                    <button @click="hapusBahanBaku(idx)" class="text-rose-500 p-1.5 hover:bg-rose-50 rounded-lg"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                                <div class="grid grid-cols-3 gap-2 text-xs">
+                                    <div>
+                                        <label class="block text-[10px] text-slate-500 font-bold">Proporsi (%)</label>
+                                        <input v-model.number="b.porsiPct" type="number" step="1" min="0" max="100" class="w-full p-2 bg-white rounded-lg border border-slate-300 font-bold outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] text-slate-500 font-bold">Harga/Kg (Rp)</label>
+                                        <input v-model.number="b.hargaPerKg" type="number" step="500" min="0" class="w-full p-2 bg-white rounded-lg border border-slate-300 font-bold text-emerald-700 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] text-slate-500 font-bold">Protein (%)</label>
+                                        <input v-model.number="b.proteinPct" type="number" step="0.5" min="0" class="w-full p-2 bg-white rounded-lg border border-slate-300 font-bold text-indigo-700 outline-none">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PANEL RINGKASAN & INTEGRASI HARGA -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-5 flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <h4 class="font-bold text-slate-800 text-sm border-b pb-2">Analisis Hasil Racikan</h4>
+
+                            <!-- STATUS PROPORSI 100% -->
+                            <div class="p-3.5 rounded-xl text-xs space-y-1" :class="totalPersenFormulasi === 100 ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-rose-50 border border-rose-200 text-rose-900'">
+                                <div class="flex justify-between items-center font-bold">
+                                    <span>Total Proporsi Mix:</span>
+                                    <span class="text-sm font-extrabold">{{ totalPersenFormulasi }}%</span>
+                                </div>
+                                <p v-if="totalPersenFormulasi !== 100" class="text-[10px] text-rose-600 font-semibold">
+                                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Total persentase harus genap 100%!
+                                </p>
+                                <p v-else class="text-[10px] text-emerald-600 font-semibold">
+                                    <i class="fa-solid fa-circle-check mr-1"></i> Proporsi formulasi sudah seimbang (100%).
+                                </p>
+                            </div>
+
+                            <!-- ESTIMASI HARGA PAKAN PER KG -->
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-1">
+                                <span class="text-[10px] font-bold uppercase text-slate-400">Estimasi Biaya Racikan</span>
+                                <div class="text-2xl font-black text-emerald-700">{{ formatRupiah(hargaTotalPakanCampuran) }} <span class="text-xs font-semibold text-slate-500">/ Kg</span></div>
+                            </div>
+
+                            <!-- ESTIMASI KANDUNGAN PROTEIN -->
+                            <div class="bg-indigo-50/70 p-4 rounded-2xl border border-indigo-100 space-y-1">
+                                <span class="text-[10px] font-bold uppercase text-indigo-400">Estimasi Protein Kasar</span>
+                                <div class="text-2xl font-black text-indigo-800">{{ proteinTotalPakanCampuran }}%</div>
+                                <p class="text-[10px] font-semibold text-indigo-600 mt-1">
+                                    Standard: Starter (19-21%), Grower (15-17%)
+                                </p>
+                            </div>
+
+                            <!-- FORM INTEGRASI KE KELOMPOK AYAM -->
+                            <div class="border-t pt-4 space-y-3">
+                                <h5 class="font-bold text-slate-800 text-xs">Terapkan Harga Ke Kelompok Ayam:</h5>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-600 mb-1">Pilih Kelompok Ayam Target</label>
+                                    <select v-model="pakanApplyForm.flockId" class="w-full p-2.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none">
+                                        <option value="" disabled>-- Pilih Kelompok --</option>
+                                        <option v-for="f in flockList" :key="f.id" :value="f.id">{{ f.namaFlock }} ({{ f.kandang }})</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-600 mb-1">Target Pakan Usia</label>
+                                    <select v-model="pakanApplyForm.targetAge" class="w-full p-2.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none">
+                                        <option value="doc">Pakan Starter (Usia 0 - 30 Hari)</option>
+                                        <option value="grower">Pakan Grower (Usia > 30 Hari)</option>
+                                    </select>
+                                </div>
+                                <button @click="terapkanHargaPakanKeFlock" :disabled="!pakanApplyForm.flockId || totalPersenFormulasi !== 100" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white font-bold rounded-xl text-xs transition shadow-md shadow-emerald-600/20">
+                                    <i class="fa-solid fa-check"></i> Simpan & Terapkan Ke HPP Batch
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: CATATAN HARIAN -->
             <div v-if="activeTab === 'harian'" class="space-y-6">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4.5 rounded-2xl border border-slate-200 shadow-sm">
                     <div>
@@ -423,7 +583,7 @@
                 </div>
             </div>
 
-            <!-- TAB 5: KEUANGAN -->
+            <!-- TAB 6: KEUANGAN -->
             <div v-if="activeTab === 'keuangan'" class="space-y-6">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4.5 rounded-2xl border border-slate-200 shadow-sm no-print">
                     <div>
@@ -494,8 +654,33 @@
                 </div>
             </div>
 
-            <!-- TAB 6: PENGATURAN & SINKRONISASI -->
+            <!-- TAB 7: PENGATURAN & SINKRONISASI & BACKUP RESTORE -->
             <div v-if="activeTab === 'pengaturan'" class="space-y-6">
+                <!-- FITUR BACKUP & RESTORE DATA (MANUAL JSON) -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-database text-blue-600"></i> Cadangkan & Pulihkan Data (Backup & Restore)
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">
+                            Simpan seluruh data peternakan ke dalam file komputer/HP Anda atau pulihkan data dari file cadangan JSON.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                        <!-- Ekspor Backup -->
+                        <button @click="exportBackupFile" class="py-3.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-md shadow-blue-600/20">
+                            <i class="fa-solid fa-download text-sm"></i> Unduh File Backup (JSON)
+                        </button>
+
+                        <!-- Impor / Restore -->
+                        <label class="py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-md shadow-emerald-600/20 cursor-pointer text-center">
+                            <i class="fa-solid fa-upload text-sm"></i> Restore Data Dari File (JSON)
+                            <input type="file" accept=".json" @change="importBackupFile" class="hidden">
+                        </label>
+                    </div>
+                </div>
+
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
                     <div>
                         <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
@@ -517,7 +702,7 @@
                     </div>
 
                     <div class="border-t border-slate-200 pt-5 space-y-3">
-                        <h4 class="font-bold text-slate-800 text-sm">Cadangan & Pemulihan Data</h4>
+                        <h4 class="font-bold text-slate-800 text-sm">Hapus Semua Data</h4>
                         <div class="flex flex-wrap gap-3">
                             <button @click="confirmClearAll" class="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm">
                                 <i class="fa-solid fa-trash-can"></i> Hapus Semua Data Peternakan
@@ -557,57 +742,119 @@
             </div>
         </div>
 
-        <!-- FINISH HATCHING MODAL -->
+        <!-- FINISH HATCHING MODAL (KONFIRMASI PANEN DOC + PEMINDAHAN H+1 KE KANDANG BROODING) -->
         <div v-if="finishHatchingModal.show" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
             <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
                 <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl font-bold">
                     <i class="fa-solid fa-egg"></i>
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold text-slate-900">Selesaikan Inkubasi Telur</h3>
-                    <p class="text-xs text-slate-500 mt-1">Batch: {{ finishHatchingModal.batch?.namaBatch }} (Total Telur: {{ finishHatchingModal.batch?.jumlahTelur }} Butir)</p>
+                    <h3 class="text-lg font-bold text-slate-900">Panen DOC Ke Kandang Brooding</h3>
+                    <p class="text-xs text-slate-500 mt-1">Batch: <span class="font-bold text-slate-700">{{ finishHatchingModal.batch?.namaBatch }}</span> (Total Telur Masuk: <strong>{{ finishHatchingModal.batch?.jumlahTelur }}</strong> Butir)</p>
                 </div>
 
-                <div class="space-y-3 text-xs">
+                <div class="space-y-3 text-xs bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <!-- OPSI JENIS AYAM PANEN -->
                     <div>
-                        <label class="block font-bold mb-1 text-slate-700">Jumlah Telur Menetas (Ekor DOC)</label>
-                        <input v-model.number="finishHatchingModal.menetasCount" type="number" min="0" :max="finishHatchingModal.batch?.jumlahTelur" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none font-bold text-sm">
+                        <label class="block font-bold mb-1 text-slate-700">Jenis Ayam</label>
+                        <select v-model="finishHatchingModal.tipeAyam" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800 outline-none">
+                            <option value="Pedaging">Pedaging (Meat)</option>
+                            <option value="Petelur">Petelur (Egg Layer)</option>
+                        </select>
                     </div>
+
+                    <!-- INPUT FERTIL & INFERTIL -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-bold mb-1 text-blue-800 flex items-center gap-1">
+                                <i class="fa-solid fa-circle-check text-blue-600"></i> Telur Fertil (Butir)
+                            </label>
+                            <input v-model.number="finishHatchingModal.telurFertilCount" @input="onFertilInput" type="number" min="0" :max="finishHatchingModal.batch?.jumlahTelur" class="w-full p-2.5 rounded-xl border border-blue-300 bg-white font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1 text-amber-800 flex items-center gap-1">
+                                <i class="fa-solid fa-circle-xmark text-amber-600"></i> Telur Infertil (Butir)
+                            </label>
+                            <input v-model.number="finishHatchingModal.telurInfertilCount" @input="onInfertilInput" type="number" min="0" :max="finishHatchingModal.batch?.jumlahTelur" class="w-full p-2.5 rounded-xl border border-amber-300 bg-white font-bold text-slate-800 outline-none focus:ring-2 focus:ring-amber-500">
+                        </div>
+                    </div>
+
+                    <!-- RINGKASAN PERSENTASE FERTILITAS -->
+                    <div class="flex justify-between items-center bg-white p-2.5 rounded-xl border border-slate-200 text-[11px]">
+                        <span class="text-slate-500">Tingkat Fertilitas Telur:</span>
+                        <span class="font-bold text-blue-700">{{ hitungModalFertilitasPct() }}%</span>
+                    </div>
+
+                    <!-- INPUT HASIL DOC MENETAS -->
+                    <div class="pt-1">
+                        <label class="block font-bold mb-1 text-emerald-800 flex items-center gap-1">
+                            <i class="fa-solid fa-crow text-emerald-600"></i> DOC Menetas Hidup (Ekor)
+                        </label>
+                        <input v-model.number="finishHatchingModal.menetasCount" type="number" min="0" :max="finishHatchingModal.telurFertilCount" class="w-full p-3 rounded-xl border border-emerald-300 bg-white font-extrabold text-emerald-700 text-base outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+
+                    <!-- RINGKASAN DAYA TETAS -->
+                    <div class="flex justify-between items-center bg-emerald-50 p-2.5 rounded-xl border border-emerald-200 text-[11px]">
+                        <span class="text-slate-600">Daya Tetas (Hatchability):</span>
+                        <span class="font-extrabold text-emerald-700 text-xs">{{ hitungModalDayaTetasPct() }}% (dari Fertil)</span>
+                    </div>
+
+                    <!-- PEMBERITAHUAN TANGGAL MASUK KANDANG BROODING (H+1 SETELAH TETAS) -->
+                    <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 text-[11px] space-y-1">
+                        <div class="font-bold text-amber-900 flex items-center gap-1">
+                            <i class="fa-solid fa-calendar-check text-amber-600"></i> Otomatis Masuk Kandang Brooding (H+1)
+                        </div>
+                        <p class="text-slate-600 leading-tight">
+                            Akan dimasukkan ke <strong>Kandang Brooding</strong> pada tanggal: <strong>{{ getFormattedHPlus1(finishHatchingModal.batch?.estMenetas) }}</strong> (1 Hari setelah menetas).
+                        </p>
+                    </div>
+
                     <div class="flex items-center gap-2 pt-1">
                         <input type="checkbox" id="createDocBatch" v-model="finishHatchingModal.createDocFlock" class="w-4 h-4 text-emerald-600 rounded">
-                        <label for="createDocBatch" class="font-semibold text-slate-700 cursor-pointer">Buat Kelompok Ayam DOC Baru Otomatis</label>
+                        <label for="createDocBatch" class="font-semibold text-slate-700 cursor-pointer">
+                            Otomatis Buat Data Kelompok Ayam Brooding Baru
+                        </label>
                     </div>
                 </div>
 
                 <div class="flex gap-2 pt-2">
                     <button @click="finishHatchingModal.show = false" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">Batal</button>
-                    <button @click="saveFinishPenetasan" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-blue-600/20">Simpan Hasil Panen</button>
+                    <button @click="saveFinishPenetasan" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-blue-600/20">Simpan Panen Brooding</button>
                 </div>
             </div>
         </div>
 
-        <!-- INPUT MODALS -->
+        <!-- INPUT / EDIT MODALS -->
         <div v-if="showModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
             <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative overflow-y-auto max-h-[90vh]">
-                <button @click="showModal = false" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-lg w-8 h-8 flex items-center justify-center rounded-full bg-slate-100">
+                <button @click="closeModal" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-lg w-8 h-8 flex items-center justify-center rounded-full bg-slate-100">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
 
-                <!-- Form Penetasan -->
+                <!-- Form Penetasan (Tambah & Edit) -->
                 <div v-if="modalType === 'penetasan'">
-                    <h3 class="text-lg font-extrabold text-slate-900 mb-4">Inkubasi Telur Tetas Baru</h3>
+                    <h3 class="text-lg font-extrabold text-slate-900 mb-4">{{ editingPenetasanId ? 'Edit Batch Penetasan' : 'Inkubasi Telur Tetas Baru' }}</h3>
                     <form @submit.prevent="savePenetasan" class="space-y-4 text-xs">
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Nama Batch / Label</label>
                             <input v-model="formPenetasan.namaBatch" type="text" required placeholder="Misal: Penetasan Batch #01" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
-                        <div>
-                            <label class="block font-bold mb-1 text-slate-700">Nama / Kode Mesin Tetas</label>
-                            <input v-model="formPenetasan.mesin" type="text" required placeholder="Misal: Mesin Tetas Otomatis A" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-bold mb-1 text-slate-700">Nama / Kode Mesin Tetas</label>
+                                <input v-model="formPenetasan.mesin" type="text" required placeholder="Mesin A" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold mb-1 text-slate-700">Jenis Ayam</label>
+                                <select v-model="formPenetasan.tipeAyam" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+                                    <option value="Pedaging">Pedaging (Meat)</option>
+                                    <option value="Petelur">Petelur (Egg Layer)</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block font-bold mb-1 text-slate-700">Tanggal Masuk</label>
+                                <label class="block font-bold mb-1 text-slate-700">Tanggal Masuk Mesin</label>
                                 <input v-model="formPenetasan.tglMasuk" type="date" required class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
                             <div>
@@ -615,18 +862,56 @@
                                 <input v-model.number="formPenetasan.jumlahTelur" type="number" required min="1" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
                         </div>
-                        <button type="submit" class="w-full py-3.5 bg-emerald-600 text-white font-bold rounded-xl text-sm hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">Simpan Inkubasi</button>
+
+                        <!-- KETERANGAN OTOMATIS PENETASAN 21 HARI -->
+                        <div class="bg-blue-50 p-3 rounded-xl text-[11px] text-blue-900 border border-blue-200 flex items-center gap-2">
+                            <i class="fa-solid fa-clock text-blue-600 text-sm"></i>
+                            <span>Estimasi tanggal menetas dihitung otomatis <strong>21 hari</strong> dari tanggal telur masuk.</span>
+                        </div>
+
+                        <div v-if="editingPenetasanId" class="space-y-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-bold mb-1 text-slate-700">Status Batch</label>
+                                    <select v-model="formPenetasan.status" class="w-full p-2.5 rounded-lg border border-slate-300 bg-white font-semibold">
+                                        <option value="Berjalan">Berjalan</option>
+                                        <option value="Selesai">Selesai</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-bold mb-1 text-slate-700">Daya Tetas (%)</label>
+                                    <input v-model.number="formPenetasan.dayaTetas" type="number" min="0" max="100" class="w-full p-2.5 rounded-lg border border-slate-300 bg-white font-bold">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-bold mb-1 text-slate-700">Telur Fertil (Butir)</label>
+                                    <input v-model.number="formPenetasan.telurFertil" type="number" min="0" class="w-full p-2.5 rounded-lg border border-slate-300 bg-white font-bold">
+                                </div>
+                                <div>
+                                    <label class="block font-bold mb-1 text-slate-700">Telur Infertil (Butir)</label>
+                                    <input v-model.number="formPenetasan.telurInfertil" type="number" min="0" class="w-full p-2.5 rounded-lg border border-slate-300 bg-white font-bold">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full py-3.5 bg-emerald-600 text-white font-bold rounded-xl text-sm hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">
+                            {{ editingPenetasanId ? 'Simpan Perubahan Batch' : 'Simpan Inkubasi (21 Hari)' }}
+                        </button>
                     </form>
                 </div>
 
-                <!-- Form Kelompok Ayam -->
+                <!-- Form Kelompok Ayam (Tambah & Edit Bisnis Baru) -->
                 <div v-if="modalType === 'flock'">
-                    <h3 class="text-lg font-extrabold text-slate-900 mb-4">Tambah Kelompok Ayam Baru</h3>
+                    <h3 class="text-lg font-extrabold text-slate-900 mb-4">{{ editingFlockId ? 'Edit Kelompok Ayam' : 'Tambah Kelompok Ayam Baru' }}</h3>
                     <form @submit.prevent="saveFlock" class="space-y-4 text-xs">
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Nama Kelompok / Batch</label>
                             <input v-model="formFlock.namaFlock" type="text" required placeholder="Misal: Kampung Pedaging Batch A" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
+
+                        <!-- FASE AWAL & TIPE AYAM EDITABLE -->
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Tipe Ayam</label>
@@ -636,35 +921,71 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block font-bold mb-1 text-slate-700">Fase Pertumbuhan</label>
-                                <select v-model="formFlock.fase" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
-                                    <option value="DOC">DOC (0-2 Minggu)</option>
-                                    <option value="Brooder">Brooding (2-4 Minggu)</option>
-                                    <option value="Pembesaran">Pembesaran / Grower</option>
-                                    <option value="Produksi">Produksi Telur / Layer</option>
+                                <label class="block font-bold mb-1 text-slate-700">Fase Awal Ayam</label>
+                                <select v-model="formFlock.fase" @change="onFaseChangeInForm" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold text-xs">
+                                    <option value="DOC / Brooding">DOC / Brooding (Starter)</option>
+                                    <option value="Pembesaran / Grower">Pembesaran / Grower (Remaja)</option>
+                                    <option value="Produksi / Indukan">Produksi / Indukan (Dewasa)</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block font-bold mb-1 text-slate-700">Nama Kandang</label>
-                                <input v-model="formFlock.kandang" type="text" required placeholder="Kandang A1" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+
+                        <!-- INPUT UMUR PEMBELIAN AYAM (HARI) -->
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1.5">
+                            <div class="flex justify-between items-center">
+                                <label class="block font-bold text-slate-700 text-xs">Umur Ayam Saat Dibeli / Masuk (Hari)</label>
+                                <span class="text-[10px] text-slate-500 font-bold">Total: {{ (getUmurAyamHari(formFlock.tglMulai, formFlock.umurAwalHari)) }} Hari</span>
                             </div>
+                            <input v-model.number="formFlock.umurAwalHari" type="number" min="0" placeholder="0" class="w-full p-2.5 rounded-lg border border-slate-300 bg-white font-bold text-xs outline-none focus:ring-1 focus:ring-emerald-500">
+                            <p class="text-[10px] text-slate-400">DOC = 0 Hari, Ayam Remaja = 30-45 Hari, Ayam Indukan = 120+ Hari</p>
+                        </div>
+
+                        <!-- PILIHAN 3 JENIS KANDANG -->
+                        <div>
+                            <label class="block font-bold mb-1 text-slate-700">Pilih / Nama Kandang</label>
+                            <div class="grid grid-cols-3 gap-2 mb-2">
+                                <button type="button" @click="formFlock.kandang = 'Kandang Brooding 1'" class="py-2 px-2 border rounded-xl font-bold text-[10px]" :class="formFlock.kandang.includes('Brooding') ? 'bg-amber-100 border-amber-400 text-amber-900' : 'bg-slate-50 border-slate-200 text-slate-600'">
+                                    Brooding
+                                </button>
+                                <button type="button" @click="formFlock.kandang = 'Kandang Grower 1'" class="py-2 px-2 border rounded-xl font-bold text-[10px]" :class="formFlock.kandang.includes('Grower') ? 'bg-emerald-100 border-emerald-400 text-emerald-900' : 'bg-slate-50 border-slate-200 text-slate-600'">
+                                    Grower
+                                </button>
+                                <button type="button" @click="formFlock.kandang = 'Kandang Indukan 1'" class="py-2 px-2 border rounded-xl font-bold text-[10px]" :class="formFlock.kandang.includes('Indukan') || formFlock.kandang.includes('Layer') ? 'bg-purple-100 border-purple-400 text-purple-900' : 'bg-slate-50 border-slate-200 text-slate-600'">
+                                    Indukan/Layer
+                                </button>
+                            </div>
+                            <input v-model="formFlock.kandang" type="text" required placeholder="Misal: Kandang Brooding 1" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Populasi Awal (Ekor)</label>
                                 <input v-model.number="formFlock.jumlahAwal" type="number" required min="1" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
+                            <div v-if="editingFlockId">
+                                <label class="block font-bold mb-1 text-slate-700">Populasi Saat Ini (Ekor)</label>
+                                <input v-model.number="formFlock.jumlahSaatIni" type="number" required min="0" class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-emerald-700">
+                            </div>
                         </div>
 
-                        <!-- Parameter Biaya Awal HPP -->
-                        <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <!-- Parameter Biaya & Harga Pakan (Dapat Diubah) -->
+                        <div class="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                            <span class="block font-bold text-slate-700 text-[11px] uppercase tracking-wider">Pengaturan Harga Pakan & Biaya Modal:</span>
+                            
                             <div>
-                                <label class="block font-bold mb-1 text-slate-700">Biaya Modal DOC (Rp)</label>
-                                <input v-model.number="formFlock.biayaDoc" type="number" min="0" placeholder="750000" class="w-full p-2.5 rounded-lg border border-slate-300 bg-white font-bold text-xs">
+                                <label class="block font-bold text-slate-600 mb-0.5">Biaya Modal Pembelian Ayam (Rp)</label>
+                                <input v-model.number="formFlock.biayaDoc" type="number" min="0" placeholder="0" class="w-full p-2.5 rounded-lg border border-slate-300 bg-white font-bold text-xs">
                             </div>
-                            <div>
-                                <label class="block font-bold mb-1 text-slate-700">Harga Pakan/Kg (Rp)</label>
-                                <input v-model.number="formFlock.hargaPakanPerKg" type="number" min="0" placeholder="8500" class="w-full p-2.5 rounded-lg border border-slate-300 bg-white font-bold text-xs">
+
+                            <div class="grid grid-cols-2 gap-2 pt-1">
+                                <div>
+                                    <label class="block font-bold text-slate-600 mb-0.5">Pakan Starter (0-30 Hari) /kg</label>
+                                    <input v-model.number="formFlock.hargaPakanDocPerKg" type="number" min="0" placeholder="10000" class="w-full p-2.5 rounded-lg border border-emerald-300 bg-white font-bold text-xs text-emerald-700">
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-600 mb-0.5">Pakan Grower (>30 Hari) /kg</label>
+                                    <input v-model.number="formFlock.hargaPakanGrowerPerKg" type="number" min="0" placeholder="4000" class="w-full p-2.5 rounded-lg border border-emerald-300 bg-white font-bold text-xs text-emerald-700">
+                                </div>
                             </div>
                         </div>
 
@@ -672,7 +993,9 @@
                             <label class="block font-bold mb-1 text-slate-700">Tanggal Masuk Kandang</label>
                             <input v-model="formFlock.tglMulai" type="date" required class="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
-                        <button type="submit" class="w-full py-3.5 bg-emerald-600 text-white font-bold rounded-xl text-sm hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">Simpan Kelompok Ayam</button>
+                        <button type="submit" class="w-full py-3.5 bg-emerald-600 text-white font-bold rounded-xl text-sm hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">
+                            {{ editingFlockId ? 'Simpan Perubahan Kelompok' : 'Simpan Kelompok Ayam' }}
+                        </button>
                     </form>
                 </div>
 
@@ -783,6 +1106,9 @@
                     activeTab: 'beranda',
                     showModal: false,
                     modalType: '',
+                    editingPenetasanId: null,
+                    editingFlockId: null,
+
                     gasApiUrl: localStorage.getItem('mandirifarm_gas_url') || '',
                     isGasSynced: false,
                     isSaving: false,
@@ -792,31 +1118,50 @@
                     
                     toast: { show: false, message: '', type: 'info' },
                     confirmModal: { show: false, title: '', message: '', action: null },
-                    finishHatchingModal: { show: false, batch: null, menetasCount: 0, createDocFlock: true },
+                    finishHatchingModal: { show: false, batch: null, tipeAyam: 'Pedaging', telurFertilCount: 0, telurInfertilCount: 0, menetasCount: 0, createDocFlock: true },
 
                     navItems: [
                         { id: 'beranda', label: 'Beranda', icon: 'fa-solid fa-house' },
                         { id: 'penetasan', label: 'Penetasan', icon: 'fa-solid fa-temperature-arrow-up' },
                         { id: 'flock', label: 'Kelompok Ayam & HPP', icon: 'fa-solid fa-crow' },
+                        { id: 'pakan', label: 'Formulasi Pakan', icon: 'fa-solid fa-wheat-awn' },
                         { id: 'harian', label: 'Catatan Harian', icon: 'fa-solid fa-clipboard-list' },
                         { id: 'keuangan', label: 'Keuangan', icon: 'fa-solid fa-wallet' },
                         { id: 'pengaturan', label: 'Sinkronisasi', icon: 'fa-solid fa-cloud-arrow-up' },
                     ],
+
+                    // DATA PAKAN & FORMULASI
+                    activeFormula: JSON.parse(localStorage.getItem('mandirifarm_pakan_active')) || {
+                        kategori: 'starter',
+                        bahanList: [
+                            { nama: 'Jagung Giling', porsiPct: 50, hargaPerKg: 6000, proteinPct: 8.5 },
+                            { nama: 'Konsentrat Ayam Starter', porsiPct: 35, hargaPerKg: 18000, proteinPct: 36.0 },
+                            { nama: 'Dedak Halus / Katul', porsiPct: 15, hargaPerKg: 3500, proteinPct: 11.0 }
+                        ]
+                    },
+                    pakanApplyForm: { flockId: '', targetAge: 'doc' },
                     
-                    penetasanList: JSON.parse(localStorage.getItem('mandirifarm_penetasan')) || [],
+                    penetasanList: (JSON.parse(localStorage.getItem('mandirifarm_penetasan')) || []).map(p => ({
+                        tipeAyam: 'Pedaging',
+                        ...p
+                    })),
                     flockList: (JSON.parse(localStorage.getItem('mandirifarm_flock')) || []).map(f => ({
-                        biayaDoc: 750000,
-                        hargaPakanPerKg: 8500,
-                        biayaLainnya: 100000,
-                        avgBobotKg: 1.2,
-                        hargaJualPerKg: 45000,
+                        fase: f.fase || 'DOC / Brooding',
+                        umurAwalHari: f.umurAwalHari || 0,
+                        biayaDoc: f.biayaDoc || 0,
+                        hargaPakanDocPerKg: f.hargaPakanDocPerKg || 10000,
+                        hargaPakanGrowerPerKg: f.hargaPakanGrowerPerKg || 4000,
+                        hargaPakanPerKg: f.hargaPakanPerKg || 10000,
+                        biayaLainnya: f.biayaLainnya || 100000,
+                        avgBobotKg: f.avgBobotKg || 1.2,
+                        hargaJualPerKg: f.hargaJualPerKg || 45000,
                         ...f
                     })),
                     harianList: JSON.parse(localStorage.getItem('mandirifarm_harian')) || [],
                     keuanganList: JSON.parse(localStorage.getItem('mandirifarm_keuangan')) || [],
 
-                    formPenetasan: { namaBatch: '', mesin: '', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 50 },
-                    formFlock: { namaFlock: '', tipe: 'Pedaging', fase: 'DOC', kandang: '', jumlahAwal: 100, biayaDoc: 750000, hargaPakanPerKg: 8500, tglMulai: new Date().toISOString().substr(0, 10) },
+                    formPenetasan: { namaBatch: '', mesin: '', tipeAyam: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 50, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0 },
+                    formFlock: { namaFlock: '', tipe: 'Pedaging', fase: 'DOC / Brooding', umurAwalHari: 0, kandang: 'Kandang Brooding 1', jumlahAwal: 100, jumlahSaatIni: 100, biayaDoc: 0, hargaPakanDocPerKg: 10000, hargaPakanGrowerPerKg: 4000, tglMulai: new Date().toISOString().substr(0, 10) },
                     formHarian: { flockId: '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' },
                     formKeuangan: { jenis: 'Pemasukan', kategori: 'Penjualan Telur', nominal: 0, tanggal: new Date().toISOString().substr(0, 10), keterangan: '' },
 
@@ -864,6 +1209,29 @@
                 },
                 sortedKeuanganList() {
                     return [...this.keuanganList].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+                },
+
+                // KALKULASI FORMULASI PAKAN
+                totalPersenFormulasi() {
+                    return this.activeFormula.bahanList.reduce((acc, b) => acc + (parseFloat(b.porsiPct) || 0), 0);
+                },
+                hargaTotalPakanCampuran() {
+                    if (this.totalPersenFormulasi === 0) return 0;
+                    const totalHarga = this.activeFormula.bahanList.reduce((acc, b) => {
+                        const porsi = (parseFloat(b.porsiPct) || 0) / 100;
+                        const harga = parseFloat(b.hargaPerKg) || 0;
+                        return acc + (porsi * harga);
+                    }, 0);
+                    return Math.round(totalHarga);
+                },
+                proteinTotalPakanCampuran() {
+                    if (this.totalPersenFormulasi === 0) return 0;
+                    const totalProtein = this.activeFormula.bahanList.reduce((acc, b) => {
+                        const porsi = (parseFloat(b.porsiPct) || 0) / 100;
+                        const protein = parseFloat(b.proteinPct) || 0;
+                        return acc + (porsi * protein);
+                    }, 0);
+                    return totalProtein.toFixed(1);
                 }
             },
             watch: {
@@ -871,6 +1239,12 @@
                     if (newTab === 'beranda') {
                         this.$nextTick(() => this.renderCharts());
                     }
+                },
+                activeFormula: {
+                    handler(val) {
+                        localStorage.setItem('mandirifarm_pakan_active', JSON.stringify(val));
+                    },
+                    deep: true
                 },
                 penetasanList: { handler(val) { localStorage.setItem('mandirifarm_penetasan', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true },
                 flockList: { handler(val) { localStorage.setItem('mandirifarm_flock', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true },
@@ -892,9 +1266,218 @@
                 if (this.pushTimer) clearTimeout(this.pushTimer);
             },
             methods: {
+                // PENENTUAN FASE SIKLUS OTOMATIS BERDASARKAN UMUR AYAM & FASE AWAL
+                getFaseAktif(flock) {
+                    const umur = this.getUmurAyamHari(flock.tglMulai, flock.umurAwalHari);
+                    if (umur <= 30) {
+                        return 'DOC / Brooding';
+                    } else if (umur <= 120) {
+                        return 'Pembesaran / Grower';
+                    } else {
+                        return flock.tipe === 'Petelur' ? 'Produksi / Indukan' : 'Siap Panen / Layer';
+                    }
+                },
+                getFaseStyle(flock) {
+                    const umur = this.getUmurAyamHari(flock.tglMulai, flock.umurAwalHari);
+                    if (umur <= 30) {
+                        return 'bg-amber-100 text-amber-900 border border-amber-300';
+                    } else if (umur <= 120) {
+                        return 'bg-emerald-100 text-emerald-900 border border-emerald-300';
+                    } else {
+                        return 'bg-purple-100 text-purple-900 border border-purple-300';
+                    }
+                },
+                onFaseChangeInForm() {
+                    if (this.formFlock.fase === 'DOC / Brooding') {
+                        this.formFlock.umurAwalHari = 0;
+                        if (!this.editingFlockId) this.formFlock.kandang = 'Kandang Brooding 1';
+                    } else if (this.formFlock.fase === 'Pembesaran / Grower') {
+                        this.formFlock.umurAwalHari = 31;
+                        if (!this.editingFlockId) this.formFlock.kandang = 'Kandang Grower 1';
+                    } else if (this.formFlock.fase === 'Produksi / Indukan') {
+                        this.formFlock.umurAwalHari = 121;
+                        if (!this.editingFlockId) this.formFlock.kandang = 'Kandang Indukan 1';
+                    }
+                },
+
+                // METHOD PAKAN
+                pilihPresetPakan(kategori) {
+                    if (kategori === 'starter') {
+                        this.activeFormula = {
+                            kategori: 'starter',
+                            bahanList: [
+                                { nama: 'Jagung Giling', porsiPct: 50, hargaPerKg: 6000, proteinPct: 8.5 },
+                                { nama: 'Konsentrat Ayam Starter', porsiPct: 35, hargaPerKg: 18000, proteinPct: 36.0 },
+                                { nama: 'Dedak Halus / Katul', porsiPct: 15, hargaPerKg: 3500, proteinPct: 11.0 }
+                            ]
+                        };
+                        this.pakanApplyForm.targetAge = 'doc';
+                        this.showToast('Preset Pakan Starter (0-30 Hari) Dimuat.', 'info');
+                    } else {
+                        this.activeFormula = {
+                            kategori: 'grower',
+                            bahanList: [
+                                { nama: 'Jagung Giling', porsiPct: 55, hargaPerKg: 6000, proteinPct: 8.5 },
+                                { nama: 'Konsentrat Ayam Grower', porsiPct: 15, hargaPerKg: 16000, proteinPct: 32.0 },
+                                { nama: 'Dedak Halus / Katul', porsiPct: 30, hargaPerKg: 3500, proteinPct: 11.0 }
+                            ]
+                        };
+                        this.pakanApplyForm.targetAge = 'grower';
+                        this.showToast('Preset Pakan Grower (>30 Hari) Dimuat.', 'info');
+                    }
+                },
+                tambahBahanBaku() {
+                    this.activeFormula.bahanList.push({
+                        nama: 'Bahan Baku Baru',
+                        porsiPct: 0,
+                        hargaPerKg: 5000,
+                        proteinPct: 10.0
+                    });
+                },
+                hapusBahanBaku(idx) {
+                    if (this.activeFormula.bahanList.length <= 1) {
+                        this.showToast('Minimal harus ada 1 bahan baku!', 'error');
+                        return;
+                    }
+                    this.activeFormula.bahanList.splice(idx, 1);
+                },
+                terapkanHargaPakanKeFlock() {
+                    const flockId = this.pakanApplyForm.flockId;
+                    if (!flockId) return;
+
+                    const targetFlock = this.flockList.find(f => f.id === flockId);
+                    if (!targetFlock) return;
+
+                    const hargaHasil = this.hargaTotalPakanCampuran;
+                    if (this.pakanApplyForm.targetAge === 'doc') {
+                        targetFlock.hargaPakanDocPerKg = hargaHasil;
+                        this.showToast(`Harga Pakan Starter (${this.formatRupiah(hargaHasil)}/kg) diterapkan ke ${targetFlock.namaFlock}.`, 'info');
+                    } else {
+                        targetFlock.hargaPakanGrowerPerKg = hargaHasil;
+                        this.showToast(`Harga Pakan Grower (${this.formatRupiah(hargaHasil)}/kg) diterapkan ke ${targetFlock.namaFlock}.`, 'info');
+                    }
+                },
+
+                // HITUNG UMUR AYAM (HARI) TERMASUK UMUR AWAL PEMBELIAN
+                getUmurAyamHari(tglMulai, umurAwalHari = 0) {
+                    if (!tglMulai) return parseInt(umurAwalHari) || 0;
+                    const diffTime = Math.abs(new Date() - new Date(tglMulai));
+                    const hariDiFarm = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                    return hariDiFarm + (parseInt(umurAwalHari) || 0);
+                },
+
+                // HARGA PAKAN DINAMIS BERDASARKAN USIA (0-30 Hari vs >30 Hari)
+                getHargaPakanAktif(flock) {
+                    const umur = this.getUmurAyamHari(flock.tglMulai, flock.umurAwalHari);
+                    if (umur <= 30) {
+                        return flock.hargaPakanDocPerKg !== undefined ? flock.hargaPakanDocPerKg : 10000;
+                    } else {
+                        return flock.hargaPakanGrowerPerKg !== undefined ? flock.hargaPakanGrowerPerKg : 4000;
+                    }
+                },
+
+                // SYSTEM BACKUP & RESTORE
+                exportBackupFile() {
+                    const backupData = {
+                        app: 'MandiriFarm',
+                        version: '1.8.0',
+                        exportedAt: new Date().toISOString(),
+                        data: {
+                            penetasanList: this.penetasanList,
+                            flockList: this.flockList,
+                            harianList: this.harianList,
+                            keuanganList: this.keuanganList,
+                            activeFormula: this.activeFormula
+                        }
+                    };
+
+                    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+                    const downloadAnchor = document.createElement('a');
+                    const fileName = `MandiriFarm_Backup_${new Date().toISOString().substr(0, 10)}.json`;
+
+                    downloadAnchor.setAttribute("href", dataStr);
+                    downloadAnchor.setAttribute("download", fileName);
+                    document.body.appendChild(downloadAnchor);
+                    downloadAnchor.click();
+                    downloadAnchor.remove();
+
+                    this.showToast('File backup berhasil diunduh.', 'info');
+                },
+
+                importBackupFile(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const imported = JSON.parse(e.target.result);
+                            if (imported && imported.data) {
+                                this.showConfirm(
+                                    'Pulihkan Data (Restore)?',
+                                    'Tindakan ini akan menggantikan data yang ada dengan data dari berkas backup ini.',
+                                    () => {
+                                        this.isSyncingFromGas = true;
+                                        this.penetasanList = imported.data.penetasanList || [];
+                                        this.flockList = imported.data.flockList || [];
+                                        this.harianList = imported.data.harianList || [];
+                                        this.keuanganList = imported.data.keuanganList || [];
+                                        if (imported.data.activeFormula) this.activeFormula = imported.data.activeFormula;
+
+                                        this.$nextTick(() => {
+                                            this.isSyncingFromGas = false;
+                                            this.pushToGas();
+                                            this.renderCharts();
+                                        });
+                                        this.showToast('Data berhasil dipulihkan dari file backup.', 'info');
+                                    }
+                                );
+                            } else {
+                                this.showToast('Format file backup tidak valid.', 'error');
+                            }
+                        } catch (err) {
+                            this.showToast('Gagal membaca file backup JSON.', 'error');
+                        }
+                    };
+                    reader.readAsText(file);
+                },
+
+                closeModal() {
+                    this.showModal = false;
+                    this.editingPenetasanId = null;
+                    this.editingFlockId = null;
+                },
+
+                // FITUR EDIT PENETASAN
+                editPenetasan(b) {
+                    this.editingPenetasanId = b.id;
+                    this.formPenetasan = { 
+                        tipeAyam: 'Pedaging',
+                        telurFertil: 0,
+                        telurInfertil: 0,
+                        ...b 
+                    };
+                    this.modalType = 'penetasan';
+                    this.showModal = true;
+                },
+
+                // FITUR EDIT KELOMPOK AYAM
+                editFlock(f) {
+                    this.editingFlockId = f.id;
+                    this.formFlock = { 
+                        fase: this.getFaseAktif(f),
+                        umurAwalHari: f.umurAwalHari || 0,
+                        hargaPakanDocPerKg: 10000,
+                        hargaPakanGrowerPerKg: 4000,
+                        ...f 
+                    };
+                    this.modalType = 'flock';
+                    this.showModal = true;
+                },
+
                 hitungHPP(flock) {
                     const totalPakanKg = parseFloat(this.getPakanTotalByFlock(flock.id)) || 0;
-                    const hargaPakan = parseFloat(flock.hargaPakanPerKg) || 8500;
+                    const hargaPakan = this.getHargaPakanAktif(flock);
                     const biayaDoc = parseFloat(flock.biayaDoc) || 0;
                     const biayaLain = parseFloat(flock.biayaLainnya) || 100000;
                     
@@ -905,7 +1488,7 @@
                     const hppPerEkor = Math.round(totalBiayaModal / populasiHidup);
                     const hppPerKg = Math.round(hppPerEkor / avgBobot);
 
-                    return { totalBiayaModal, hppPerEkor, hppPerKg };
+                    return { totalBiayaModal, hppPerEkor, hppPerKg, hargaPakanAktif: hargaPakan };
                 },
                 hitungProyeksiLaba(flock) {
                     const populasiHidup = parseInt(flock.jumlahSaatIni) || 0;
@@ -921,12 +1504,14 @@
                     return { estOmzet, labaBersih, marginPct };
                 },
 
-                // EKSPOR HPP DENGAN HEADER LOGO & KOLOM TANDA TANGAN
                 exportHppPdf(flock) {
                     const hpp = this.hitungHPP(flock);
                     const laba = this.hitungProyeksiLaba(flock);
                     const pakanTotal = this.getPakanTotalByFlock(flock.id);
                     const fcr = this.hitungFCR(flock);
+                    const hargaPakanAktif = this.getHargaPakanAktif(flock);
+                    const umur = this.getUmurAyamHari(flock.tglMulai, flock.umurAwalHari);
+                    const faseAktif = this.getFaseAktif(flock);
                     
                     const htmlContent = `
                         <div style="font-family: Arial, sans-serif; padding: 25px; color: #1e293b; max-width: 700px; margin: 0 auto; background: #ffffff;">
@@ -959,11 +1544,11 @@
                                 </tr>
                                 <tr>
                                     <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Tipe &amp; Fase Pertumbuhan</td>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">${flock.tipe} (${flock.fase})</td>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">${flock.tipe} (${faseAktif}) - Umur ${umur} Hari</td>
                                 </tr>
                                 <tr>
                                     <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Kandang / Lokasi</td>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">${flock.kandang}</td>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1; font-weight: bold;">${flock.kandang}</td>
                                 </tr>
                                 <tr>
                                     <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Populasi Saat Ini / Awal</td>
@@ -986,12 +1571,12 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Biaya Modal DOC / Indukan</td>
+                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Biaya Modal Pembelian Ayam</td>
                                         <td style="padding: 6px 10px; border: 1px solid #cbd5e1; text-align: right;">${this.formatRupiah(flock.biayaDoc)}</td>
                                     </tr>
                                     <tr>
-                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Estimasi Biaya Pakan (${pakanTotal} kg @ ${this.formatRupiah(flock.hargaPakanPerKg)})</td>
-                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1; text-align: right;">${this.formatRupiah(pakanTotal * flock.hargaPakanPerKg)}</td>
+                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Biaya Pakan (${pakanTotal} kg @ ${this.formatRupiah(hargaPakanAktif)})</td>
+                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1; text-align: right;">${this.formatRupiah(pakanTotal * hargaPakanAktif)}</td>
                                     </tr>
                                     <tr>
                                         <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Biaya Operasional &amp; Obat-obatan</td>
@@ -1140,15 +1725,23 @@
                         if (json.status === 'success' && json.data) {
                             if (Array.isArray(json.data.penetasanList)) {
                                 this.penetasanList = json.data.penetasanList.map(p => ({
+                                    tipeAyam: 'Pedaging',
                                     ...p,
                                     jumlahTelur: parseInt(p.jumlahTelur) || 0,
-                                    dayaTetas: parseInt(p.dayaTetas) || 0
+                                    dayaTetas: parseInt(p.dayaTetas) || 0,
+                                    telurFertil: parseInt(p.telurFertil) || 0,
+                                    telurInfertil: parseInt(p.telurInfertil) || 0,
+                                    menetasCount: parseInt(p.menetasCount) || 0
                                 }));
                             }
                             if (Array.isArray(json.data.flockList)) {
                                 this.flockList = json.data.flockList.map(f => ({
-                                    biayaDoc: 750000,
-                                    hargaPakanPerKg: 8500,
+                                    fase: f.fase || 'DOC / Brooding',
+                                    umurAwalHari: parseInt(f.umurAwalHari) || 0,
+                                    biayaDoc: parseFloat(f.biayaDoc) || 0,
+                                    hargaPakanDocPerKg: parseFloat(f.hargaPakanDocPerKg) || 10000,
+                                    hargaPakanGrowerPerKg: parseFloat(f.hargaPakanGrowerPerKg) || 4000,
+                                    hargaPakanPerKg: 10000,
                                     avgBobotKg: 1.2,
                                     hargaJualPerKg: 45000,
                                     ...f,
@@ -1205,64 +1798,155 @@
                     }
                 },
 
+                // ATURAN PENETASAN 21 HARI DARI TANGGAL TELUR MASUK
                 savePenetasan() {
                     const tglMasuk = new Date(this.formPenetasan.tglMasuk);
                     const estMenetas = new Date(tglMasuk);
-                    estMenetas.setDate(estMenetas.getDate() + 21);
+                    estMenetas.setDate(estMenetas.getDate() + 21); // Pas 21 Hari
 
-                    const newBatch = {
-                        id: 'PEN-' + Date.now(),
-                        namaBatch: this.formPenetasan.namaBatch,
-                        mesin: this.formPenetasan.mesin,
-                        tglMasuk: this.formPenetasan.tglMasuk,
-                        estMenetas: estMenetas.toISOString().substr(0, 10),
-                        jumlahTelur: parseInt(this.formPenetasan.jumlahTelur) || 0,
-                        status: 'Berjalan',
-                        dayaTetas: 0
-                    };
+                    if (this.editingPenetasanId) {
+                        const idx = this.penetasanList.findIndex(p => p.id === this.editingPenetasanId);
+                        if (idx !== -1) {
+                            this.penetasanList[idx] = {
+                                ...this.penetasanList[idx],
+                                namaBatch: this.formPenetasan.namaBatch,
+                                mesin: this.formPenetasan.mesin,
+                                tipeAyam: this.formPenetasan.tipeAyam || 'Pedaging',
+                                tglMasuk: this.formPenetasan.tglMasuk,
+                                estMenetas: estMenetas.toISOString().substr(0, 10),
+                                jumlahTelur: parseInt(this.formPenetasan.jumlahTelur) || 0,
+                                status: this.formPenetasan.status || 'Berjalan',
+                                dayaTetas: parseInt(this.formPenetasan.dayaTetas) || 0,
+                                telurFertil: parseInt(this.formPenetasan.telurFertil) || 0,
+                                telurInfertil: parseInt(this.formPenetasan.telurInfertil) || 0
+                            };
+                        }
+                        this.showToast('Batch inkubasi diperbarui.', 'info');
+                    } else {
+                        const newBatch = {
+                            id: 'PEN-' + Date.now(),
+                            namaBatch: this.formPenetasan.namaBatch,
+                            mesin: this.formPenetasan.mesin,
+                            tipeAyam: this.formPenetasan.tipeAyam || 'Pedaging',
+                            tglMasuk: this.formPenetasan.tglMasuk,
+                            estMenetas: estMenetas.toISOString().substr(0, 10),
+                            jumlahTelur: parseInt(this.formPenetasan.jumlahTelur) || 0,
+                            status: 'Berjalan',
+                            dayaTetas: 0,
+                            telurFertil: 0,
+                            telurInfertil: 0,
+                            menetasCount: 0
+                        };
+                        this.penetasanList.unshift(newBatch);
+                        this.showToast('Batch inkubasi baru disimpan (Est. Tetas 21 Hari).', 'info');
+                    }
 
-                    this.penetasanList.unshift(newBatch);
-                    this.showModal = false;
-                    this.formPenetasan = { namaBatch: '', mesin: '', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 50 };
-                    this.showToast('Batch inkubasi baru disimpan.', 'info');
+                    this.closeModal();
+                    this.formPenetasan = { namaBatch: '', mesin: '', tipeAyam: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 50, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0 };
                 },
+
+                // KONFIRMASI PANEN DOC (TANGGAL MASUK KANDANG BROODING AUTOMATIS H+1)
                 openFinishPenetasanModal(b) {
+                    const total = parseInt(b.jumlahTelur) || 0;
+                    const fertilDefault = Math.round(total * 0.9);
+                    const infertilDefault = total - fertilDefault;
+                    const menetasDefault = Math.round(fertilDefault * 0.85);
+
                     this.finishHatchingModal = {
                         show: true,
                         batch: b,
-                        menetasCount: Math.round((b.jumlahTelur || 0) * 0.8),
+                        tipeAyam: b.tipeAyam || 'Pedaging',
+                        telurFertilCount: b.telurFertil || fertilDefault,
+                        telurInfertilCount: b.telurInfertil || infertilDefault,
+                        menetasCount: b.menetasCount || menetasDefault,
                         createDocFlock: true
                     };
+                },
+                onFertilInput() {
+                    const total = parseInt(this.finishHatchingModal.batch?.jumlahTelur) || 0;
+                    let fertil = parseInt(this.finishHatchingModal.telurFertilCount) || 0;
+                    if (fertil > total) fertil = total;
+                    this.finishHatchingModal.telurFertilCount = fertil;
+                    this.finishHatchingModal.telurInfertilCount = Math.max(0, total - fertil);
+                    if (this.finishHatchingModal.menetasCount > fertil) {
+                        this.finishHatchingModal.menetasCount = fertil;
+                    }
+                },
+                onInfertilInput() {
+                    const total = parseInt(this.finishHatchingModal.batch?.jumlahTelur) || 0;
+                    let infertil = parseInt(this.finishHatchingModal.telurInfertilCount) || 0;
+                    if (infertil > total) infertil = total;
+                    this.finishHatchingModal.telurInfertilCount = infertil;
+                    this.finishHatchingModal.telurFertilCount = Math.max(0, total - infertil);
+                    if (this.finishHatchingModal.menetasCount > this.finishHatchingModal.telurFertilCount) {
+                        this.finishHatchingModal.menetasCount = this.finishHatchingModal.telurFertilCount;
+                    }
+                },
+                hitungModalFertilitasPct() {
+                    const total = parseInt(this.finishHatchingModal.batch?.jumlahTelur) || 0;
+                    const fertil = parseInt(this.finishHatchingModal.telurFertilCount) || 0;
+                    if (total === 0) return 0;
+                    return Math.round((fertil / total) * 100);
+                },
+                hitungModalDayaTetasPct() {
+                    const fertil = parseInt(this.finishHatchingModal.telurFertilCount) || 0;
+                    const menetas = parseInt(this.finishHatchingModal.menetasCount) || 0;
+                    if (fertil === 0) return 0;
+                    return Math.round((menetas / fertil) * 100);
+                },
+                getFormattedHPlus1(estMenetasStr) {
+                    const hatchBase = estMenetasStr ? new Date(estMenetasStr) : new Date();
+                    const hPlus1Date = new Date(hatchBase);
+                    hPlus1Date.setDate(hPlus1Date.getDate() + 1);
+                    return this.formatDate(hPlus1Date.toISOString().substr(0, 10));
                 },
                 saveFinishPenetasan() {
                     const b = this.finishHatchingModal.batch;
                     if (!b) return;
 
+                    const fertil = parseInt(this.finishHatchingModal.telurFertilCount) || 0;
+                    const infertil = parseInt(this.finishHatchingModal.telurInfertilCount) || 0;
                     const menetas = parseInt(this.finishHatchingModal.menetasCount) || 0;
-                    b.status = 'Selesai';
                     const totalTelur = parseInt(b.jumlahTelur) || 1;
-                    b.dayaTetas = Math.round((menetas / totalTelur) * 100);
+                    const tipeAyam = this.finishHatchingModal.tipeAyam || 'Pedaging';
 
+                    b.status = 'Selesai';
+                    b.tipeAyam = tipeAyam;
+                    b.telurFertil = fertil;
+                    b.telurInfertil = infertil;
+                    b.menetasCount = menetas;
+                    b.fertilitasPct = Math.round((fertil / totalTelur) * 100);
+                    b.dayaTetas = fertil > 0 ? Math.round((menetas / fertil) * 100) : 0;
+
+                    // OTOMATIS MASUK KANDANG BROODING 1 HARI SETELAH TETAS (H+1)
                     if (this.finishHatchingModal.createDocFlock && menetas > 0) {
+                        const hatchBase = b.estMenetas ? new Date(b.estMenetas) : new Date();
+                        const hPlus1Date = new Date(hatchBase);
+                        hPlus1Date.setDate(hPlus1Date.getDate() + 1);
+                        const tglMulaiKandang = hPlus1Date.toISOString().substr(0, 10);
+
                         const newFlock = {
                             id: 'FLK-' + Date.now(),
-                            namaFlock: 'DOC Hasil ' + b.namaBatch,
-                            tipe: 'Pedaging',
-                            fase: 'DOC',
-                            kandang: 'Kandang DOC A',
+                            namaFlock: 'Brooding (' + tipeAyam + ') ' + b.namaBatch,
+                            tipe: tipeAyam,
+                            fase: 'DOC / Brooding',
+                            umurAwalHari: 0,
+                            kandang: 'Kandang Brooding 1',
                             jumlahAwal: menetas,
                             jumlahSaatIni: menetas,
                             biayaDoc: 0,
-                            hargaPakanPerKg: 8500,
+                            hargaPakanDocPerKg: 10000,
+                            hargaPakanGrowerPerKg: 4000,
+                            hargaPakanPerKg: 10000,
                             avgBobotKg: 1.2,
                             hargaJualPerKg: 45000,
-                            tglMulai: new Date().toISOString().substr(0, 10)
+                            tglMulai: tglMulaiKandang
                         };
                         this.flockList.unshift(newFlock);
                     }
 
                     this.finishHatchingModal.show = false;
-                    this.showToast(`Batch inkubasi selesai. Daya tetas: ${b.dayaTetas}%`, 'info');
+                    this.showToast(`Panen Brooding Berhasil! Total ${menetas} Ekor masuk Kandang Brooding (H+1).`, 'info');
                 },
                 confirmDeletePenetasan(id) {
                     this.showConfirm('Hapus Penetasan?', 'Apakah Anda yakin menghapus catatan inkubasi ini?', () => {
@@ -1273,24 +1957,50 @@
 
                 saveFlock() {
                     const initial = parseInt(this.formFlock.jumlahAwal) || 0;
-                    const newFlock = {
-                        id: 'FLK-' + Date.now(),
-                        namaFlock: this.formFlock.namaFlock,
-                        tipe: this.formFlock.tipe,
-                        fase: this.formFlock.fase,
-                        kandang: this.formFlock.kandang,
-                        jumlahAwal: initial,
-                        jumlahSaatIni: initial,
-                        biayaDoc: parseFloat(this.formFlock.biayaDoc) || 0,
-                        hargaPakanPerKg: parseFloat(this.formFlock.hargaPakanPerKg) || 8500,
-                        avgBobotKg: 1.2,
-                        hargaJualPerKg: 45000,
-                        tglMulai: this.formFlock.tglMulai
-                    };
-                    this.flockList.unshift(newFlock);
-                    this.showModal = false;
-                    this.formFlock = { namaFlock: '', tipe: 'Pedaging', fase: 'DOC', kandang: '', jumlahAwal: 100, biayaDoc: 750000, hargaPakanPerKg: 8500, tglMulai: new Date().toISOString().substr(0, 10) };
-                    this.showToast('Kelompok ayam berhasil ditambahkan.', 'info');
+                    
+                    if (this.editingFlockId) {
+                        const idx = this.flockList.findIndex(f => f.id === this.editingFlockId);
+                        if (idx !== -1) {
+                            this.flockList[idx] = {
+                                ...this.flockList[idx],
+                                namaFlock: this.formFlock.namaFlock,
+                                tipe: this.formFlock.tipe,
+                                fase: this.formFlock.fase,
+                                umurAwalHari: parseInt(this.formFlock.umurAwalHari) || 0,
+                                kandang: this.formFlock.kandang,
+                                jumlahAwal: initial,
+                                jumlahSaatIni: parseInt(this.formFlock.jumlahSaatIni) ?? initial,
+                                biayaDoc: parseFloat(this.formFlock.biayaDoc) || 0,
+                                hargaPakanDocPerKg: parseFloat(this.formFlock.hargaPakanDocPerKg) || 10000,
+                                hargaPakanGrowerPerKg: parseFloat(this.formFlock.hargaPakanGrowerPerKg) || 4000,
+                                tglMulai: this.formFlock.tglMulai
+                            };
+                        }
+                        this.showToast('Kelompok ayam diperbarui.', 'info');
+                    } else {
+                        const newFlock = {
+                            id: 'FLK-' + Date.now(),
+                            namaFlock: this.formFlock.namaFlock,
+                            tipe: this.formFlock.tipe,
+                            fase: this.formFlock.fase || 'DOC / Brooding',
+                            umurAwalHari: parseInt(this.formFlock.umurAwalHari) || 0,
+                            kandang: this.formFlock.kandang || 'Kandang Brooding 1',
+                            jumlahAwal: initial,
+                            jumlahSaatIni: initial,
+                            biayaDoc: parseFloat(this.formFlock.biayaDoc) || 0,
+                            hargaPakanDocPerKg: parseFloat(this.formFlock.hargaPakanDocPerKg) || 10000,
+                            hargaPakanGrowerPerKg: parseFloat(this.formFlock.hargaPakanGrowerPerKg) || 4000,
+                            hargaPakanPerKg: 10000,
+                            avgBobotKg: 1.2,
+                            hargaJualPerKg: 45000,
+                            tglMulai: this.formFlock.tglMulai
+                        };
+                        this.flockList.unshift(newFlock);
+                        this.showToast('Kelompok ayam berhasil ditambahkan.', 'info');
+                    }
+
+                    this.closeModal();
+                    this.formFlock = { namaFlock: '', tipe: 'Pedaging', fase: 'DOC / Brooding', umurAwalHari: 0, kandang: 'Kandang Brooding 1', jumlahAwal: 100, jumlahSaatIni: 100, biayaDoc: 0, hargaPakanDocPerKg: 10000, hargaPakanGrowerPerKg: 4000, tglMulai: new Date().toISOString().substr(0, 10) };
                 },
                 confirmDeleteFlock(id) {
                     this.showConfirm('Hapus Kelompok Ayam?', 'Apakah Anda yakin ingin menghapus kelompok ayam ini?', () => {
@@ -1320,7 +2030,7 @@
                     }
 
                     this.harianList.unshift(newHarian);
-                    this.showModal = false;
+                    this.closeModal();
                     this.formHarian = { flockId: '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' };
                     this.showToast('Catatan harian berhasil disimpan.', 'info');
                 },
@@ -1341,7 +2051,7 @@
                         keterangan: this.formKeuangan.keterangan
                     };
                     this.keuanganList.unshift(newKeuangan);
-                    this.showModal = false;
+                    this.closeModal();
                     this.formKeuangan = { jenis: 'Pemasukan', kategori: 'Penjualan Telur', nominal: 0, tanggal: new Date().toISOString().substr(0, 10), keterangan: '' };
                     this.showToast('Transaksi keuangan disimpan.', 'info');
                 },
@@ -1354,7 +2064,7 @@
 
                 getFlockName(flockId) {
                     const f = this.flockList.find(x => x.id === flockId);
-                    return f ? f.namaFlock : 'Unknown Flock';
+                    return f ? `${f.namaFlock} (${f.kandang})` : 'Unknown Flock';
                 },
                 getPakanTotalByFlock(flockId) {
                     return this.harianList
@@ -1423,7 +2133,7 @@
                     if (ctxFlock) {
                         if (this.flockChartInstance) this.flockChartInstance.destroy();
 
-                        const labels = this.flockList.map(f => f.namaFlock);
+                        const labels = this.flockList.map(f => `${f.namaFlock} (${f.kandang})`);
                         const counts = this.flockList.map(f => f.jumlahSaatIni);
 
                         this.flockChartInstance = new Chart(ctxFlock, {
