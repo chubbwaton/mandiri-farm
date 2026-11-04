@@ -57,12 +57,12 @@
         <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-white min-h-screen sticky top-0 shadow-2xl z-30 no-print">
             <div class="p-5 flex items-center justify-between border-b border-slate-800">
                 <div class="flex items-center gap-3">
-                    <div class="flex flex-col items-center justify-center mb-4 mt-8">
-                         <img src="Logo-Mandiri-Farm.png" alt="Mandiri Farm" class="w-20 h-20 object-contain mx-auto mb-2">
-                     </div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-emerald-500/30">
+                        <i class="fa-solid fa-egg"></i>
+                    </div>
                     <div>
                         <h1 class="font-bold text-lg leading-tight text-white tracking-wide">Mandiri Farm</h1>
-                        <p class="text-xs text-emerald-400 font-medium">Monitoring Ayam Kampung</p>
+                        <p class="text-xs text-emerald-400 font-medium">Monitoring Ayam</p>
                     </div>
                 </div>
             </div>
@@ -165,8 +165,8 @@
                 </div>
             </div>
 
-            <!-- DROPDOWN PANEL NOTIFIKASI -->
-            <div v-if="showNotifDropdown" class="mb-5 bg-white rounded-2xl border border-slate-200 shadow-2xl p-4 space-y-3 relative z-30 no-print animate-in fade-in duration-200">
+            <!-- DROPDOWN / POPUP PANEL NOTIFIKASI (TAMPIL HANYA SAAT IKON LONCENG DIKLIK) -->
+            <div v-if="showNotifDropdown" class="mb-5 bg-white rounded-2xl border border-amber-200 shadow-2xl p-4 space-y-3 relative z-30 no-print animate-in fade-in duration-200">
                 <div class="flex items-center justify-between border-b pb-2">
                     <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2">
                         <i class="fa-solid fa-bell text-amber-500"></i> Notifikasi &amp; Pengingat Pindah Kandang
@@ -324,6 +324,22 @@
                             </div>
                         </div>
 
+                        <!-- ASAL-USUL TELUR TETAS -->
+                        <div class="bg-amber-50/70 p-2.5 rounded-xl text-xs space-y-1 border border-amber-200/70">
+                            <div class="flex justify-between items-center text-[10px] sm:text-[11px]">
+                                <span class="text-slate-500 font-bold">Asal Telur Tetas:</span>
+                                <span class="font-bold px-1.5 py-0.5 rounded text-[10px]" :class="b.asalTelur === 'Beli' ? 'bg-purple-100 text-purple-800' : 'bg-emerald-100 text-emerald-800'">
+                                    {{ b.asalTelur === 'Beli' ? 'Beli (Luar)' : 'Indukan Sendiri' }}
+                                </span>
+                            </div>
+                            <div v-if="b.asalTelur === 'Beli'" class="text-[10px] text-slate-600">
+                                Supplier: <strong class="text-slate-800">{{ b.sumberBeli || '-' }}</strong> | Biaya: <strong class="text-purple-700">{{ formatRupiah(b.biayaTelur) }}</strong>
+                            </div>
+                            <div v-else class="text-[10px] text-slate-600">
+                                Indukan: <strong class="text-emerald-800">{{ getIndukanFlockName(b.indukanFlockId) }}</strong>
+                            </div>
+                        </div>
+
                         <div v-if="b.status === 'Selesai'" class="bg-blue-50/60 p-2.5 rounded-xl text-xs space-y-1 border border-blue-100">
                             <div class="flex justify-between items-center text-[10px] sm:text-[11px]">
                                 <span class="text-slate-500">Fertilitas Telur:</span>
@@ -389,9 +405,12 @@
                                         </span>
                                     </div>
                                     <h4 class="font-bold text-slate-800 text-base sm:text-lg leading-tight">{{ f.namaFlock }}</h4>
-                                    <div class="mt-1 flex items-center gap-1.5 text-xs text-slate-600">
+                                    <div class="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-slate-600">
                                         <span class="px-2 py-0.5 bg-slate-800 text-emerald-400 font-mono font-bold rounded-md text-[11px]">
                                             <i class="fa-solid fa-house-chimney text-[10px] mr-1"></i>{{ f.kandang }}
+                                        </span>
+                                        <span v-if="getOtherBatchesInKandang(f).length > 0" class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded">
+                                            +{{ getOtherBatchesInKandang(f).length }} Batch Lain di Kandang Ini
                                         </span>
                                         <span class="text-slate-400 text-[11px]">Masuk: {{ formatDate(f.tglMulai) }}</span>
                                     </div>
@@ -418,6 +437,19 @@
                                 <div>
                                     <span class="text-[9px] sm:text-[10px] text-slate-400 block uppercase font-bold">Mati/Afkir</span>
                                     <span class="font-semibold text-rose-500 text-xs sm:text-sm">{{ f.jumlahAwal - f.jumlahSaatIni }}</span>
+                                </div>
+                            </div>
+
+                            <!-- ASAL-USUL DOC AYAM -->
+                            <div class="bg-amber-50/70 p-2.5 rounded-xl text-xs space-y-1 border border-amber-200/70">
+                                <div class="flex justify-between items-center text-[10px] sm:text-[11px]">
+                                    <span class="text-slate-500 font-bold">Asal DOC Ayam:</span>
+                                    <span class="font-bold px-1.5 py-0.5 rounded text-[10px]" :class="f.asalDoc === 'Beli' ? 'bg-purple-100 text-purple-800' : 'bg-emerald-100 text-emerald-800'">
+                                        {{ f.asalDoc === 'Beli' ? 'Beli (Luar)' : 'Hasil Penetasan' }}
+                                    </span>
+                                </div>
+                                <div v-if="f.asalDoc === 'Beli'" class="text-[10px] text-slate-600">
+                                    Supplier: <strong class="text-slate-800">{{ f.sumberBeli || '-' }}</strong> | Biaya DOC: <strong class="text-purple-700">{{ formatRupiah(f.biayaDoc) }}</strong>
                                 </div>
                             </div>
 
@@ -1035,8 +1067,8 @@
                     <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mb-3.5">{{ editingPenetasanId ? 'Edit Batch Penetasan' : 'Inkubasi Telur Tetas Baru' }}</h3>
                     <form @submit.prevent="savePenetasan" class="space-y-3 text-xs">
                         <div>
-                            <label class="block font-bold mb-1 text-slate-700">Nama Batch / Label</label>
-                            <input v-model="formPenetasan.namaBatch" type="text" required placeholder="Contoh: Batch Tetas #01" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <label class="block font-bold mb-1 text-slate-700">Nama Batch / Label (Harus Unik)</label>
+                            <input v-model="formPenetasan.namaBatch" type="text" required placeholder="Contoh: Batch Tetas #01" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold">
                         </div>
                         <div class="grid grid-cols-2 gap-2.5">
                             <div>
@@ -1051,6 +1083,46 @@
                                 </select>
                             </div>
                         </div>
+
+                        <!-- INPUT ASAL TELUR TETAS -->
+                        <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 space-y-2.5">
+                            <label class="block font-bold text-amber-900">Asal Telur Tetas:</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-amber-300 font-bold text-slate-800 cursor-pointer">
+                                    <input type="radio" v-model="formPenetasan.asalTelur" value="Indukan" class="text-emerald-600">
+                                    <span>Indukan Sendiri</span>
+                                </label>
+                                <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-amber-300 font-bold text-slate-800 cursor-pointer">
+                                    <input type="radio" v-model="formPenetasan.asalTelur" value="Beli" class="text-purple-600">
+                                    <span>Beli (Luar)</span>
+                                </label>
+                            </div>
+
+                            <!-- Form rincian jika asal telur = Indukan Sendiri -->
+                            <div v-if="formPenetasan.asalTelur === 'Indukan'" class="space-y-1.5 pt-1">
+                                <label class="block font-bold text-slate-700">Pilih Kelompok / Kandang Indukan Asal:</label>
+                                <select v-model="formPenetasan.indukanFlockId" required class="w-full p-2 rounded-lg border border-amber-300 bg-white font-semibold">
+                                    <option value="" disabled>-- Pilih Kelompok Indukan --</option>
+                                    <option v-for="f in flockList" :key="f.id" :value="f.id">
+                                        {{ f.namaFlock }} ({{ f.kandang }}) - {{ f.jumlahSaatIni }} Ekor
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Form rincian jika asal telur = Beli -->
+                            <div v-if="formPenetasan.asalTelur === 'Beli'" class="space-y-2 pt-1">
+                                <div>
+                                    <label class="block font-bold text-slate-700">Nama Supplier / Pembelian Di Mana:</label>
+                                    <input v-model="formPenetasan.sumberBeli" type="text" required placeholder="Contoh: Peternakan Pak Budi / Olshop X" class="w-full p-2 rounded-lg border border-amber-300 bg-white font-semibold">
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700">Biaya Pembelian Telur (Rp):</label>
+                                    <input type="text" inputmode="numeric" :value="formatRupiahInputVal(formPenetasan.biayaTelur)" @input="onRupiahInput($event, formPenetasan, 'biayaTelur')" required placeholder="Contoh: 150.000" class="w-full p-2 rounded-lg border border-amber-300 bg-white font-bold text-purple-700">
+                                    <p class="text-[10px] text-purple-700 font-medium mt-1">Biaya ini akan otomatis dicatat ke Laporan Keuangan (Pengeluaran).</p>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="grid grid-cols-2 gap-2.5">
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Tanggal Masuk</label>
@@ -1073,8 +1145,8 @@
                     <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mb-3.5">{{ editingFlockId ? 'Edit Kelompok Ayam' : 'Tambah Kelompok Ayam Baru' }}</h3>
                     <form @submit.prevent="saveFlock" class="space-y-3 text-xs">
                         <div>
-                            <label class="block font-bold mb-1 text-slate-700">Nama Kelompok / Batch</label>
-                            <input v-model="formFlock.namaFlock" type="text" required placeholder="Contoh: Batch Ayam Kampung #01" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <label class="block font-bold mb-1 text-slate-700">Nama Kelompok / Batch (Harus Unik)</label>
+                            <input v-model="formFlock.namaFlock" type="text" required placeholder="Contoh: Batch Ayam Kampung #01" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold">
                         </div>
                         <div class="grid grid-cols-2 gap-2.5">
                             <div>
@@ -1097,14 +1169,43 @@
                         <div class="grid grid-cols-2 gap-2.5">
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Kode &amp; Nama Kandang</label>
-                                <input v-model="formFlock.kandang" list="kandangListPreset" type="text" required placeholder="Contoh: B01 - Kandang Brooding 1" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+                                <input v-model="formFlock.kandang" list="kandangListPreset" type="text" required placeholder="Contoh: Kandang B-01" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
                                 <datalist id="kandangListPreset">
                                     <option v-for="k in kandangPresets" :key="k" :value="k"></option>
                                 </datalist>
+                                <p class="text-[10px] text-slate-500 mt-1">Bisa gabung dengan batch lain di kandang yang sama.</p>
                             </div>
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Umur Awal (Hari)</label>
                                 <input v-model.number="formFlock.umurAwalHari" type="number" min="0" required placeholder="0" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold">
+                            </div>
+                        </div>
+
+                        <!-- INPUT ASAL DOC AYAM (HASIL PENETASAN VS BELI) -->
+                        <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 space-y-2.5">
+                            <label class="block font-bold text-amber-900">Asal DOC Ayam:</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-amber-300 font-bold text-slate-800 cursor-pointer">
+                                    <input type="radio" v-model="formFlock.asalDoc" value="Hasil Penetasan" class="text-emerald-600">
+                                    <span>Hasil Penetasan</span>
+                                </label>
+                                <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-amber-300 font-bold text-slate-800 cursor-pointer">
+                                    <input type="radio" v-model="formFlock.asalDoc" value="Beli" class="text-purple-600">
+                                    <span>Beli (Luar)</span>
+                                </label>
+                            </div>
+
+                            <!-- Form Rincian jika Beli DOC Luar -->
+                            <div v-if="formFlock.asalDoc === 'Beli'" class="space-y-2 pt-1">
+                                <div>
+                                    <label class="block font-bold text-slate-700">Nama Toko / Supplier Pembelian:</label>
+                                    <input v-model="formFlock.sumberBeli" type="text" required placeholder="Contoh: Toko PS Jaya / Poultry Shop Pak Joko" class="w-full p-2 rounded-lg border border-amber-300 bg-white font-semibold">
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700">Biaya Pembelian DOC (Rp):</label>
+                                    <input type="text" inputmode="numeric" :value="formatRupiahInputVal(formFlock.biayaDoc)" @input="onRupiahInput($event, formFlock, 'biayaDoc')" required placeholder="Contoh: 750.000" class="w-full p-2 rounded-lg border border-amber-300 bg-white font-bold text-purple-700">
+                                    <p class="text-[10px] text-purple-700 font-medium mt-1">Biaya ini akan otomatis dicatat ke Laporan Keuangan (Pengeluaran Kas).</p>
+                                </div>
                             </div>
                         </div>
 
@@ -1120,18 +1221,6 @@
                         </div>
 
                         <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-2">
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <div>
-                                    <label class="block font-bold mb-1 text-slate-700">Biaya Modal Pembelian (Rp)</label>
-                                    <input type="text" inputmode="numeric" :value="formatRupiahInputVal(formFlock.biayaDoc)" @input="onRupiahInput($event, formFlock, 'biayaDoc')" placeholder="Contoh: 750.000" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-bold text-xs">
-                                </div>
-                                <div class="flex items-end pb-1">
-                                    <label v-if="!editingFlockId" class="flex items-center gap-1.5 font-bold text-emerald-800 cursor-pointer text-[11px]">
-                                        <input type="checkbox" v-model="formFlock.autoRecordKeuangan" class="w-4 h-4 text-emerald-600 rounded">
-                                        <span>Auto Keuangan</span>
-                                    </label>
-                                </div>
-                            </div>
                             <div class="grid grid-cols-2 gap-2.5">
                                 <div>
                                     <label class="block font-bold mb-1 text-slate-700">Harga Pakan Starter (Rp/Kg)</label>
@@ -1324,8 +1413,8 @@
                     isKnownBahan: false,
 
                     formBahanPakan: { nama: '', rasio: 0, harga: 0, protein: 0 },
-                    formPenetasan: { namaBatch: '', mesin: '', tipe: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 0, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0 },
-                    formFlock: { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang B-01', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) },
+                    formPenetasan: { namaBatch: '', mesin: '', tipe: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 0, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0, asalTelur: 'Indukan', biayaTelur: 0, sumberBeli: '', indukanFlockId: '' },
+                    formFlock: { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang B-01', jumlahAwal: 0, jumlahSaatIni: 0, asalDoc: 'Hasil Penetasan', sumberBeli: '', biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) },
                     formHarian: { flockId: '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' },
                     formKeuangan: { jenis: 'Pemasukan', kategori: 'Penjualan Telur', nominal: 0, tanggal: new Date().toISOString().substr(0, 10), keterangan: '' },
 
@@ -1504,14 +1593,22 @@
                     const f = this.flockList.find(item => item.id === flockId);
                     return f ? `${f.namaFlock} (${f.kandang})` : 'Kelompok Terhapus';
                 },
+                getIndukanFlockName(indukanFlockId) {
+                    if (!indukanFlockId) return 'Koloni Indukan Mandiri';
+                    const f = this.flockList.find(item => item.id === indukanFlockId);
+                    return f ? `${f.namaFlock} (${f.kandang})` : 'Indukan Internal';
+                },
+                getOtherBatchesInKandang(flock) {
+                    return this.flockList.filter(f => f.kandang === flock.kandang && f.id !== flock.id);
+                },
                 openModal(type) {
                     this.modalType = type;
                     if (type === 'penetasan') {
                         this.editingPenetasanId = null;
-                        this.formPenetasan = { namaBatch: '', mesin: '', tipe: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 0, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0 };
+                        this.formPenetasan = { namaBatch: '', mesin: '', tipe: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 0, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0, asalTelur: 'Indukan', biayaTelur: 0, sumberBeli: '', indukanFlockId: '' };
                     } else if (type === 'flock') {
                         this.editingFlockId = null;
-                        this.formFlock = { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang B-01', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) };
+                        this.formFlock = { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang B-01', jumlahAwal: 0, jumlahSaatIni: 0, asalDoc: 'Hasil Penetasan', sumberBeli: '', biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) };
                     } else if (type === 'harian') {
                         this.formHarian = { flockId: this.flockList.length ? this.flockList[0].id : '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' };
                     } else if (type === 'keuangan') {
@@ -1526,10 +1623,38 @@
                     this.showModal = true;
                 },
                 savePenetasan() {
+                    const batchName = (this.formPenetasan.namaBatch || '').trim();
+                    if (!batchName) {
+                        this.showToast('Nama batch penetasan wajib diisi.', 'error');
+                        return;
+                    }
+
+                    // 1. Validasi Nama Batch Unik
+                    const isDuplicate = this.penetasanList.some(p => 
+                        p.namaBatch.trim().toLowerCase() === batchName.toLowerCase() && p.id !== this.editingPenetasanId
+                    );
+                    if (isDuplicate) {
+                        this.showToast('Nama batch penetasan sudah ada! Gunakan nama batch yang unik.', 'error');
+                        return;
+                    }
+
                     const tglIn = new Date(this.formPenetasan.tglMasuk);
                     const tglHatch = new Date(tglIn);
                     tglHatch.setDate(tglHatch.getDate() + 21);
                     const estStr = tglHatch.toISOString().substr(0, 10);
+
+                    // 2. Pencatatan Keuangan Otomatis jika Beli Telur Luar
+                    if (this.formPenetasan.asalTelur === 'Beli' && parseFloat(this.formPenetasan.biayaTelur) > 0 && !this.editingPenetasanId) {
+                        const newTrx = {
+                            id: 'TRX-' + Date.now(),
+                            jenis: 'Pengeluaran',
+                            kategori: 'Pembelian DOC / Indukan',
+                            nominal: parseFloat(this.formPenetasan.biayaTelur) || 0,
+                            tanggal: this.formPenetasan.tglMasuk,
+                            keterangan: `Pembelian Telur Tetas (${batchName}) - Supplier: ${this.formPenetasan.sumberBeli || '-'}`
+                        };
+                        this.keuanganList.unshift(newTrx);
+                    }
 
                     if (this.editingPenetasanId) {
                         const idx = this.penetasanList.findIndex(p => p.id === this.editingPenetasanId);
@@ -1537,6 +1662,7 @@
                             this.penetasanList[idx] = {
                                 ...this.penetasanList[idx],
                                 ...this.formPenetasan,
+                                namaBatch: batchName,
                                 estMenetas: estStr
                             };
                         }
@@ -1545,6 +1671,7 @@
                         const newBatch = {
                             id: 'PEN-' + Date.now(),
                             ...this.formPenetasan,
+                            namaBatch: batchName,
                             estMenetas: estStr,
                             status: 'Berjalan',
                             dayaTetas: 0,
@@ -1610,6 +1737,8 @@
                         kandang: f.kandang || 'Kandang B-01',
                         jumlahAwal: f.jumlahAwal,
                         jumlahSaatIni: f.jumlahSaatIni,
+                        asalDoc: f.asalDoc || (f.biayaDoc > 0 ? 'Beli' : 'Hasil Penetasan'),
+                        sumberBeli: f.sumberBeli || '',
                         biayaDoc: f.biayaDoc || 0,
                         autoRecordKeuangan: false,
                         hargaPakanStarter: f.hargaPakanStarter || 0,
@@ -2280,43 +2409,81 @@
                         const tglStarter = new Date(tglHatching);
                         tglStarter.setDate(tglStarter.getDate() + 1);
 
+                        // MENGGUNAKAN NAMA BATCH YANG SAMA DENGAN PENETASAN UNTUK KONTINUITAS MONITORING
+                        let docBatchName = b.namaBatch;
+                        const isDuplicateFlock = this.flockList.some(f => f.namaFlock.trim().toLowerCase() === docBatchName.trim().toLowerCase());
+                        if (isDuplicateFlock) {
+                            docBatchName = docBatchName + ' (DOC)';
+                        }
+
                         const newFlock = {
                             id: 'FLK-' + Date.now(),
-                            namaFlock: 'DOC Hasil ' + b.namaBatch,
+                            namaFlock: docBatchName,
                             tipe: b.tipe || 'Pedaging',
                             faseAwal: 'Starter',
                             kandang: this.finishHatchingModal.kandangTarget || 'Kandang B-01',
                             jumlahAwal: menetas,
                             jumlahSaatIni: menetas,
-                            biayaDoc: 0,
+                            biayaDoc: b.asalTelur === 'Beli' ? (parseFloat(b.biayaTelur) || 0) : 0,
                             hargaPakanStarter: 0,
                             hargaPakanGrower: 0,
                             avgBobotKg: 0.05,
                             hargaJualPerKg: 0,
                             umurAwalHari: 0,
-                            tglMulai: tglStarter.toISOString().substr(0, 10)
+                            tglMulai: tglStarter.toISOString().substr(0, 10),
+                            parentPenetasanId: b.id
                         };
                         this.flockList.unshift(newFlock);
                     }
 
                     this.finishHatchingModal.show = false;
-                    this.showToast(`Panen DOC Berhasil! Total ${menetas} ekor masuk ${this.finishHatchingModal.kandangTarget}.`, 'info');
+                    this.showToast(`Panen DOC Berhasil! Batch "${b.namaBatch}" masuk ${this.finishHatchingModal.kandangTarget}.`, 'info');
                 },
                 saveFlock() {
+                    const flockName = (this.formFlock.namaFlock || '').trim();
+                    if (!flockName) {
+                        this.showToast('Nama kelompok / batch wajib diisi.', 'error');
+                        return;
+                    }
+
+                    // VALIDASI NAMA BATCH KELOMPOK UNIK
+                    const isDuplicate = this.flockList.some(f => 
+                        f.namaFlock.trim().toLowerCase() === flockName.toLowerCase() && f.id !== this.editingFlockId
+                    );
+                    if (isDuplicate) {
+                        this.showToast('Nama kelompok / batch sudah digunakan! Pilih nama batch yang unik.', 'error');
+                        return;
+                    }
+
                     const initial = parseInt(this.formFlock.jumlahAwal) || 0;
                     const modalPembelian = parseFloat(this.formFlock.biayaDoc) || 0;
+
+                    // 1. Catat Pengeluaran Kas Otomatis jika Beli DOC dari Luar
+                    if (this.formFlock.asalDoc === 'Beli' && modalPembelian > 0 && !this.editingFlockId) {
+                        const newTrx = {
+                            id: 'TRX-' + Date.now(),
+                            jenis: 'Pengeluaran',
+                            kategori: 'Pembelian DOC / Indukan',
+                            nominal: modalPembelian,
+                            tanggal: this.formFlock.tglMulai,
+                            keterangan: `Pembelian DOC (${flockName}) - Supplier: ${this.formFlock.sumberBeli || '-'}`
+                        };
+                        this.keuanganList.unshift(newTrx);
+                    }
                     
                     if (this.editingFlockId) {
                         const idx = this.flockList.findIndex(f => f.id === this.editingFlockId);
                         if (idx !== -1) {
                             this.flockList[idx] = {
                                 ...this.flockList[idx],
-                                namaFlock: this.formFlock.namaFlock,
+                                namaFlock: flockName,
                                 tipe: this.formFlock.tipe,
                                 faseAwal: this.formFlock.faseAwal,
                                 kandang: this.formFlock.kandang || 'Kandang B-01',
                                 jumlahAwal: initial,
                                 jumlahSaatIni: parseInt(this.formFlock.jumlahSaatIni) ?? initial,
+                                asalDoc: this.formFlock.asalDoc,
+                                sumberBeli: this.formFlock.asalDoc === 'Beli' ? this.formFlock.sumberBeli : '',
                                 biayaDoc: modalPembelian,
                                 hargaPakanStarter: parseFloat(this.formFlock.hargaPakanStarter) || 0,
                                 hargaPakanGrower: parseFloat(this.formFlock.hargaPakanGrower) || 0,
@@ -2328,12 +2495,14 @@
                     } else {
                         const newFlock = {
                             id: 'FLK-' + Date.now(),
-                            namaFlock: this.formFlock.namaFlock,
+                            namaFlock: flockName,
                             tipe: this.formFlock.tipe,
                             faseAwal: this.formFlock.faseAwal,
                             kandang: this.formFlock.kandang || 'Kandang B-01',
                             jumlahAwal: initial,
                             jumlahSaatIni: initial,
+                            asalDoc: this.formFlock.asalDoc,
+                            sumberBeli: this.formFlock.asalDoc === 'Beli' ? this.formFlock.sumberBeli : '',
                             biayaDoc: modalPembelian,
                             hargaPakanStarter: parseFloat(this.formFlock.hargaPakanStarter) || 0,
                             hargaPakanGrower: parseFloat(this.formFlock.hargaPakanGrower) || 0,
@@ -2346,7 +2515,7 @@
                     }
 
                     this.closeModal();
-                    this.formFlock = { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang B-01', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) };
+                    this.formFlock = { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang B-01', jumlahAwal: 0, jumlahSaatIni: 0, asalDoc: 'Hasil Penetasan', sumberBeli: '', biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) };
                 }
             }
         }).mount('#app');
