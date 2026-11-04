@@ -57,12 +57,12 @@
         <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-white min-h-screen sticky top-0 shadow-2xl z-30 no-print">
             <div class="p-5 flex items-center justify-between border-b border-slate-800">
                 <div class="flex items-center gap-3">
-                    <div class="flex flex-col items-center justify-center mb-4 mt-8">
-                         <img src="Logo-Mandiri-Farm.png" alt="Mandiri Farm" class="w-20 h-20 object-contain mx-auto mb-2">
-                     </div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-emerald-500/30">
+                        <i class="fa-solid fa-egg"></i>
+                    </div>
                     <div>
                         <h1 class="font-bold text-lg leading-tight text-white tracking-wide">Mandiri Farm</h1>
-                        <p class="text-xs text-emerald-400 font-medium">Monitoring & HPP Ayam</p>
+                        <p class="text-xs text-emerald-400 font-medium">Monitoring Ayam</p>
                     </div>
                 </div>
             </div>
@@ -71,9 +71,14 @@
                 <button v-for="item in navItems" :key="item.id" 
                     @click="activeTab = item.id"
                     :class="activeTab === item.id ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 font-semibold' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'"
-                    class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-xs sm:text-sm">
-                    <i :class="item.icon" class="text-base w-5 text-center"></i>
-                    <span>{{ item.label }}</span>
+                    class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all duration-200 text-xs sm:text-sm">
+                    <div class="flex items-center gap-3">
+                        <i :class="item.icon" class="text-base w-5 text-center"></i>
+                        <span>{{ item.label }}</span>
+                    </div>
+                    <span v-if="item.id === 'flock' && flockMoveAlerts.length > 0" class="w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center animate-bounce">
+                        {{ flockMoveAlerts.length }}
+                    </span>
                 </button>
             </nav>
 
@@ -123,11 +128,39 @@
                 <span>{{ toast.message }}</span>
             </div>
 
+            <!-- NOTIFIKASI JADWAL PINDAH KANDANG (GLOBAL ALERT BANNER) -->
+            <div v-if="flockMoveAlerts.length > 0" class="mb-5 bg-gradient-to-r from-amber-500 to-rose-500 text-white p-4 rounded-2xl shadow-lg no-print">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-xl shrink-0">
+                            <i class="fa-solid fa-truck-ramp-box animate-bounce"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-extrabold text-sm sm:text-base">Pemberitahuan Pindah Kandang ({{ flockMoveAlerts.length }} Kelompok)</h3>
+                            <p class="text-xs text-amber-100 mt-0.5">Ayam telah memasuki batas umur fase baru dan siap dipindahkan ke kandang berikutnya.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div v-for="alert in flockMoveAlerts" :key="alert.flock.id" class="bg-white/10 backdrop-blur-md p-2.5 rounded-xl flex items-center justify-between gap-2 border border-white/20">
+                        <div class="text-xs">
+                            <span class="font-bold block">{{ alert.flock.namaFlock }}</span>
+                            <span class="text-[11px] text-amber-100">
+                                Saat ini: <strong class="underline">{{ alert.flock.kandang }}</strong> ({{ formatUmurMinggu(alert.flock) }})
+                            </span>
+                        </div>
+                        <button @click="openMoveKandangModal(alert.flock, alert.suggestedKandang, alert.nextFase)" class="px-3 py-1.5 bg-white text-rose-700 hover:bg-amber-50 font-extrabold rounded-lg text-[11px] transition shadow">
+                            <i class="fa-solid fa-right-left mr-1"></i> Pindah ke {{ alert.suggestedKandang }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- TOP BAR HEADER TITLES & SETTINGS GEAR (DESKTOP) -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 sm:mb-6 no-print">
                 <div>
                     <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{{ currentNavTitle }}</h2>
-                    <p class="text-slate-500 text-xs sm:text-sm">Kelola penetasan, 3 fase pertumbuhan ayam, HPP, dan keuangan.</p>
+                    <p class="text-slate-500 text-xs sm:text-sm">Kelola penetasan, 3 fase pertumbuhan ayam, penataan kandang (B01, G01, L01), HPP, dan keuangan.</p>
                 </div>
                 <button @click="activeTab = 'pengaturan'" 
                     :class="activeTab === 'pengaturan' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'"
@@ -295,12 +328,12 @@
                 </div>
             </div>
 
-            <!-- TAB 3: MANAJEMEN KELOMPOK AYAM & 3 FASE PERTUMBUHAN -->
+            <!-- TAB 3: MANAJEMEN KELOMPOK AYAM & KODE KANDANG -->
             <div v-if="activeTab === 'flock'" class="space-y-4 sm:space-y-6">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 bg-white p-3.5 sm:p-4.5 rounded-2xl border border-slate-200 shadow-sm">
                     <div>
-                        <h3 class="font-bold text-slate-800 text-sm sm:text-base">Kelompok Ayam & 3 Fase Pertumbuhan</h3>
-                        <p class="text-xs text-slate-500">Monitoring batch ayam (Starter, Grower/Pullet, Layer) beserta target bobot & HPP.</p>
+                        <h3 class="font-bold text-slate-800 text-sm sm:text-base">Kelompok Ayam & Managemen Kode Kandang</h3>
+                        <p class="text-xs text-slate-500">Monitoring lokasi kandang (B01, G01, L01), target bobot, dan otomatisasi HPP.</p>
                     </div>
                     <button @click="openModal('flock')" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
                         <i class="fa-solid fa-plus"></i> Tambah Kelompok Baru
@@ -308,20 +341,33 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-                    <div v-for="f in flockList" :key="f.id" class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-sm space-y-3.5 flex flex-col justify-between">
+                    <div v-for="f in flockList" :key="f.id" class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-sm space-y-3.5 flex flex-col justify-between relative overflow-hidden">
+                        
+                        <!-- Indikator Siap Pindah Kandang -->
+                        <div v-if="isFlockNeedsMove(f)" class="absolute top-0 right-0 bg-rose-500 text-white text-[9px] font-extrabold px-3 py-1 rounded-bl-xl shadow flex items-center gap-1">
+                            <i class="fa-solid fa-bell animate-pulse"></i> SIAP PINDAH KANDANG
+                        </div>
+
                         <div class="space-y-3">
                             <div class="flex justify-between items-start gap-2">
                                 <div>
-                                    <span class="px-2 py-0.5 text-[9px] sm:text-[10px] font-bold rounded-full uppercase tracking-wider mr-1"
-                                        :class="f.tipe === 'Pedaging' ? 'bg-amber-100 text-amber-800' : 'bg-purple-100 text-purple-800'">
-                                        {{ f.tipe }}
-                                    </span>
-                                    <span class="px-2 py-0.5 text-[9px] sm:text-[10px] font-bold rounded-full uppercase font-bold"
-                                        :class="getFaseBadgeClass(f)">
-                                        {{ getFaseLabel(f) }}
-                                    </span>
-                                    <h4 class="font-bold text-slate-800 text-base sm:text-lg mt-1.5 leading-tight">{{ f.namaFlock }}</h4>
-                                    <p class="text-xs text-slate-400">Kandang: {{ f.kandang }} | Masuk: {{ formatDate(f.tglMulai) }}</p>
+                                    <div class="flex flex-wrap items-center gap-1 mb-1">
+                                        <span class="px-2 py-0.5 text-[9px] sm:text-[10px] font-bold rounded-full uppercase tracking-wider"
+                                            :class="f.tipe === 'Pedaging' ? 'bg-amber-100 text-amber-800' : 'bg-purple-100 text-purple-800'">
+                                            {{ f.tipe }}
+                                        </span>
+                                        <span class="px-2 py-0.5 text-[9px] sm:text-[10px] font-bold rounded-full uppercase"
+                                            :class="getFaseBadgeClass(f)">
+                                            {{ getFaseLabel(f) }}
+                                        </span>
+                                    </div>
+                                    <h4 class="font-bold text-slate-800 text-base sm:text-lg leading-tight">{{ f.namaFlock }}</h4>
+                                    <div class="mt-1 flex items-center gap-1.5 text-xs text-slate-600">
+                                        <span class="px-2 py-0.5 bg-slate-800 text-emerald-400 font-mono font-bold rounded-md text-[11px]">
+                                            <i class="fa-solid fa-house-chimney text-[10px] mr-1"></i>{{ f.kandang }}
+                                        </span>
+                                        <span class="text-slate-400 text-[11px]">Masuk: {{ formatDate(f.tglMulai) }}</span>
+                                    </div>
                                 </div>
                                 <div class="flex items-center gap-1 shrink-0">
                                     <button @click="editFlock(f)" class="text-slate-400 hover:text-blue-600 p-1.5 rounded-lg hover:bg-blue-50 transition">
@@ -365,6 +411,13 @@
                                     <span class="text-slate-500">Tarif Pakan Aktif:</span>
                                     <span class="font-bold text-emerald-700">{{ formatRupiah(getHargaPakanAktif(f)) }}/Kg</span>
                                 </div>
+                            </div>
+
+                            <!-- TOMBOL CEPAT PINDAH KANDANG -->
+                            <div v-if="isFlockNeedsMove(f)">
+                                <button @click="triggerMoveFromCard(f)" class="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition shadow flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-right-left"></i> Pindahkan Ke Kandang Baru
+                                </button>
                             </div>
 
                             <!-- PANEL KALKULATOR HPP -->
@@ -716,9 +769,10 @@
             <button v-for="item in navItems" :key="item.id" 
                 @click="activeTab = item.id"
                 :class="activeTab === item.id ? 'text-emerald-400 font-bold' : 'text-slate-400'"
-                class="flex flex-col items-center justify-center py-1.5 px-1 text-center w-full active:scale-95 transition">
+                class="flex flex-col items-center justify-center py-1.5 px-1 text-center w-full active:scale-95 transition relative">
                 <i :class="item.icon" class="text-base mb-0.5"></i>
                 <span class="text-[9px] tracking-tight truncate max-w-[55px]">{{ item.label }}</span>
+                <span v-if="item.id === 'flock' && flockMoveAlerts.length > 0" class="absolute top-1 right-3 w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
             </button>
         </nav>
 
@@ -735,6 +789,48 @@
                 <div class="flex gap-2 pt-1">
                     <button @click="confirmModal.show = false" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">Batal</button>
                     <button @click="executeConfirm" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-rose-600/20">Ya, Lanjutkan</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL PINDAH KANDANG (MOVE CAGE MODAL) -->
+        <div v-if="moveKandangModal.show" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
+            <div class="bg-white rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl space-y-4">
+                <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl font-bold">
+                    <i class="fa-solid fa-truck-ramp-box"></i>
+                </div>
+                <div>
+                    <h3 class="text-base sm:text-lg font-bold text-slate-900">Form Pemindahan Kandang Ayam</h3>
+                    <p class="text-xs text-slate-500 mt-1">Kelompok: <strong>{{ moveKandangModal.flock?.namaFlock }}</strong> ({{ formatUmurMinggu(moveKandangModal.flock) }})</p>
+                </div>
+
+                <div class="space-y-3 text-xs bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                    <div>
+                        <label class="block font-bold mb-1 text-slate-600">Kandang Lama Saat Ini:</label>
+                        <input :value="moveKandangModal.flock?.kandang" disabled type="text" class="w-full p-2.5 bg-slate-200/80 rounded-xl font-bold text-slate-700">
+                    </div>
+
+                    <div>
+                        <label class="block font-bold mb-1 text-emerald-800">Pilih Kandang Tujuan Baru (Brooding / Grower / Layer):</label>
+                        <input v-model="moveKandangModal.newKandang" list="kandangListPreset" type="text" placeholder="Contoh: G01 - Kandang Grower 1" class="w-full p-2.5 rounded-xl border border-emerald-400 bg-white font-bold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500">
+                        <datalist id="kandangListPreset">
+                            <option v-for="k in kandangPresets" :key="k" :value="k"></option>
+                        </datalist>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold mb-1 text-slate-700">Fase Baru Ayam:</label>
+                        <select v-model="moveKandangModal.newFase" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800">
+                            <option value="Starter">1. Starter (0-4 Minggu)</option>
+                            <option value="Grower">2. Grower &amp; Pullet (5-19 Minggu)</option>
+                            <option value="Layer">3. Layer (20+ Minggu)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 pt-1">
+                    <button @click="moveKandangModal.show = false" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">Batal</button>
+                    <button @click="saveMoveKandang" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-emerald-600/20">Simpan Pemindahan Kandang</button>
                 </div>
             </div>
         </div>
@@ -772,6 +868,11 @@
                         <input v-model.number="finishHatchingModal.menetasCount" type="number" min="0" :max="finishHatchingModal.telurFertilCount" placeholder="40" class="w-full p-2.5 rounded-xl border border-emerald-300 bg-white font-extrabold text-emerald-700 text-sm outline-none">
                     </div>
 
+                    <div>
+                        <label class="block font-bold mb-1 text-slate-700">Kode Kandang Brooding Tujuan:</label>
+                        <input v-model="finishHatchingModal.kandangTarget" list="kandangListPreset" type="text" placeholder="B01 - Kandang Brooding 1" class="w-full p-2 rounded-xl border border-slate-300 bg-white font-bold text-slate-800">
+                    </div>
+
                     <div class="flex justify-between items-center bg-emerald-50 p-2 rounded-xl border border-emerald-200 text-[11px]">
                         <span class="text-slate-600">Daya Tetas (Hatchability):</span>
                         <span class="font-extrabold text-emerald-700">{{ hitungModalDayaTetasPct() }}% (dari Fertil)</span>
@@ -779,7 +880,7 @@
 
                     <div class="flex items-center gap-2 pt-1 border-t border-slate-200">
                         <input type="checkbox" id="createDocBatch" v-model="finishHatchingModal.createDocFlock" class="w-4 h-4 text-emerald-600 rounded">
-                        <label for="createDocBatch" class="font-semibold text-slate-700 cursor-pointer text-[11px]">Auto Masuk Kandang Brooding (H+1)</label>
+                        <label for="createDocBatch" class="font-semibold text-slate-700 cursor-pointer text-[11px]">Auto Masuk Kandang Starter / Brooding (H+1)</label>
                     </div>
                 </div>
 
@@ -872,13 +973,13 @@
                     </form>
                 </div>
 
-                <!-- Form Kelompok Ayam (3 Fase) -->
+                <!-- Form Kelompok Ayam (3 Fase & Kode Kandang) -->
                 <div v-if="modalType === 'flock'">
                     <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mb-3.5">{{ editingFlockId ? 'Edit Kelompok Ayam' : 'Tambah Kelompok Ayam Baru' }}</h3>
                     <form @submit.prevent="saveFlock" class="space-y-3 text-xs">
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Nama Kelompok / Batch</label>
-                            <input v-model="formFlock.namaFlock" type="text" required placeholder="Contoh: Batch Ayam Kampung A" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <input v-model="formFlock.namaFlock" type="text" required placeholder="Contoh: Batch Ayam Kampung #01" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
                         <div class="grid grid-cols-2 gap-2.5">
                             <div>
@@ -889,10 +990,10 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block font-bold mb-1 text-slate-700">Fase Awal Ayam</label>
+                                <label class="block font-bold mb-1 text-slate-700">Fase Ayam Saat Ini</label>
                                 <select v-model="formFlock.faseAwal" @change="onFaseAwalChange" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
-                                    <option value="Starter">1. Starter (0-4 Minggu)</option>
-                                    <option value="Grower">2. Grower (5-19 Minggu)</option>
+                                    <option value="Starter">1. Starter / Brooding (0-4 Minggu)</option>
+                                    <option value="Grower">2. Grower &amp; Pullet (5-19 Minggu)</option>
                                     <option value="Layer">3. Layer (20+ Minggu)</option>
                                 </select>
                             </div>
@@ -900,12 +1001,11 @@
 
                         <div class="grid grid-cols-2 gap-2.5">
                             <div>
-                                <label class="block font-bold mb-1 text-slate-700">Pilih Kandang</label>
-                                <select v-model="formFlock.kandang" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
-                                    <option value="Kandang Brooding">Kandang Brooding</option>
-                                    <option value="Kandang Grower">Kandang Grower</option>
-                                    <option value="Kandang Layer / Produksi">Kandang Layer / Produksi</option>
-                                </select>
+                                <label class="block font-bold mb-1 text-slate-700">Kode &amp; Nama Kandang</label>
+                                <input v-model="formFlock.kandang" list="kandangListPreset" type="text" required placeholder="Contoh: B01 - Kandang Brooding 1" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+                                <datalist id="kandangListPreset">
+                                    <option v-for="k in kandangPresets" :key="k" :value="k"></option>
+                                </datalist>
                             </div>
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Umur Awal (Hari)</label>
@@ -968,7 +1068,7 @@
                             <label class="block font-bold mb-1 text-slate-700">Pilih Kelompok Ayam</label>
                             <select v-model="formHarian.flockId" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
                                 <option value="" disabled>-- Pilih Kelompok --</option>
-                                <option v-for="f in flockList" :key="f.id" :value="f.id">{{ f.namaFlock }} ({{ f.kandang }})</option>
+                                <option v-for="f in flockList" :key="f.id" :value="f.id">{{ f.namaFlock }} (Kandang: {{ f.kandang }})</option>
                             </select>
                         </div>
                         <div>
@@ -1083,7 +1183,18 @@
                     
                     toast: { show: false, message: '', type: 'info' },
                     confirmModal: { show: false, title: '', message: '', action: null },
-                    finishHatchingModal: { show: false, batch: null, telurFertilCount: 0, telurInfertilCount: 0, menetasCount: 0, createDocFlock: true },
+                    finishHatchingModal: { show: false, batch: null, telurFertilCount: 0, telurInfertilCount: 0, menetasCount: 0, kandangTarget: 'B01 - Kandang Brooding 1', createDocFlock: true },
+                    moveKandangModal: { show: false, flock: null, newKandang: '', newFase: 'Grower' },
+
+                    // PRESET KODE KANDANG STANDARD
+                    kandangPresets: [
+                        'B01 - Kandang Brooding 1',
+                        'B02 - Kandang Brooding 2',
+                        'G01 - Kandang Grower 1',
+                        'G02 - Kandang Grower 2',
+                        'L01 - Kandang Layer 1',
+                        'L02 - Kandang Layer 2'
+                    ],
 
                     navItems: [
                         { id: 'beranda', label: 'Beranda', icon: 'fa-solid fa-house' },
@@ -1099,7 +1210,7 @@
                     harianList: JSON.parse(localStorage.getItem('mandirifarm_harian')) || [],
                     keuanganList: JSON.parse(localStorage.getItem('mandirifarm_keuangan')) || [],
 
-                    // PRESET 3 FASE PAKAN (PULLET DIGABUNG KE GROWER)
+                    // PRESET 3 FASE PAKAN
                     activePakanPreset: 'starter',
                     pakanPresets: JSON.parse(localStorage.getItem('mandirifarm_pakan_presets')) || {
                         starter: [],
@@ -1114,7 +1225,7 @@
 
                     formBahanPakan: { nama: '', rasio: 0, harga: 0, protein: 0 },
                     formPenetasan: { namaBatch: '', mesin: '', tipe: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 0, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0 },
-                    formFlock: { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang Brooding', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) },
+                    formFlock: { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'B01 - Kandang Brooding 1', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) },
                     formHarian: { flockId: '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' },
                     formKeuangan: { jenis: 'Pemasukan', kategori: 'Penjualan Telur', nominal: 0, tanggal: new Date().toISOString().substr(0, 10), keterangan: '' },
 
@@ -1189,6 +1300,35 @@
                     return Object.keys(this.pakanHistory).map(k => {
                         return k.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
                     });
+                },
+
+                // LOGIKA AUTO REKOMENDASI NOTIFIKASI PINDAH KANDANG
+                flockMoveAlerts() {
+                    const alerts = [];
+                    this.flockList.forEach(f => {
+                        const umurHari = this.hitungUmurAyamHari(f);
+                        const kUpper = (f.kandang || '').toUpperCase();
+                        const isBrooding = kUpper.startsWith('B') || f.faseAwal === 'Starter' || kUpper.includes('BROODING') || kUpper.includes('STARTER');
+                        const isGrower = kUpper.startsWith('G') || f.faseAwal === 'Grower' || kUpper.includes('GROWER') || kUpper.includes('PULLET');
+
+                        // Rekomendasi 1: Umur > 28 hari (4 minggu) masih di Kandang Brooding/Starter
+                        if (umurHari > 28 && isBrooding) {
+                            alerts.push({
+                                flock: f,
+                                suggestedKandang: 'G01 - Kandang Grower 1',
+                                nextFase: 'Grower'
+                            });
+                        }
+                        // Rekomendasi 2: Umur > 139 hari (19+ minggu) masih di Kandang Grower
+                        else if (umurHari > 139 && isGrower) {
+                            alerts.push({
+                                flock: f,
+                                suggestedKandang: 'L01 - Kandang Layer 1',
+                                nextFase: 'Layer'
+                            });
+                        }
+                    });
+                    return alerts;
                 }
             },
             watch: {
@@ -1230,6 +1370,38 @@
                 formatRupiahInputVal(val) {
                     if (!val || isNaN(val) || val === 0) return '';
                     return new Intl.NumberFormat('id-ID').format(val);
+                },
+
+                // FITUR OPERASIONAL & NOTIFIKASI PINDAH KANDANG
+                isFlockNeedsMove(flock) {
+                    return this.flockMoveAlerts.some(a => a.flock.id === flock.id);
+                },
+                openMoveKandangModal(flock, suggestedKandang, nextFase) {
+                    this.moveKandangModal = {
+                        show: true,
+                        flock: flock,
+                        newKandang: suggestedKandang || 'G01 - Kandang Grower 1',
+                        newFase: nextFase || 'Grower'
+                    };
+                },
+                triggerMoveFromCard(flock) {
+                    const alert = this.flockMoveAlerts.find(a => a.flock.id === flock.id);
+                    const suggested = alert ? alert.suggestedKandang : 'G01 - Kandang Grower 1';
+                    const nextFase = alert ? alert.nextFase : 'Grower';
+                    this.openMoveKandangModal(flock, suggested, nextFase);
+                },
+                saveMoveKandang() {
+                    const m = this.moveKandangModal;
+                    if (!m.flock || !m.newKandang) return;
+
+                    const flock = this.flockList.find(f => f.id === m.flock.id);
+                    if (flock) {
+                        const prevKandang = flock.kandang;
+                        flock.kandang = m.newKandang;
+                        flock.faseAwal = m.newFase;
+                        this.showToast(`Ayam ${flock.namaFlock} dipindahkan dari ${prevKandang} ke ${m.newKandang}!`, 'info');
+                    }
+                    this.moveKandangModal.show = false;
                 },
 
                 // FORMULASI PAKAN 3 FASE & AUTO-SYNC OTOMATIS KE KELOMPOK AYAM
@@ -1352,7 +1524,7 @@
                 getFaseLabel(flock) {
                     const umur = this.hitungUmurAyamHari(flock);
                     if (umur <= 28) return '1. Starter (0-4 Mg)';
-                    if (umur <= 139) return '2. Grower (5-19 Mg)';
+                    if (umur <= 139) return '2. Grower & Pullet (5-19 Mg)';
                     return '3. Layer (20+ Mg)';
                 },
                 getFaseBadgeClass(flock) {
@@ -1379,7 +1551,7 @@
                 exportBackupFile() {
                     const backupData = {
                         app: 'MandiriFarm',
-                        version: '1.8.0',
+                        version: '1.9.0',
                         exportedAt: new Date().toISOString(),
                         data: {
                             penetasanList: this.penetasanList,
@@ -1461,13 +1633,13 @@
                 onFaseAwalChange() {
                     if (this.formFlock.faseAwal === 'Starter') {
                         this.formFlock.umurAwalHari = 0;
-                        this.formFlock.kandang = 'Kandang Brooding';
+                        this.formFlock.kandang = 'B01 - Kandang Brooding 1';
                     } else if (this.formFlock.faseAwal === 'Grower') {
                         this.formFlock.umurAwalHari = 31;
-                        this.formFlock.kandang = 'Kandang Grower';
+                        this.formFlock.kandang = 'G01 - Kandang Grower 1';
                     } else if (this.formFlock.faseAwal === 'Layer') {
                         this.formFlock.umurAwalHari = 140;
-                        this.formFlock.kandang = 'Kandang Layer / Produksi';
+                        this.formFlock.kandang = 'L01 - Kandang Layer 1';
                     }
                 },
 
@@ -1546,11 +1718,15 @@
                                 </tr>
                             </table>
 
-                            <h3 style="font-size: 13px; font-weight: bold; color: #0f172a; margin: 0 0 8px 0; text-transform: uppercase;">1. Informasi Kelompok Ayam</h3>
+                            <h3 style="font-size: 13px; font-weight: bold; color: #0f172a; margin: 0 0 8px 0; text-transform: uppercase;">1. Informasi Kelompok Ayam &amp; Kandang</h3>
                             <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 18px;">
                                 <tr style="background-color: #f8fafc;">
                                     <td style="padding: 6px 10px; border: 1px solid #cbd5e1; font-weight: bold; width: 40%;">Nama Batch / Kelompok</td>
                                     <td style="padding: 6px 10px; border: 1px solid #cbd5e1; font-weight: bold; color: #047857;">${flock.namaFlock}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Kode &amp; Lokasi Kandang</td>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1; font-weight: bold;">${flock.kandang}</td>
                                 </tr>
                                 <tr>
                                     <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Tipe &amp; Umur Ayam</td>
@@ -1559,10 +1735,6 @@
                                 <tr>
                                     <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Target Bobot Fase</td>
                                     <td style="padding: 6px 10px; border: 1px solid #cbd5e1; font-weight: bold; color: #047857;">${this.getFaseTargetBobot(flock)}</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Kandang / Lokasi</td>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">${flock.kandang}</td>
                                 </tr>
                                 <tr>
                                     <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Populasi Saat Ini / Awal</td>
@@ -1752,6 +1924,7 @@
                                     hargaPakanGrower: 0,
                                     avgBobotKg: 1.2,
                                     hargaJualPerKg: 0,
+                                    kandang: f.kandang || 'G01 - Kandang Grower 1',
                                     umurAwalHari: 0,
                                     ...f,
                                     jumlahAwal: parseInt(f.jumlahAwal) || 0,
@@ -1867,6 +2040,7 @@
                         telurFertilCount: b.telurFertil || fertilDefault,
                         telurInfertilCount: b.telurInfertil || infertilDefault,
                         menetasCount: b.menetasCount || menetasDefault,
+                        kandangTarget: 'B01 - Kandang Brooding 1',
                         createDocFlock: true
                     };
                 },
@@ -1928,7 +2102,7 @@
                             namaFlock: 'DOC Hasil ' + b.namaBatch,
                             tipe: b.tipe || 'Pedaging',
                             faseAwal: 'Starter',
-                            kandang: 'Kandang Brooding',
+                            kandang: this.finishHatchingModal.kandangTarget || 'B01 - Kandang Brooding 1',
                             jumlahAwal: menetas,
                             jumlahSaatIni: menetas,
                             biayaDoc: 0,
@@ -1943,7 +2117,7 @@
                     }
 
                     this.finishHatchingModal.show = false;
-                    this.showToast(`Panen DOC Berhasil! Total ${menetas} ekor masuk Kandang Brooding (H+1).`, 'info');
+                    this.showToast(`Panen DOC Berhasil! Total ${menetas} ekor masuk Kandang Brooding (${this.finishHatchingModal.kandangTarget}).`, 'info');
                 },
                 confirmDeletePenetasan(id) {
                     this.showConfirm('Hapus Penetasan?', 'Apakah Anda yakin menghapus catatan inkubasi ini?', () => {
@@ -1964,7 +2138,7 @@
                                 namaFlock: this.formFlock.namaFlock,
                                 tipe: this.formFlock.tipe,
                                 faseAwal: this.formFlock.faseAwal,
-                                kandang: this.formFlock.kandang,
+                                kandang: this.formFlock.kandang || 'B01 - Kandang Brooding 1',
                                 jumlahAwal: initial,
                                 jumlahSaatIni: parseInt(this.formFlock.jumlahSaatIni) ?? initial,
                                 biayaDoc: modalPembelian,
@@ -1981,7 +2155,7 @@
                             namaFlock: this.formFlock.namaFlock,
                             tipe: this.formFlock.tipe,
                             faseAwal: this.formFlock.faseAwal,
-                            kandang: this.formFlock.kandang,
+                            kandang: this.formFlock.kandang || 'B01 - Kandang Brooding 1',
                             jumlahAwal: initial,
                             jumlahSaatIni: initial,
                             biayaDoc: modalPembelian,
@@ -2011,7 +2185,7 @@
                     }
 
                     this.closeModal();
-                    this.formFlock = { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang Brooding', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) };
+                    this.formFlock = { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'B01 - Kandang Brooding 1', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) };
                 },
                 confirmDeleteFlock(id) {
                     this.showConfirm('Hapus Kelompok Ayam?', 'Apakah Anda yakin ingin menghapus kelompok ayam ini?', () => {
@@ -2075,7 +2249,7 @@
 
                 getFlockName(flockId) {
                     const f = this.flockList.find(x => x.id === flockId);
-                    return f ? f.namaFlock : 'Unknown Flock';
+                    return f ? `${f.namaFlock} (${f.kandang})` : 'Unknown Flock';
                 },
                 getPakanTotalByFlock(flockId) {
                     return this.harianList
@@ -2144,7 +2318,7 @@
                     if (ctxFlock) {
                         if (this.flockChartInstance) this.flockChartInstance.destroy();
 
-                        const labels = this.flockList.map(f => f.namaFlock);
+                        const labels = this.flockList.map(f => `${f.namaFlock} (${f.kandang})`);
                         const counts = this.flockList.map(f => f.jumlahSaatIni);
 
                         this.flockChartInstance = new Chart(ctxFlock, {
