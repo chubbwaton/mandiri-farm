@@ -697,8 +697,9 @@
                                     <td class="p-3"><span class="text-amber-600 font-bold">{{ h.telurRusak }}</span> Butir</td>
                                     <td class="p-3"><span class="text-rose-600 font-bold">{{ h.kematian }}</span> Ekor</td>
                                     <td class="p-3 text-slate-400 italic max-w-xs truncate">{{ h.catatan || '-' }}</td>
-                                    <td class="p-3 text-center">
-                                        <button @click="confirmDeleteHarian(h.id)" class="text-slate-300 hover:text-rose-500 p-1"><i class="fa-solid fa-trash"></i></button>
+                                    <td class="p-3 text-center whitespace-nowrap">
+                                        <button @click="editHarian(h)" class="text-slate-400 hover:text-blue-600 p-1 mr-1.5" title="Edit Log Harian"><i class="fa-solid fa-pen-to-square"></i></button>
+                                        <button @click="confirmDeleteHarian(h.id)" class="text-slate-300 hover:text-rose-500 p-1" title="Hapus Log Harian"><i class="fa-solid fa-trash"></i></button>
                                     </td>
                                 </tr>
                                 <tr v-if="filteredHarianList.length === 0">
@@ -1284,7 +1285,7 @@
 
                 <!-- Form Pencatatan Harian -->
                 <div v-if="modalType === 'harian'">
-                    <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mb-3.5">Catat Log Harian Kandang</h3>
+                    <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mb-3.5">{{ editingHarianId ? 'Edit Log Harian Kandang' : 'Catat Log Harian Kandang' }}</h3>
                     <form @submit.prevent="saveHarian" class="space-y-3 text-xs">
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Pilih Kelompok Ayam</label>
@@ -1321,7 +1322,9 @@
                             <label class="block font-bold mb-1 text-slate-700">Catatan Kesehatan / Aktivitas</label>
                             <input v-model="formHarian.catatan" type="text" placeholder="Contoh: Pemberian vitamin Vita Stress" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
-                        <button type="submit" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">Simpan Log Harian</button>
+                        <button type="submit" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">
+                            {{ editingHarianId ? 'Simpan Perubahan Log' : 'Simpan Log Harian' }}
+                        </button>
                     </form>
                 </div>
 
@@ -1395,6 +1398,7 @@
                     editingPenetasanId: null,
                     editingFlockId: null,
                     editingBahanIndex: null,
+                    editingHarianId: null,
 
                     // PAGINASI & FILTER STATE
                     harianSearch: '',
@@ -1626,6 +1630,7 @@
             },
             mounted() {
                 this.loadPakanPreset('starter');
+                this.recalculateAllFlockPopulations();
                 if (this.gasApiUrl) {
                     this.fetchFromGas();
                     this.autoSyncTimer = setInterval(() => {
@@ -1900,78 +1905,116 @@
                     const total = this.harianList
                         .filter(h => h.flockId === flockId)
                         .reduce((acc, curr) => acc + (parseFloat(curr.pakanKg) || 0), 0);
-                    return total.toFixed(1);
+                    return Math.round(total * 10) / 10;
                 },
-                hitungHPP(f) {
-                    const totalPakanKg = parseFloat(this.getPakanTotalByFlock(f.id)) || 0;
-                    const hargaPakan = this.getHargaPakanAktif(f);
-                    const totalBiayaPakan = totalPakanKg * hargaPakan;
-                    const totalBiayaModal = (parseFloat(f.biayaDoc) || 0) + totalBiayaPakan;
-                    const totalEkor = parseInt(f.jumlahSaatIni) || 1;
+                hitungHPP(flock) {
+                    const totalPakanKg = parseFloat(this.getPakanTotalByFlock(flock.id)) || 0;
+                    const hargaPakanAvg = this.getHargaPakanAktif(flock) || 8500;
+                    const biayaPakan = totalPakanKg * hargaPakanAvg;
+                    const modalDoc = parseFloat(flock.biayaDoc) || 0;
+                    const totalBiaya = modalDoc + biayaPakan;
+                    const pop = parseInt(flock.jumlahSaatIni) || 1;
+                    const avgBobot = parseFloat(flock.avgBobotKg) || 1;
+                    const totalKg = pop * avgBobot;
 
-                    const hppPerEkor = Math.round(totalBiayaModal / totalEkor);
-                    const avgBobot = parseFloat(f.avgBobotKg) || 1;
-                    const hppPerKg = Math.round(hppPerEkor / avgBobot);
-
-                    return { totalBiaya: totalBiayaModal, totalEkor, hppPerEkor, hppPerKg };
+                    return {
+                        totalBiaya,
+                        hppPerEkor: Math.round(totalBiaya / Math.max(1, pop)),
+                        hppPerKg: totalKg > 0 ? Math.round(totalBiaya / totalKg) : 0
+                    };
                 },
-                hitungProyeksiLaba(f) {
-                    const hpp = this.hitungHPP(f);
-                    const totalEkor = parseInt(f.jumlahSaatIni) || 0;
-                    const avgBobot = parseFloat(f.avgBobotKg) || 0;
-                    const hargaJualKg = parseFloat(f.hargaJualPerKg) || 0;
-
-                    const totalKg = totalEkor * avgBobot;
-                    const estOmzet = Math.round(totalKg * hargaJualKg);
-                    const labaBersih = estOmzet - hpp.totalBiaya;
-
-                    return { estOmzet, labaBersih };
+                hitungProyeksiLaba(flock) {
+                    const pop = parseInt(flock.jumlahSaatIni) || 0;
+                    const avgBobot = parseFloat(flock.avgBobotKg) || 0;
+                    const totalKg = pop * avgBobot;
+                    const hargaJual = parseFloat(flock.hargaJualPerKg) || 0;
+                    const estOmzet = totalKg * hargaJual;
+                    const { totalBiaya } = this.hitungHPP(flock);
+                    return {
+                        estOmzet: Math.round(estOmzet),
+                        labaBersih: Math.round(estOmzet - totalBiaya)
+                    };
                 },
-                exportHppPdf(f) {
-                    const hpp = this.hitungHPP(f);
-                    const proyeksi = this.hitungProyeksiLaba(f);
-
+                exportHppPdf(flock) {
+                    const hpp = this.hitungHPP(flock);
+                    const laba = this.hitungProyeksiLaba(flock);
                     const content = `
-                        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-                            <h2 style="text-align: center; margin-bottom: 5px; text-transform: uppercase;">MANDIRI FARM - LAPORAN ANALISIS HPP</h2>
-                            <p style="text-align: center; color: #666; font-size: 12px; margin-top: 0;">Tanggal: ${this.getFormattedNow()}</p>
-                            <hr style="border: 1px solid #ddd; margin: 15px 0;"/>
-                            
-                            <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 20px;">
-                                <tr><td style="padding: 6px; font-weight: bold; width: 40%;">Kelompok / Batch:</td><td style="padding: 6px;">${f.namaFlock}</td></tr>
-                                <tr><td style="padding: 6px; font-weight: bold;">Kode Kandang:</td><td style="padding: 6px;">${f.kandang}</td></tr>
-                                <tr><td style="padding: 6px; font-weight: bold;">Tipe / Fase:</td><td style="padding: 6px;">${f.tipe} (${this.getFaseLabel(f)})</td></tr>
-                                <tr><td style="padding: 6px; font-weight: bold;">Umur Ayam:</td><td style="padding: 6px;">${this.formatUmurMinggu(f)}</td></tr>
-                                <tr><td style="padding: 6px; font-weight: bold;">Populasi Saat Ini:</td><td style="padding: 6px;">${f.jumlahSaatIni} Ekor (Kematian/Afkir: ${f.jumlahAwal - f.jumlahSaatIni})</td></tr>
-                                <tr><td style="padding: 6px; font-weight: bold;">Pakan Dikonsumsi:</td><td style="padding: 6px;">${this.getPakanTotalByFlock(f.id)} Kg</td></tr>
-                                <tr><td style="padding: 6px; font-weight: bold;">Tarif Harga Pakan:</td><td style="padding: 6px;">${this.formatRupiah(this.getHargaPakanAktif(f))}/Kg</td></tr>
+                        <div style="font-family: sans-serif; padding: 20px; color: #333;">
+                            <h2 style="text-align: center; margin-bottom: 5px;">MANDIRI FARM - LAPORAN HPP BATCH</h2>
+                            <p style="text-align: center; color: #666; font-size: 12px; margin-top: 0;">Kelompok: ${flock.namaFlock} (${flock.kandang})</p>
+                            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #ccc;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                                <tr><td style="padding: 6px 0;">Populasi Saat Ini:</td><td style="font-weight: bold; text-align: right;">${flock.jumlahSaatIni} Ekor</td></tr>
+                                <tr><td style="padding: 6px 0;">Umur Akumulasi:</td><td style="font-weight: bold; text-align: right;">${this.formatUmurMinggu(flock)}</td></tr>
+                                <tr><td style="padding: 6px 0;">Modal DOC/Bibit:</td><td style="font-weight: bold; text-align: right;">${this.formatRupiah(flock.biayaDoc || 0)}</td></tr>
+                                <tr><td style="padding: 6px 0;">Pakan Dikonsumsi:</td><td style="font-weight: bold; text-align: right;">${this.getPakanTotalByFlock(flock.id)} Kg</td></tr>
+                                <tr><td style="padding: 6px 0;">Total Estimasi Biaya:</td><td style="font-weight: bold; text-align: right;">${this.formatRupiah(hpp.totalBiaya)}</td></tr>
+                                <tr style="background: #f0fdf4;"><td style="padding: 8px 6px; font-weight: bold;">HPP Per Ekor:</td><td style="font-weight: bold; text-align: right; color: #15803d;">${this.formatRupiah(hpp.hppPerEkor)}</td></tr>
+                                <tr style="background: #f0fdf4;"><td style="padding: 8px 6px; font-weight: bold;">HPP Per Kg:</td><td style="font-weight: bold; text-align: right; color: #15803d;">${this.formatRupiah(hpp.hppPerKg)}</td></tr>
+                                <tr><td style="padding: 6px 0;">Proyeksi Omzet:</td><td style="font-weight: bold; text-align: right;">${this.formatRupiah(laba.estOmzet)}</td></tr>
+                                <tr style="background: #ecfdf5;"><td style="padding: 8px 6px; font-weight: bold;">Proyeksi Laba Bersih:</td><td style="font-weight: bold; text-align: right; color: #166534;">${this.formatRupiah(laba.labaBersih)}</td></tr>
                             </table>
-
-                            <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                                <h3 style="margin-top: 0; color: #0f172a; font-size: 14px;">Ringkasan Kalkulasi HPP & Proyeksi Laba</h3>
-                                <table style="width: 100%; font-size: 13px; line-height: 1.8;">
-                                    <tr><td>Modal Pembelian Awal / DOC:</td><td style="text-align: right; font-weight: bold;">${this.formatRupiah(f.biayaDoc)}</td></tr>
-                                    <tr><td>Total Biaya Pakan:</td><td style="text-align: right; font-weight: bold;">${this.formatRupiah(hpp.totalBiaya - (f.biayaDoc||0))}</td></tr>
-                                    <tr style="border-top: 1px solid #ccc; font-weight: bold;"><td>Total Modal Terakumulasi:</td><td style="text-align: right; color: #1e293b;">${this.formatRupiah(hpp.totalBiaya)}</td></tr>
-                                    <tr style="font-size: 15px; font-weight: bold; color: #059669;"><td>HPP per Ekor:</td><td style="text-align: right;">${this.formatRupiah(hpp.hppPerEkor)}</td></tr>
-                                    <tr style="font-size: 15px; font-weight: bold; color: #059669;"><td>HPP per Kg (Avg ${f.avgBobotKg || 1} Kg):</td><td style="text-align: right;">${this.formatRupiah(hpp.hppPerKg)}</td></tr>
-                                    <tr style="border-top: 1px dashed #ccc;"><td>Estimasi Omzet Penjualan:</td><td style="text-align: right; font-weight: bold;">${this.formatRupiah(proyeksi.estOmzet)}</td></tr>
-                                    <tr style="font-size: 16px; font-weight: bold;"><td>Proyeksi Laba Bersih:</td><td style="text-align: right; color: ${proyeksi.labaBersih >= 0 ? '#059669' : '#dc2626'};">${this.formatRupiah(proyeksi.labaBersih)}</td></tr>
-                                </table>
-                            </div>
                         </div>
                     `;
-
                     const opt = {
-                        margin: 0.5,
-                        filename: `HPP_${f.namaFlock.replace(/\s+/g, '_')}_${f.kandang}.pdf`,
+                        margin: 10,
+                        filename: `HPP_${flock.namaFlock.replace(/\s+/g, '_')}_${new Date().toISOString().substr(0,10)}.pdf`,
                         image: { type: 'jpeg', quality: 0.98 },
                         html2canvas: { scale: 2 },
-                        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                     };
-
-                    html2pdf().set(opt).from(content).save();
-                    this.showToast('Laporan HPP PDF sedang diunduh...', 'info');
+                    html2pdf().from(content).set(opt).save();
+                },
+                recalculateFlockPopulation(flockId) {
+                    if (!flockId) return;
+                    const flock = this.flockList.find(f => f.id === flockId);
+                    if (!flock) return;
+                    const totalKematian = this.harianList
+                        .filter(h => h.flockId === flockId)
+                        .reduce((acc, curr) => acc + (parseInt(curr.kematian) || 0), 0);
+                    flock.jumlahSaatIni = Math.max(0, (parseInt(flock.jumlahAwal) || 0) - totalKematian);
+                },
+                recalculateAllFlockPopulations() {
+                    this.flockList.forEach(f => {
+                        this.recalculateFlockPopulation(f.id);
+                    });
+                },
+                openModal(type) {
+                    this.modalType = type;
+                    if (type === 'penetasan') {
+                        this.editingPenetasanId = null;
+                        this.formPenetasan = { namaBatch: '', mesin: '', tipe: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 0, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0, asalTelur: 'Indukan', biayaTelur: 0, sumberBeli: '', indukanFlockId: '' };
+                    } else if (type === 'flock') {
+                        this.editingFlockId = null;
+                        this.formFlock = { 
+                            namaFlock: '', 
+                            tipe: 'Pedaging', 
+                            faseAwal: 'Starter', 
+                            kandang: 'Kandang B-01', 
+                            jumlahAwal: 0, 
+                            jumlahSaatIni: 0, 
+                            asalDoc: 'Hasil Penetasan', 
+                            sumberBeli: '', 
+                            biayaDoc: 0, 
+                            autoRecordKeuangan: true, 
+                            hargaPakanStarter: this.getPresetPrice('starter'), 
+                            hargaPakanGrower: this.getPresetPrice('grower'), 
+                            umurAwalHari: 0, 
+                            tglMulai: new Date().toISOString().substr(0, 10) 
+                        };
+                    } else if (type === 'harian') {
+                        this.editingHarianId = null;
+                        this.formHarian = { flockId: this.flockList.length ? this.flockList[0].id : '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' };
+                    } else if (type === 'keuangan') {
+                        this.formKeuangan = { jenis: 'Pemasukan', kategori: 'Penjualan Telur', nominal: 0, tanggal: new Date().toISOString().substr(0, 10), keterangan: '' };
+                    }
+                    this.showModal = true;
+                },
+                editHarian(h) {
+                    this.editingHarianId = h.id;
+                    this.formHarian = JSON.parse(JSON.stringify(h));
+                    this.modalType = 'harian';
+                    this.showModal = true;
                 },
                 saveHarian() {
                     const f = this.flockList.find(item => item.id === this.formHarian.flockId);
@@ -1981,26 +2024,49 @@
                     }
 
                     const dead = parseInt(this.formHarian.kematian) || 0;
-                    if (dead > 0) {
-                        f.jumlahSaatIni = Math.max(0, (parseInt(f.jumlahSaatIni) || 0) - dead);
+                    const oldFlockId = this.editingHarianId ? (this.harianList.find(h => h.id === this.editingHarianId)?.flockId) : null;
+
+                    if (this.editingHarianId) {
+                        const idx = this.harianList.findIndex(h => h.id === this.editingHarianId);
+                        if (idx !== -1) {
+                            this.harianList[idx] = {
+                                ...this.harianList[idx],
+                                ...this.formHarian,
+                                pakanKg: parseFloat(this.formHarian.pakanKg) || 0,
+                                kematian: dead,
+                                telurBagus: parseInt(this.formHarian.telurBagus) || 0,
+                                telurRusak: parseInt(this.formHarian.telurRusak) || 0
+                            };
+                        }
+                        if (oldFlockId && oldFlockId !== this.formHarian.flockId) {
+                            this.recalculateFlockPopulation(oldFlockId);
+                        }
+                        this.showToast('Catatan harian berhasil diperbarui.', 'info');
+                    } else {
+                        const newHarian = {
+                            id: 'LOG-' + Date.now(),
+                            ...this.formHarian,
+                            pakanKg: parseFloat(this.formHarian.pakanKg) || 0,
+                            kematian: dead,
+                            telurBagus: parseInt(this.formHarian.telurBagus) || 0,
+                            telurRusak: parseInt(this.formHarian.telurRusak) || 0
+                        };
+                        this.harianList.unshift(newHarian);
+                        this.showToast('Catatan harian berhasil disimpan.', 'info');
                     }
 
-                    const newHarian = {
-                        id: 'LOG-' + Date.now(),
-                        ...this.formHarian,
-                        pakanKg: parseFloat(this.formHarian.pakanKg) || 0,
-                        kematian: dead,
-                        telurBagus: parseInt(this.formHarian.telurBagus) || 0,
-                        telurRusak: parseInt(this.formHarian.telurRusak) || 0
-                    };
-
-                    this.harianList.unshift(newHarian);
+                    this.recalculateFlockPopulation(this.formHarian.flockId);
                     this.closeModal();
-                    this.showToast('Catatan harian berhasil disimpan.', 'info');
                 },
                 confirmDeleteHarian(id) {
                     this.showConfirm('Hapus Record Harian?', 'Data catatan harian ini akan dihapus.', () => {
+                        const targetLog = this.harianList.find(h => h.id === id);
+                        const targetFlockId = targetLog ? targetLog.flockId : null;
+
                         this.harianList = this.harianList.filter(h => h.id !== id);
+                        if (targetFlockId) {
+                            this.recalculateFlockPopulation(targetFlockId);
+                        }
                         this.showToast('Record harian dihapus.', 'info');
                     });
                 },
@@ -2570,6 +2636,7 @@
                     this.editingPenetasanId = null;
                     this.editingFlockId = null;
                     this.editingBahanIndex = null;
+                    this.editingHarianId = null;
                     this.isKnownBahan = false;
                 },
 
