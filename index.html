@@ -60,7 +60,7 @@
             <div class="p-5 flex items-center justify-between border-b border-slate-800">
                 <div class="flex items-center gap-3">
                     <div class="flex flex-col items-center justify-center mb-4 mt-8">
-                        <img src="Logo-Mandiri-Farm.png" alt="Mandiri Farm" class="w-20 h-20 object-contain mx-auto mb-2">
+                     	<img src="Logo-Mandiri-Farm.png" alt="Mandiri Farm" class="w-20 h-20 object-contain mx-auto mb-2">
                      </div>
                     <div>
                         <h1 class="font-bold text-lg leading-tight text-white tracking-wide">Mandiri Farm</h1>
@@ -1671,28 +1671,6 @@
                         this.showToast(`Kelompok ${f.namaFlock} dipindahkan ke Arsip (Panen Selesai).`, 'info');
                     }
                 },
-                kandangList: { handler(val) { localStorage.setItem('mandirifarm_kandang_list', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true },
-                penetasanList: { handler(val) { localStorage.setItem('mandirifarm_penetasan', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true },
-                flockList: { handler(val) { localStorage.setItem('mandirifarm_flock', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true },
-                harianList: { handler(val) { localStorage.setItem('mandirifarm_harian', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true },
-                keuanganList: { handler(val) { localStorage.setItem('mandirifarm_keuangan', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true }
-            },
-            mounted() {
-                this.loadPakanPreset('starter');
-                if (this.gasApiUrl) {
-                    this.fetchFromGas();
-                    this.autoSyncTimer = setInterval(() => {
-                        this.fetchFromGas(true);
-                    }, 30000);
-                } else {
-                    this.$nextTick(() => this.renderCharts());
-                }
-            },
-            unmounted() {
-                if (this.autoSyncTimer) clearInterval(this.autoSyncTimer);
-                if (this.pushTimer) clearTimeout(this.pushTimer);
-            },
-            methods: {
                 getFormattedNow() {
                     return new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' });
                 },
