@@ -57,12 +57,12 @@
         <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-white min-h-screen sticky top-0 shadow-2xl z-30 no-print">
             <div class="p-5 flex items-center justify-between border-b border-slate-800">
                 <div class="flex items-center gap-3">
-                    <div class="flex flex-col items-center justify-center mb-4 mt-8">
-                         <img src="Logo-Mandiri-Farm.png" alt="Mandiri Farm" class="w-20 h-20 object-contain mx-auto mb-2">
-                     </div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-emerald-500/30">
+                        <i class="fa-solid fa-egg"></i>
+                    </div>
                     <div>
                         <h1 class="font-bold text-lg leading-tight text-white tracking-wide">Mandiri Farm</h1>
-                        <p class="text-xs text-emerald-400 font-medium">Monitoring Ayam kampung</p>
+                        <p class="text-xs text-emerald-400 font-medium">Monitoring Ayam</p>
                     </div>
                 </div>
             </div>
@@ -110,12 +110,23 @@
                     </div>
                 </div>
             </div>
-            <!-- TOMBOL IKON RODA GERIGI (PENGATURAN & SYNC) -->
-            <button @click="activeTab = 'pengaturan'" 
-                :class="activeTab === 'pengaturan' ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-slate-800 text-slate-300 border-slate-700'"
-                class="p-2 rounded-xl text-xs flex items-center justify-center w-9 h-9 border active:scale-95 transition shadow-sm">
-                <i class="fa-solid fa-gear text-sm"></i>
-            </button>
+            <!-- IKON LONCENG NOTIFIKASI & IKON GERIGI PENGATURAN -->
+            <div class="flex items-center gap-2 relative">
+                <button @click="showNotifDropdown = !showNotifDropdown" 
+                    :class="showNotifDropdown ? 'bg-amber-500 text-white border-amber-400' : 'bg-slate-800 text-slate-300 border-slate-700'"
+                    class="p-2 rounded-xl text-xs flex items-center justify-center w-9 h-9 border active:scale-95 transition shadow-sm relative">
+                    <i class="fa-solid fa-bell text-sm"></i>
+                    <span v-if="flockMoveAlerts.length > 0" class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-extrabold flex items-center justify-center animate-pulse">
+                        {{ flockMoveAlerts.length }}
+                    </span>
+                </button>
+
+                <button @click="activeTab = 'pengaturan'" 
+                    :class="activeTab === 'pengaturan' ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-slate-800 text-slate-300 border-slate-700'"
+                    class="p-2 rounded-xl text-xs flex items-center justify-center w-9 h-9 border active:scale-95 transition shadow-sm">
+                    <i class="fa-solid fa-gear text-sm"></i>
+                </button>
+            </div>
         </header>
 
         <!-- MAIN WORKSPACE -->
@@ -128,7 +139,59 @@
                 <span>{{ toast.message }}</span>
             </div>
 
-            <!-- NOTIFIKASI JADWAL PINDAH KANDANG (GLOBAL ALERT BANNER) -->
+            <!-- TOP BAR HEADER TITLES & SETTINGS GEAR (DESKTOP) -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 sm:mb-6 no-print">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{{ currentNavTitle }}</h2>
+                    <p class="text-slate-500 text-xs sm:text-sm">Kelola penetasan, 3 fase pertumbuhan ayam, penataan kandang (B-01, G-01, A-01), HPP, dan keuangan.</p>
+                </div>
+                <div class="hidden md:flex items-center gap-2.5 relative">
+                    <!-- TOMBOL IKON LONCENG NOTIFIKASI -->
+                    <button @click="showNotifDropdown = !showNotifDropdown" 
+                        :class="showNotifDropdown ? 'bg-amber-500 text-white border-amber-500' : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'"
+                        class="relative flex items-center gap-2 px-3.5 py-2 font-bold rounded-xl text-xs border shadow-sm transition">
+                        <i class="fa-solid fa-bell" :class="showNotifDropdown ? 'text-white' : 'text-amber-500'"></i> 
+                        <span>Notifikasi</span>
+                        <span v-if="flockMoveAlerts.length > 0" class="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-extrabold animate-pulse">
+                            {{ flockMoveAlerts.length }}
+                        </span>
+                    </button>
+
+                    <button @click="activeTab = 'pengaturan'" 
+                        :class="activeTab === 'pengaturan' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'"
+                        class="flex items-center gap-2 px-3.5 py-2 font-bold rounded-xl text-xs border shadow-sm transition">
+                        <i class="fa-solid fa-gear" :class="activeTab === 'pengaturan' ? 'text-white' : 'text-emerald-600'"></i> Pengaturan &amp; Sync
+                    </button>
+                </div>
+            </div>
+
+            <!-- DROPDOWN PANEL NOTIFIKASI -->
+            <div v-if="showNotifDropdown" class="mb-5 bg-white rounded-2xl border border-slate-200 shadow-2xl p-4 space-y-3 relative z-30 no-print animate-in fade-in duration-200">
+                <div class="flex items-center justify-between border-b pb-2">
+                    <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-bell text-amber-500"></i> Notifikasi &amp; Pengingat Pindah Kandang
+                    </h3>
+                    <button @click="showNotifDropdown = false" class="text-xs text-slate-400 hover:text-slate-600 font-bold">
+                        <i class="fa-solid fa-xmark"></i> Tutup
+                    </button>
+                </div>
+                <div v-if="flockMoveAlerts.length > 0" class="space-y-2">
+                    <div v-for="alert in flockMoveAlerts" :key="alert.flock.id" class="p-3 bg-amber-50 rounded-xl border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                        <div>
+                            <span class="font-bold text-slate-800 block">{{ alert.flock.namaFlock }}</span>
+                            <span class="text-slate-600">Saat ini di <strong>{{ alert.flock.kandang }}</strong> ({{ formatUmurMinggu(alert.flock) }}). Siap dipindah ke <strong>{{ alert.suggestedKandang }}</strong>.</span>
+                        </div>
+                        <button @click="openMoveKandangModal(alert.flock, alert.suggestedKandang, alert.nextFase); showNotifDropdown = false;" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg shrink-0 transition">
+                            <i class="fa-solid fa-right-left mr-1"></i> Pindah ke {{ alert.suggestedKandang }}
+                        </button>
+                    </div>
+                </div>
+                <div v-else class="text-xs text-slate-500 p-3 text-center bg-slate-50 rounded-xl">
+                    <i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i> Tidak ada notifikasi baru. Seluruh kelompok ayam berada di kandang yang sesuai umur.
+                </div>
+            </div>
+
+            <!-- BANNER ALERT JADWAL PINDAH KANDANG -->
             <div v-if="flockMoveAlerts.length > 0" class="mb-5 bg-gradient-to-r from-amber-500 to-rose-500 text-white p-4 rounded-2xl shadow-lg no-print">
                 <div class="flex items-start justify-between gap-3">
                     <div class="flex items-center gap-3">
@@ -149,24 +212,11 @@
                                 Saat ini: <strong class="underline">{{ alert.flock.kandang }}</strong> ({{ formatUmurMinggu(alert.flock) }})
                             </span>
                         </div>
-                        <button @click="openMoveKandangModal(alert.flock, alert.suggestedKandang, alert.nextFase)" class="px-3 py-1.5 bg-white text-rose-700 hover:bg-amber-50 font-extrabold rounded-lg text-[11px] transition shadow">
+                        <button @click="triggerMoveFromCard(alert.flock)" class="px-3 py-1.5 bg-white text-rose-700 hover:bg-amber-50 font-extrabold rounded-lg text-[11px] transition shadow">
                             <i class="fa-solid fa-right-left mr-1"></i> Pindah ke {{ alert.suggestedKandang }}
                         </button>
                     </div>
                 </div>
-            </div>
-
-            <!-- TOP BAR HEADER TITLES & SETTINGS GEAR (DESKTOP) -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 sm:mb-6 no-print">
-                <div>
-                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{{ currentNavTitle }}</h2>
-                    <p class="text-slate-500 text-xs sm:text-sm">Kelola penetasan, 3 fase pertumbuhan ayam, penataan kandang (B01, G01, L01), HPP, dan keuangan.</p>
-                </div>
-                <button @click="activeTab = 'pengaturan'" 
-                    :class="activeTab === 'pengaturan' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'"
-                    class="hidden md:flex items-center gap-2 px-3.5 py-2 font-bold rounded-xl text-xs border shadow-sm transition">
-                    <i class="fa-solid fa-gear" :class="activeTab === 'pengaturan' ? 'text-white' : 'text-emerald-600'"></i> Pengaturan &amp; Sync
-                </button>
             </div>
 
             <!-- TAB 1: BERANDA -->
@@ -335,9 +385,14 @@
                         <h3 class="font-bold text-slate-800 text-sm sm:text-base">Kelompok Ayam & Managemen Kode Kandang</h3>
                         <p class="text-xs text-slate-500">Monitoring lokasi kandang (B01, G01, L01), target bobot, dan otomatisasi HPP.</p>
                     </div>
-                    <button @click="openModal('flock')" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
-                        <i class="fa-solid fa-plus"></i> Tambah Kelompok Baru
-                    </button>
+                    <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <button @click="openManageKandangModal()" class="w-full sm:w-auto px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
+                            <i class="fa-solid fa-house-chimney"></i> Kelola Data Kandang
+                        </button>
+                        <button @click="openModal('flock')" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
+                            <i class="fa-solid fa-plus"></i> Tambah Kelompok Baru
+                        </button>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
@@ -793,7 +848,7 @@
             </div>
         </div>
 
-        <!-- MODAL PINDAH KANDANG (MOVE CAGE MODAL) -->
+        <!-- MODAL PINDAH KANDANG -->
         <div v-if="moveKandangModal.show" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
             <div class="bg-white rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl space-y-4">
                 <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl font-bold">
@@ -803,34 +858,102 @@
                     <h3 class="text-base sm:text-lg font-bold text-slate-900">Form Pemindahan Kandang Ayam</h3>
                     <p class="text-xs text-slate-500 mt-1">Kelompok: <strong>{{ moveKandangModal.flock?.namaFlock }}</strong> ({{ formatUmurMinggu(moveKandangModal.flock) }})</p>
                 </div>
-
-                <div class="space-y-3 text-xs bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                <div class="space-y-3 text-xs bg-amber-50/50 p-3.5 rounded-2xl border border-amber-200">
                     <div>
-                        <label class="block font-bold mb-1 text-slate-600">Kandang Lama Saat Ini:</label>
-                        <input :value="moveKandangModal.flock?.kandang" disabled type="text" class="w-full p-2.5 bg-slate-200/80 rounded-xl font-bold text-slate-700">
+                        <label class="block font-bold text-slate-700 mb-1">Kode & Nama Kandang Tujuan:</label>
+                        <input v-model="moveKandangModal.newKandang" list="kandangListPreset" type="text" required placeholder="Contoh: Kandang G-01" class="w-full p-2.5 rounded-xl border border-amber-300 bg-white font-bold text-slate-800 outline-none focus:ring-2 focus:ring-amber-500">
                     </div>
-
                     <div>
-                        <label class="block font-bold mb-1 text-emerald-800">Pilih Kandang Tujuan Baru (Brooding / Grower / Layer):</label>
-                        <input v-model="moveKandangModal.newKandang" list="kandangListPreset" type="text" placeholder="Contoh: G01 - Kandang Grower 1" class="w-full p-2.5 rounded-xl border border-emerald-400 bg-white font-bold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500">
-                        <datalist id="kandangListPreset">
-                            <option v-for="k in kandangPresets" :key="k" :value="k"></option>
-                        </datalist>
-                    </div>
-
-                    <div>
-                        <label class="block font-bold mb-1 text-slate-700">Fase Baru Ayam:</label>
-                        <select v-model="moveKandangModal.newFase" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-bold text-slate-800">
-                            <option value="Starter">1. Starter (0-4 Minggu)</option>
-                            <option value="Grower">2. Grower &amp; Pullet (5-19 Minggu)</option>
+                        <label class="block font-bold text-slate-700 mb-1">Perbarui Fase Growth Ayam:</label>
+                        <select v-model="moveKandangModal.newFase" class="w-full p-2.5 rounded-xl border border-amber-300 bg-white font-bold text-slate-800 outline-none">
+                            <option value="Starter">1. Starter / Brooding (0-4 Minggu)</option>
+                            <option value="Grower">2. Grower & Pullet (5-19 Minggu)</option>
                             <option value="Layer">3. Layer (20+ Minggu)</option>
                         </select>
                     </div>
                 </div>
-
                 <div class="flex gap-2 pt-1">
                     <button @click="moveKandangModal.show = false" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">Batal</button>
-                    <button @click="saveMoveKandang" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-emerald-600/20">Simpan Pemindahan Kandang</button>
+                    <button @click="saveMoveKandang()" class="flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-amber-600/20">Simpan Pemindahan</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL KELOLA MASTER KANDANG -->
+        <div v-if="manageKandangModal.show" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
+            <div class="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-4 relative max-h-[90vh] overflow-y-auto">
+                <button @click="manageKandangModal.show = false" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-base w-8 h-8 flex items-center justify-center rounded-full bg-slate-100">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-slate-100 text-slate-800 flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-house-chimney text-emerald-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base sm:text-lg font-bold text-slate-900">Kelola Master Data Kandang</h3>
+                        <p class="text-xs text-slate-500">Tambah, ubah, atau hapus daftar kandang peternakan.</p>
+                    </div>
+                </div>
+
+                <!-- Form Tambah / Edit Kandang -->
+                <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-3">
+                    <h4 class="font-bold text-xs text-slate-700 uppercase tracking-wider">
+                        {{ manageKandangModal.editIndex !== null ? 'Edit Kandang' : 'Tambah Kandang Baru' }}
+                    </h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                        <div class="sm:col-span-2">
+                            <label class="block font-bold text-slate-600 mb-1">Nama / Kode Kandang:</label>
+                            <input v-model="manageKandangModal.namaKandang" type="text" placeholder="Contoh: Kandang B-04 / Kandang G-04" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-bold outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Fase Peruntukan:</label>
+                            <select v-model="manageKandangModal.tipeFase" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white font-bold">
+                                <option value="Brooding">Brooding (B)</option>
+                                <option value="Grower">Grower (G)</option>
+                                <option value="Indukan">Indukan/Layer (A)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button v-if="manageKandangModal.editIndex !== null" @click="cancelEditKandang()" class="py-2 px-3 bg-slate-200 text-slate-700 font-bold rounded-xl text-xs">
+                            Batal
+                        </button>
+                        <button @click="saveKandangItem()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow">
+                            <i class="fa-solid" :class="manageKandangModal.editIndex !== null ? 'fa-floppy-disk' : 'fa-plus'"></i>
+                            {{ manageKandangModal.editIndex !== null ? 'Simpan Perubahan' : 'Tambah Kandang' }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- List Master Kandang -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-xs text-slate-700 uppercase tracking-wider">Daftar Kandang Terdaftar ({{ kandangList.length }} Kandang):</h4>
+                    <div class="divide-y divide-slate-100 border rounded-2xl overflow-hidden max-h-60 overflow-y-auto bg-white">
+                        <div v-for="(k, idx) in kandangList" :key="idx" class="p-3 flex items-center justify-between gap-2 hover:bg-slate-50 transition text-xs">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 rounded-md font-extrabold text-[10px] uppercase"
+                                    :class="k.includes('B-') || k.includes('B0') ? 'bg-amber-100 text-amber-800' : (k.includes('G-') || k.includes('G0') ? 'bg-emerald-100 text-emerald-800' : 'bg-purple-100 text-purple-800')">
+                                    {{ k.includes('B-') || k.includes('B0') ? 'Brooding' : (k.includes('G-') || k.includes('G0') ? 'Grower' : 'Indukan') }}
+                                </span>
+                                <span class="font-bold text-slate-800">{{ k }}</span>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <span class="text-[11px] text-slate-500 font-medium bg-slate-100 px-2 py-0.5 rounded-full">
+                                    <i class="fa-solid fa-crow text-[10px] text-slate-400 mr-1"></i>{{ getPopulasiInKandang(k) }} Ekor
+                                </span>
+                                <div class="flex items-center gap-1">
+                                    <button @click="editKandangItem(idx)" class="p-1 text-slate-400 hover:text-blue-600 transition">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    <button @click="deleteKandangItem(idx)" class="p-1 text-slate-400 hover:text-rose-600 transition">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -870,7 +993,7 @@
 
                     <div>
                         <label class="block font-bold mb-1 text-slate-700">Kode Kandang Brooding Tujuan:</label>
-                        <input v-model="finishHatchingModal.kandangTarget" list="kandangListPreset" type="text" placeholder="B01 - Kandang Brooding 1" class="w-full p-2 rounded-xl border border-slate-300 bg-white font-bold text-slate-800">
+                        <input v-model="finishHatchingModal.kandangTarget" list="kandangListPreset" type="text" placeholder="Kandang B-01" class="w-full p-2 rounded-xl border border-slate-300 bg-white font-bold text-slate-800">
                     </div>
 
                     <div class="flex justify-between items-center bg-emerald-50 p-2 rounded-xl border border-emerald-200 text-[11px]">
@@ -880,7 +1003,7 @@
 
                     <div class="flex items-center gap-2 pt-1 border-t border-slate-200">
                         <input type="checkbox" id="createDocBatch" v-model="finishHatchingModal.createDocFlock" class="w-4 h-4 text-emerald-600 rounded">
-                        <label for="createDocBatch" class="font-semibold text-slate-700 cursor-pointer text-[11px]">Auto Masuk Kandang Starter / Brooding (H+1)</label>
+                        <label for="createDocBatch" class="font-semibold text-slate-700 cursor-pointer text-[11px]">Auto Masuk Kandang Brooding / Starter (H+1)</label>
                     </div>
                 </div>
 
@@ -1166,6 +1289,7 @@
                 const DEFAULT_GAS_URL = '';
                 return {
                     activeTab: 'beranda',
+                    showNotifDropdown: false,
                     showModal: false,
                     modalType: '',
                     editingPenetasanId: null,
@@ -1183,17 +1307,21 @@
                     
                     toast: { show: false, message: '', type: 'info' },
                     confirmModal: { show: false, title: '', message: '', action: null },
-                    finishHatchingModal: { show: false, batch: null, telurFertilCount: 0, telurInfertilCount: 0, menetasCount: 0, kandangTarget: 'B01 - Kandang Brooding 1', createDocFlock: true },
-                    moveKandangModal: { show: false, flock: null, newKandang: '', newFase: 'Grower' },
+                    finishHatchingModal: { show: false, batch: null, telurFertilCount: 0, telurInfertilCount: 0, menetasCount: 0, kandangTarget: 'Kandang B-01', createDocFlock: true },
+                    moveKandangModal: { show: false, flock: null, newKandang: 'Kandang G-01', newFase: 'Grower' },
+                    manageKandangModal: { show: false, editIndex: null, namaKandang: '', tipeFase: 'Brooding' },
 
-                    // PRESET KODE KANDANG STANDARD
-                    kandangPresets: [
-                        'B01 - Kandang Brooding 1',
-                        'B02 - Kandang Brooding 2',
-                        'G01 - Kandang Grower 1',
-                        'G02 - Kandang Grower 2',
-                        'L01 - Kandang Layer 1',
-                        'L02 - Kandang Layer 2'
+                    // MASTER DATA KODE KANDANG
+                    kandangList: JSON.parse(localStorage.getItem('mandirifarm_kandang_list')) || [
+                        'Kandang B-01',
+                        'Kandang B-02',
+                        'Kandang B-03',
+                        'Kandang G-01',
+                        'Kandang G-02',
+                        'Kandang G-03',
+                        'Kandang A-01',
+                        'Kandang A-02',
+                        'Kandang A-03'
                     ],
 
                     navItems: [
@@ -1225,7 +1353,7 @@
 
                     formBahanPakan: { nama: '', rasio: 0, harga: 0, protein: 0 },
                     formPenetasan: { namaBatch: '', mesin: '', tipe: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 0, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0 },
-                    formFlock: { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'B01 - Kandang Brooding 1', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) },
+                    formFlock: { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang B-01', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) },
                     formHarian: { flockId: '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' },
                     formKeuangan: { jenis: 'Pemasukan', kategori: 'Penjualan Telur', nominal: 0, tanggal: new Date().toISOString().substr(0, 10), keterangan: '' },
 
@@ -1238,6 +1366,9 @@
                     if (this.activeTab === 'pengaturan') return 'Pengaturan & Cloud Sync';
                     const item = this.navItems.find(n => n.id === this.activeTab);
                     return item ? item.label : 'Beranda';
+                },
+                kandangPresets() {
+                    return this.kandangList;
                 },
                 totalPopulasi() {
                     return this.flockList.reduce((acc, curr) => acc + (parseInt(curr.jumlahSaatIni) || 0), 0);
@@ -1308,22 +1439,22 @@
                     this.flockList.forEach(f => {
                         const umurHari = this.hitungUmurAyamHari(f);
                         const kUpper = (f.kandang || '').toUpperCase();
-                        const isBrooding = kUpper.startsWith('B') || f.faseAwal === 'Starter' || kUpper.includes('BROODING') || kUpper.includes('STARTER');
-                        const isGrower = kUpper.startsWith('G') || f.faseAwal === 'Grower' || kUpper.includes('GROWER') || kUpper.includes('PULLET');
+                        const isBrooding = kUpper.includes('B-') || kUpper.includes('B0') || kUpper.includes('BROODING') || f.faseAwal === 'Starter';
+                        const isGrower = kUpper.includes('G-') || kUpper.includes('G0') || kUpper.includes('GROWER') || f.faseAwal === 'Grower';
 
-                        // Rekomendasi 1: Umur > 28 hari (4 minggu) masih di Kandang Brooding/Starter
+                        // Brooding (B-xx) > 28 hari (4 minggu) -> Rekomendasi Pindah ke Kandang Grower (G-01)
                         if (umurHari > 28 && isBrooding) {
                             alerts.push({
                                 flock: f,
-                                suggestedKandang: 'G01 - Kandang Grower 1',
+                                suggestedKandang: 'Kandang G-01',
                                 nextFase: 'Grower'
                             });
                         }
-                        // Rekomendasi 2: Umur > 139 hari (19+ minggu) masih di Kandang Grower
+                        // Grower (G-xx) > 139 hari (19+ minggu) -> Rekomendasi Pindah ke Kandang Indukan (A-01)
                         else if (umurHari > 139 && isGrower) {
                             alerts.push({
                                 flock: f,
-                                suggestedKandang: 'L01 - Kandang Layer 1',
+                                suggestedKandang: 'Kandang A-01',
                                 nextFase: 'Layer'
                             });
                         }
@@ -1337,6 +1468,7 @@
                         this.$nextTick(() => this.renderCharts());
                     }
                 },
+                kandangList: { handler(val) { localStorage.setItem('mandirifarm_kandang_list', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true },
                 penetasanList: { handler(val) { localStorage.setItem('mandirifarm_penetasan', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true },
                 flockList: { handler(val) { localStorage.setItem('mandirifarm_flock', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true },
                 harianList: { handler(val) { localStorage.setItem('mandirifarm_harian', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true },
@@ -1358,21 +1490,534 @@
                 if (this.pushTimer) clearTimeout(this.pushTimer);
             },
             methods: {
-                isPengeluaran(jenis) {
-                    return jenis && jenis.toString().toLowerCase() === 'pengeluaran';
+                getFormattedNow() {
+                    return new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' });
                 },
-                onRupiahInput(event, targetObj, fieldName) {
-                    const raw = event.target.value.replace(/[^0-9]/g, '');
-                    const num = raw ? parseInt(raw, 10) : 0;
-                    targetObj[fieldName] = num;
-                    event.target.value = raw ? new Intl.NumberFormat('id-ID').format(num) : '';
+                formatDate(dateStr) {
+                    if (!dateStr) return '-';
+                    const d = new Date(dateStr);
+                    if (isNaN(d.getTime())) return dateStr;
+                    return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+                },
+                formatRupiah(val) {
+                    const num = parseFloat(val) || 0;
+                    return 'Rp ' + new Intl.NumberFormat('id-ID').format(num);
                 },
                 formatRupiahInputVal(val) {
-                    if (!val || isNaN(val) || val === 0) return '';
-                    return new Intl.NumberFormat('id-ID').format(val);
+                    if (val === null || val === undefined || val === '' || isNaN(val)) return '';
+                    const num = parseFloat(val);
+                    if (num === 0) return '';
+                    return new Intl.NumberFormat('id-ID').format(num);
+                },
+                onRupiahInput(event, targetObj, key) {
+                    const rawVal = event.target.value.replace(/[^0-9]/g, '');
+                    const numVal = rawVal ? parseInt(rawVal, 10) : 0;
+                    targetObj[key] = numVal;
+                    event.target.value = rawVal ? new Intl.NumberFormat('id-ID').format(numVal) : '';
+                },
+                showToast(message, type = 'info') {
+                    this.toast = { show: true, message, type };
+                    setTimeout(() => { this.toast.show = false; }, 3500);
+                },
+                showConfirm(title, message, action) {
+                    this.confirmModal = { show: true, title, message, action };
+                },
+                executeConfirm() {
+                    if (typeof this.confirmModal.action === 'function') {
+                        this.confirmModal.action();
+                    }
+                    this.confirmModal.show = false;
+                },
+                getFlockName(flockId) {
+                    const f = this.flockList.find(item => item.id === flockId);
+                    return f ? `${f.namaFlock} (${f.kandang})` : 'Kelompok Terhapus';
+                },
+                openModal(type) {
+                    this.modalType = type;
+                    if (type === 'penetasan') {
+                        this.editingPenetasanId = null;
+                        this.formPenetasan = { namaBatch: '', mesin: '', tipe: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 0, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0 };
+                    } else if (type === 'flock') {
+                        this.editingFlockId = null;
+                        this.formFlock = { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang B-01', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) };
+                    } else if (type === 'harian') {
+                        this.formHarian = { flockId: this.flockList.length ? this.flockList[0].id : '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' };
+                    } else if (type === 'keuangan') {
+                        this.formKeuangan = { jenis: 'Pemasukan', kategori: 'Penjualan Telur', nominal: 0, tanggal: new Date().toISOString().substr(0, 10), keterangan: '' };
+                    }
+                    this.showModal = true;
+                },
+                editPenetasan(b) {
+                    this.editingPenetasanId = b.id;
+                    this.formPenetasan = JSON.parse(JSON.stringify(b));
+                    this.modalType = 'penetasan';
+                    this.showModal = true;
+                },
+                savePenetasan() {
+                    const tglIn = new Date(this.formPenetasan.tglMasuk);
+                    const tglHatch = new Date(tglIn);
+                    tglHatch.setDate(tglHatch.getDate() + 21);
+                    const estStr = tglHatch.toISOString().substr(0, 10);
+
+                    if (this.editingPenetasanId) {
+                        const idx = this.penetasanList.findIndex(p => p.id === this.editingPenetasanId);
+                        if (idx !== -1) {
+                            this.penetasanList[idx] = {
+                                ...this.penetasanList[idx],
+                                ...this.formPenetasan,
+                                estMenetas: estStr
+                            };
+                        }
+                        this.showToast('Batch penetasan berhasil diperbarui.', 'info');
+                    } else {
+                        const newBatch = {
+                            id: 'PEN-' + Date.now(),
+                            ...this.formPenetasan,
+                            estMenetas: estStr,
+                            status: 'Berjalan',
+                            dayaTetas: 0,
+                            telurFertil: 0,
+                            telurInfertil: 0
+                        };
+                        this.penetasanList.unshift(newBatch);
+                        this.showToast('Batch inkubasi baru disimpan (Est 21 hari).', 'info');
+                    }
+                    this.closeModal();
+                },
+                confirmDeletePenetasan(id) {
+                    this.showConfirm('Hapus Batch Penetasan?', 'Data batch inkubasi ini akan dihapus secara permanen.', () => {
+                        this.penetasanList = this.penetasanList.filter(p => p.id !== id);
+                        this.showToast('Batch penetasan dihapus.', 'info');
+                    });
+                },
+                openFinishPenetasanModal(b) {
+                    this.finishHatchingModal = {
+                        show: true,
+                        batch: b,
+                        telurFertilCount: b.jumlahTelur,
+                        telurInfertilCount: 0,
+                        menetasCount: Math.round(b.jumlahTelur * 0.8),
+                        kandangTarget: 'Kandang B-01',
+                        createDocFlock: true
+                    };
+                },
+                onFertilInput() {
+                    if (!this.finishHatchingModal.batch) return;
+                    const max = parseInt(this.finishHatchingModal.batch.jumlahTelur) || 0;
+                    let fertil = parseInt(this.finishHatchingModal.telurFertilCount) || 0;
+                    if (fertil > max) fertil = max;
+                    this.finishHatchingModal.telurFertilCount = fertil;
+                    this.finishHatchingModal.telurInfertilCount = max - fertil;
+                },
+                onInfertilInput() {
+                    if (!this.finishHatchingModal.batch) return;
+                    const max = parseInt(this.finishHatchingModal.batch.jumlahTelur) || 0;
+                    let infertil = parseInt(this.finishHatchingModal.telurInfertilCount) || 0;
+                    if (infertil > max) infertil = max;
+                    this.finishHatchingModal.telurInfertilCount = infertil;
+                    this.finishHatchingModal.telurFertilCount = max - infertil;
+                },
+                hitungModalFertilitasPct() {
+                    if (!this.finishHatchingModal.batch) return 0;
+                    const total = parseInt(this.finishHatchingModal.batch.jumlahTelur) || 1;
+                    const fertil = parseInt(this.finishHatchingModal.telurFertilCount) || 0;
+                    return Math.round((fertil / total) * 100);
+                },
+                hitungModalDayaTetasPct() {
+                    const fertil = parseInt(this.finishHatchingModal.telurFertilCount) || 0;
+                    if (fertil <= 0) return 0;
+                    const menetas = parseInt(this.finishHatchingModal.menetasCount) || 0;
+                    return Math.round((menetas / fertil) * 100);
+                },
+                editFlock(f) {
+                    this.editingFlockId = f.id;
+                    this.formFlock = {
+                        namaFlock: f.namaFlock,
+                        tipe: f.tipe,
+                        faseAwal: f.faseAwal || 'Starter',
+                        kandang: f.kandang || 'Kandang B-01',
+                        jumlahAwal: f.jumlahAwal,
+                        jumlahSaatIni: f.jumlahSaatIni,
+                        biayaDoc: f.biayaDoc || 0,
+                        autoRecordKeuangan: false,
+                        hargaPakanStarter: f.hargaPakanStarter || 0,
+                        hargaPakanGrower: f.hargaPakanGrower || 0,
+                        umurAwalHari: f.umurAwalHari || 0,
+                        tglMulai: f.tglMulai
+                    };
+                    this.modalType = 'flock';
+                    this.showModal = true;
+                },
+                confirmDeleteFlock(id) {
+                    this.showConfirm('Hapus Kelompok Ayam?', 'Menghapus kelompok akan menghapus seluruh data populasi kelompok ini.', () => {
+                        this.flockList = this.flockList.filter(f => f.id !== id);
+                        this.showToast('Kelompok ayam dihapus.', 'info');
+                    });
+                },
+                getPakanTotalByFlock(flockId) {
+                    const total = this.harianList
+                        .filter(h => h.flockId === flockId)
+                        .reduce((acc, curr) => acc + (parseFloat(curr.pakanKg) || 0), 0);
+                    return total.toFixed(1);
+                },
+                hitungHPP(f) {
+                    const totalPakanKg = parseFloat(this.getPakanTotalByFlock(f.id)) || 0;
+                    const hargaPakan = this.getHargaPakanAktif(f);
+                    const totalBiayaPakan = totalPakanKg * hargaPakan;
+                    const totalBiayaModal = (parseFloat(f.biayaDoc) || 0) + totalBiayaPakan;
+                    const totalEkor = parseInt(f.jumlahSaatIni) || 1;
+
+                    const hppPerEkor = Math.round(totalBiayaModal / totalEkor);
+                    const avgBobot = parseFloat(f.avgBobotKg) || 1;
+                    const hppPerKg = Math.round(hppPerEkor / avgBobot);
+
+                    return { totalBiaya: totalBiayaModal, totalEkor, hppPerEkor, hppPerKg };
+                },
+                hitungProyeksiLaba(f) {
+                    const hpp = this.hitungHPP(f);
+                    const totalEkor = parseInt(f.jumlahSaatIni) || 0;
+                    const avgBobot = parseFloat(f.avgBobotKg) || 0;
+                    const hargaJualKg = parseFloat(f.hargaJualPerKg) || 0;
+
+                    const totalKg = totalEkor * avgBobot;
+                    const estOmzet = Math.round(totalKg * hargaJualKg);
+                    const labaBersih = estOmzet - hpp.totalBiaya;
+
+                    return { estOmzet, labaBersih };
+                },
+                exportHppPdf(f) {
+                    const hpp = this.hitungHPP(f);
+                    const proyeksi = this.hitungProyeksiLaba(f);
+
+                    const content = `
+                        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                            <h2 style="text-align: center; margin-bottom: 5px; text-transform: uppercase;">MANDIRI FARM - LAPORAN ANALISIS HPP</h2>
+                            <p style="text-align: center; color: #666; font-size: 12px; margin-top: 0;">Tanggal: ${this.getFormattedNow()}</p>
+                            <hr style="border: 1px solid #ddd; margin: 15px 0;"/>
+                            
+                            <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 20px;">
+                                <tr><td style="padding: 6px; font-weight: bold; width: 40%;">Kelompok / Batch:</td><td style="padding: 6px;">${f.namaFlock}</td></tr>
+                                <tr><td style="padding: 6px; font-weight: bold;">Kode Kandang:</td><td style="padding: 6px;">${f.kandang}</td></tr>
+                                <tr><td style="padding: 6px; font-weight: bold;">Tipe / Fase:</td><td style="padding: 6px;">${f.tipe} (${this.getFaseLabel(f)})</td></tr>
+                                <tr><td style="padding: 6px; font-weight: bold;">Umur Ayam:</td><td style="padding: 6px;">${this.formatUmurMinggu(f)}</td></tr>
+                                <tr><td style="padding: 6px; font-weight: bold;">Populasi Saat Ini:</td><td style="padding: 6px;">${f.jumlahSaatIni} Ekor (Kematian/Afkir: ${f.jumlahAwal - f.jumlahSaatIni})</td></tr>
+                                <tr><td style="padding: 6px; font-weight: bold;">Pakan Dikonsumsi:</td><td style="padding: 6px;">${this.getPakanTotalByFlock(f.id)} Kg</td></tr>
+                                <tr><td style="padding: 6px; font-weight: bold;">Tarif Harga Pakan:</td><td style="padding: 6px;">${this.formatRupiah(this.getHargaPakanAktif(f))}/Kg</td></tr>
+                            </table>
+
+                            <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                                <h3 style="margin-top: 0; color: #0f172a; font-size: 14px;">Ringkasan Kalkulasi HPP & Proyeksi Laba</h3>
+                                <table style="width: 100%; font-size: 13px; line-height: 1.8;">
+                                    <tr><td>Modal Pembelian Awal / DOC:</td><td style="text-align: right; font-weight: bold;">${this.formatRupiah(f.biayaDoc)}</td></tr>
+                                    <tr><td>Total Biaya Pakan:</td><td style="text-align: right; font-weight: bold;">${this.formatRupiah(hpp.totalBiaya - (f.biayaDoc||0))}</td></tr>
+                                    <tr style="border-top: 1px solid #ccc; font-weight: bold;"><td>Total Modal Terakumulasi:</td><td style="text-align: right; color: #1e293b;">${this.formatRupiah(hpp.totalBiaya)}</td></tr>
+                                    <tr style="font-size: 15px; font-weight: bold; color: #059669;"><td>HPP per Ekor:</td><td style="text-align: right;">${this.formatRupiah(hpp.hppPerEkor)}</td></tr>
+                                    <tr style="font-size: 15px; font-weight: bold; color: #059669;"><td>HPP per Kg (Avg ${f.avgBobotKg || 1} Kg):</td><td style="text-align: right;">${this.formatRupiah(hpp.hppPerKg)}</td></tr>
+                                    <tr style="border-top: 1px dashed #ccc;"><td>Estimasi Omzet Penjualan:</td><td style="text-align: right; font-weight: bold;">${this.formatRupiah(proyeksi.estOmzet)}</td></tr>
+                                    <tr style="font-size: 16px; font-weight: bold;"><td>Proyeksi Laba Bersih:</td><td style="text-align: right; color: ${proyeksi.labaBersih >= 0 ? '#059669' : '#dc2626'};">${this.formatRupiah(proyeksi.labaBersih)}</td></tr>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+
+                    const opt = {
+                        margin: 0.5,
+                        filename: `HPP_${f.namaFlock.replace(/\s+/g, '_')}_${f.kandang}.pdf`,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2 },
+                        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                    };
+
+                    html2pdf().set(opt).from(content).save();
+                    this.showToast('Laporan HPP PDF sedang diunduh...', 'info');
+                },
+                saveHarian() {
+                    const f = this.flockList.find(item => item.id === this.formHarian.flockId);
+                    if (!f) {
+                        this.showToast('Pilih kelompok ayam terlebih dahulu.', 'error');
+                        return;
+                    }
+
+                    const dead = parseInt(this.formHarian.kematian) || 0;
+                    if (dead > 0) {
+                        f.jumlahSaatIni = Math.max(0, (parseInt(f.jumlahSaatIni) || 0) - dead);
+                    }
+
+                    const newHarian = {
+                        id: 'LOG-' + Date.now(),
+                        ...this.formHarian,
+                        pakanKg: parseFloat(this.formHarian.pakanKg) || 0,
+                        kematian: dead,
+                        telurBagus: parseInt(this.formHarian.telurBagus) || 0,
+                        telurRusak: parseInt(this.formHarian.telurRusak) || 0
+                    };
+
+                    this.harianList.unshift(newHarian);
+                    this.closeModal();
+                    this.showToast('Catatan harian berhasil disimpan.', 'info');
+                },
+                confirmDeleteHarian(id) {
+                    this.showConfirm('Hapus Record Harian?', 'Data catatan harian ini akan dihapus.', () => {
+                        this.harianList = this.harianList.filter(h => h.id !== id);
+                        this.showToast('Record harian dihapus.', 'info');
+                    });
+                },
+                saveKeuangan() {
+                    const nom = parseFloat(this.formKeuangan.nominal) || 0;
+                    if (nom <= 0) {
+                        this.showToast('Nominal transaksi harus lebih besar dari 0.', 'error');
+                        return;
+                    }
+
+                    const newKue = {
+                        id: 'TRX-' + Date.now(),
+                        ...this.formKeuangan,
+                        nominal: nom
+                    };
+
+                    this.keuanganList.unshift(newKue);
+                    this.closeModal();
+                    this.showToast('Transaksi keuangan disimpan.', 'info');
+                },
+                confirmDeleteKeuangan(id) {
+                    this.showConfirm('Hapus Transaksi?', 'Transaksi keuangan ini akan dihapus dari laporan.', () => {
+                        this.keuanganList = this.keuanganList.filter(k => k.id !== id);
+                        this.showToast('Transaksi keuangan dihapus.', 'info');
+                    });
+                },
+                printLaporan() {
+                    window.print();
+                },
+                saveGasUrl() {
+                    const url = (this.gasApiUrl || '').trim();
+                    localStorage.setItem('mandirifarm_gas_url', url);
+                    this.gasApiUrl = url;
+                    if (url) {
+                        this.fetchFromGas();
+                    } else {
+                        this.isGasSynced = false;
+                        this.showToast('URL Cloud dibersihkan. Aplikasi beralih ke penyimpanan lokal.', 'info');
+                    }
+                },
+                confirmClearAll() {
+                    this.showConfirm('Hapus SELURUH Data?', 'PERINGATAN: Tindakan ini akan menghapus semua kelompok, penetasan, log harian, dan keuangan!', () => {
+                        this.penetasanList = [];
+                        this.flockList = [];
+                        this.harianList = [];
+                        this.keuanganList = [];
+                        localStorage.removeItem('mandirifarm_penetasan');
+                        localStorage.removeItem('mandirifarm_flock');
+                        localStorage.removeItem('mandirifarm_harian');
+                        localStorage.removeItem('mandirifarm_keuangan');
+                        this.debouncedPushToGas();
+                        this.showToast('Seluruh data berhasil dihapus.', 'info');
+                    });
+                },
+                debouncedPushToGas() {
+                    if (this.pushTimer) clearTimeout(this.pushTimer);
+                    this.pushTimer = setTimeout(() => {
+                        this.pushToGas();
+                    }, 1200);
+                },
+                async pushToGas() {
+                    if (!this.gasApiUrl || this.isSaving) return;
+                    this.isSaving = true;
+
+                    const payload = {
+                        penetasanList: this.penetasanList,
+                        flockList: this.flockList,
+                        harianList: this.harianList,
+                        keuanganList: this.keuanganList,
+                        pakanPresets: this.pakanPresets,
+                        kandangList: this.kandangList
+                    };
+
+                    try {
+                        await fetch(this.gasApiUrl, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        this.isGasSynced = true;
+                    } catch (err) {
+                        console.error('Push to GAS error:', err);
+                        this.isGasSynced = false;
+                    } finally {
+                        this.isSaving = false;
+                    }
+                },
+                async fetchFromGas(silent = false) {
+                    if (!this.gasApiUrl) return;
+                    try {
+                        const resp = await fetch(this.gasApiUrl);
+                        const result = await resp.json();
+                        if (result.status === 'success' && result.data) {
+                            this.isSyncingFromGas = true;
+                            if (result.data.penetasanList) this.penetasanList = result.data.penetasanList;
+                            if (result.data.flockList) this.flockList = result.data.flockList;
+                            if (result.data.harianList) this.harianList = result.data.harianList;
+                            if (result.data.keuanganList) this.keuanganList = result.data.keuanganList;
+                            if (result.data.kandangList && result.data.kandangList.length) {
+                                this.kandangList = result.data.kandangList;
+                                localStorage.setItem('mandirifarm_kandang_list', JSON.stringify(this.kandangList));
+                            }
+                            if (result.data.pakanPresets) {
+                                this.pakanPresets = result.data.pakanPresets;
+                                localStorage.setItem('mandirifarm_pakan_presets', JSON.stringify(this.pakanPresets));
+                                this.loadPakanPreset(this.activePakanPreset);
+                            }
+                            this.isGasSynced = true;
+                            if (!silent) this.showToast('Data berhasil disinkronkan dari Google Sheets!', 'info');
+                            this.$nextTick(() => {
+                                this.isSyncingFromGas = false;
+                                this.renderCharts();
+                            });
+                        }
+                    } catch (err) {
+                        console.error('Fetch from GAS error:', err);
+                        this.isGasSynced = false;
+                        if (!silent) this.showToast('Gagal terhubung ke Google Sheets. Menggunakan data lokal.', 'error');
+                        this.$nextTick(() => this.renderCharts());
+                    }
+                },
+                renderCharts() {
+                    const eggCtx = document.getElementById('eggChart');
+                    const flockCtx = document.getElementById('flockChart');
+
+                    if (eggCtx) {
+                        if (this.eggChartInstance) this.eggChartInstance.destroy();
+                        
+                        const days = [];
+                        const eggCounts = [];
+                        for (let i = 6; i >= 0; i--) {
+                            const d = new Date();
+                            d.setDate(d.getDate() - i);
+                            const dateStr = d.toISOString().substr(0, 10);
+                            const dayLabel = d.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric' });
+                            days.push(dayLabel);
+                            
+                            const count = this.harianList
+                                .filter(h => h.tanggal === dateStr)
+                                .reduce((acc, curr) => acc + (parseInt(curr.telurBagus) || 0), 0);
+                            eggCounts.push(count);
+                        }
+
+                        this.eggChartInstance = new Chart(eggCtx, {
+                            type: 'line',
+                            data: {
+                                labels: days,
+                                datasets: [{
+                                    label: 'Telur Bagus (Butir)',
+                                    data: eggCounts,
+                                    borderColor: '#10b981',
+                                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                    fill: true,
+                                    tension: 0.3
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                            }
+                        });
+                    }
+
+                    if (flockCtx) {
+                        if (this.flockChartInstance) this.flockChartInstance.destroy();
+                        
+                        const labels = this.flockList.map(f => f.namaFlock);
+                        const dataPop = this.flockList.map(f => parseInt(f.jumlahSaatIni) || 0);
+
+                        this.flockChartInstance = new Chart(flockCtx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: labels.length ? labels : ['Belum ada data'],
+                                datasets: [{
+                                    data: dataPop.length ? dataPop : [1],
+                                    backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#64748b']
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }
+                            }
+                        });
+                    }
+                },
+                // MASTER MANAJEMEN KANDANG METHODS
+                openManageKandangModal() {
+                    this.manageKandangModal = { show: true, editIndex: null, namaKandang: '', tipeFase: 'Brooding' };
+                },
+                saveKandangItem() {
+                    const name = (this.manageKandangModal.namaKandang || '').trim();
+                    if (!name) {
+                        this.showToast('Nama kandang tidak boleh kosong.', 'error');
+                        return;
+                    }
+
+                    if (this.manageKandangModal.editIndex !== null) {
+                        const oldName = this.kandangList[this.manageKandangModal.editIndex];
+                        this.kandangList[this.manageKandangModal.editIndex] = name;
+                        
+                        // Otomatis update nama kandang pada kelompok ayam yang sedang menempati kandang ini
+                        let updatedFlocks = 0;
+                        this.flockList.forEach(f => {
+                            if (f.kandang === oldName) {
+                                f.kandang = name;
+                                updatedFlocks++;
+                            }
+                        });
+
+                        this.showToast(`Kandang "${oldName}" diperbarui menjadi "${name}" (${updatedFlocks} kelompok di-update).`, 'info');
+                    } else {
+                        if (this.kandangList.includes(name)) {
+                            this.showToast('Nama/Kode kandang ini sudah ada dalam daftar.', 'error');
+                            return;
+                        }
+                        this.kandangList.push(name);
+                        this.showToast(`Kandang "${name}" berhasil ditambahkan!`, 'info');
+                    }
+
+                    this.cancelEditKandang();
+                },
+                editKandangItem(idx) {
+                    const k = this.kandangList[idx];
+                    let tipe = 'Brooding';
+                    if (k.includes('G-') || k.includes('G0')) tipe = 'Grower';
+                    else if (k.includes('A-') || k.includes('A0')) tipe = 'Indukan';
+
+                    this.manageKandangModal.editIndex = idx;
+                    this.manageKandangModal.namaKandang = k;
+                    this.manageKandangModal.tipeFase = tipe;
+                },
+                cancelEditKandang() {
+                    this.manageKandangModal.editIndex = null;
+                    this.manageKandangModal.namaKandang = '';
+                    this.manageKandangModal.tipeFase = 'Brooding';
+                },
+                deleteKandangItem(idx) {
+                    const target = this.kandangList[idx];
+                    const count = this.getPopulasiInKandang(target);
+                    if (count > 0) {
+                        this.showToast(`Gagal hapus! Masih ada ${count} ekor ayam di ${target}.`, 'error');
+                        return;
+                    }
+                    this.showConfirm('Hapus Kandang?', `Apakah Anda yakin ingin menghapus "${target}" dari master data?`, () => {
+                        this.kandangList.splice(idx, 1);
+                        this.showToast(`Kandang ${target} dihapus.`, 'info');
+                    });
+                },
+                getPopulasiInKandang(kandangName) {
+                    return this.flockList
+                        .filter(f => f.kandang === kandangName)
+                        .reduce((acc, curr) => acc + (parseInt(curr.jumlahSaatIni) || 0), 0);
                 },
 
-                // FITUR OPERASIONAL & NOTIFIKASI PINDAH KANDANG
+                // METHOD UNTUK PINDAH KANDANG DARI BUTTON FLOCK CARD
                 isFlockNeedsMove(flock) {
                     return this.flockMoveAlerts.some(a => a.flock.id === flock.id);
                 },
@@ -1380,13 +2025,13 @@
                     this.moveKandangModal = {
                         show: true,
                         flock: flock,
-                        newKandang: suggestedKandang || 'G01 - Kandang Grower 1',
+                        newKandang: suggestedKandang || 'Kandang G-01',
                         newFase: nextFase || 'Grower'
                     };
                 },
                 triggerMoveFromCard(flock) {
                     const alert = this.flockMoveAlerts.find(a => a.flock.id === flock.id);
-                    const suggested = alert ? alert.suggestedKandang : 'G01 - Kandang Grower 1';
+                    const suggested = alert ? alert.suggestedKandang : 'Kandang G-01';
                     const nextFase = alert ? alert.nextFase : 'Grower';
                     this.openMoveKandangModal(flock, suggested, nextFase);
                 },
@@ -1633,448 +2278,14 @@
                 onFaseAwalChange() {
                     if (this.formFlock.faseAwal === 'Starter') {
                         this.formFlock.umurAwalHari = 0;
-                        this.formFlock.kandang = 'B01 - Kandang Brooding 1';
+                        this.formFlock.kandang = 'Kandang B-01';
                     } else if (this.formFlock.faseAwal === 'Grower') {
                         this.formFlock.umurAwalHari = 31;
-                        this.formFlock.kandang = 'G01 - Kandang Grower 1';
+                        this.formFlock.kandang = 'Kandang G-01';
                     } else if (this.formFlock.faseAwal === 'Layer') {
                         this.formFlock.umurAwalHari = 140;
-                        this.formFlock.kandang = 'L01 - Kandang Layer 1';
+                        this.formFlock.kandang = 'Kandang A-01';
                     }
-                },
-
-                editPenetasan(b) {
-                    this.editingPenetasanId = b.id;
-                    this.formPenetasan = { 
-                        telurFertil: 0,
-                        telurInfertil: 0,
-                        tipe: 'Pedaging',
-                        ...b 
-                    };
-                    this.modalType = 'penetasan';
-                    this.showModal = true;
-                },
-
-                editFlock(f) {
-                    this.editingFlockId = f.id;
-                    this.formFlock = { autoRecordKeuangan: false, ...f };
-                    this.modalType = 'flock';
-                    this.showModal = true;
-                },
-
-                hitungHPP(flock) {
-                    const totalPakanKg = parseFloat(this.getPakanTotalByFlock(flock.id)) || 0;
-                    const hargaPakan = this.getHargaPakanAktif(flock);
-                    const biayaDoc = parseFloat(flock.biayaDoc) || 0;
-                    const biayaLain = parseFloat(flock.biayaLainnya) || 0;
-                    
-                    const totalBiayaModal = biayaDoc + (totalPakanKg * hargaPakan) + biayaLain;
-                    const populasiHidup = parseInt(flock.jumlahSaatIni) || 1;
-                    const avgBobot = parseFloat(flock.avgBobotKg) || 1.2;
-
-                    const hppPerEkor = Math.round(totalBiayaModal / populasiHidup);
-                    const hppPerKg = Math.round(hppPerEkor / avgBobot);
-
-                    return { totalBiayaModal, hppPerEkor, hppPerKg };
-                },
-                hitungProyeksiLaba(flock) {
-                    const populasiHidup = parseInt(flock.jumlahSaatIni) || 0;
-                    const avgBobot = parseFloat(flock.avgBobotKg) || 1.2;
-                    const hargaJualPerKg = parseFloat(flock.hargaJualPerKg) || 0;
-                    const hppInfo = this.hitungHPP(flock);
-
-                    const totalBobotKg = populasiHidup * avgBobot;
-                    const estOmzet = Math.round(totalBobotKg * hargaJualPerKg);
-                    const labaBersih = estOmzet - hppInfo.totalBiayaModal;
-                    const marginPct = estOmzet > 0 ? ((labaBersih / estOmzet) * 100).toFixed(1) : 0;
-
-                    return { estOmzet, labaBersih, marginPct };
-                },
-
-                exportHppPdf(flock) {
-                    const hpp = this.hitungHPP(flock);
-                    const laba = this.hitungProyeksiLaba(flock);
-                    const pakanTotal = this.getPakanTotalByFlock(flock.id);
-                    const fcr = this.hitungFCR(flock);
-                    const hargaPakanAktif = this.getHargaPakanAktif(flock);
-                    
-                    const htmlContent = `
-                        <div style="font-family: Arial, sans-serif; padding: 25px; color: #1e293b; max-width: 700px; margin: 0 auto; background: #ffffff;">
-                            <table style="width: 100%; border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 20px;">
-                                <tr>
-                                    <td style="width: 52px; vertical-align: middle;">
-                                        <div style="width: 44px; height: 44px; background: #10b981; border-radius: 10px; text-align: center; line-height: 44px; color: #ffffff; font-size: 22px;">
-                                            🐓
-                                        </div>
-                                    </td>
-                                    <td style="vertical-align: middle; padding-left: 8px;">
-                                        <h2 style="font-size: 18px; font-weight: 800; margin: 0; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px;">MANDIRI FARM</h2>
-                                        <p style="font-size: 11px; color: #059669; font-weight: 600; margin: 2px 0 0 0;">Sistem Monitoring &amp; Keuangan Peternakan Ayam</p>
-                                    </td>
-                                    <td style="text-align: right; vertical-align: middle;">
-                                        <div style="font-size: 12px; font-weight: bold; color: #0f172a; text-transform: uppercase;">Laporan HPP &amp; Analisis Batch</div>
-                                        <div style="font-size: 10px; color: #64748b; margin-top: 4px; font-family: monospace;">Tgl Cetak: ${this.getFormattedNow()}</div>
-                                    </td>
-                                </tr>
-                            </table>
-
-                            <h3 style="font-size: 13px; font-weight: bold; color: #0f172a; margin: 0 0 8px 0; text-transform: uppercase;">1. Informasi Kelompok Ayam &amp; Kandang</h3>
-                            <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 18px;">
-                                <tr style="background-color: #f8fafc;">
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1; font-weight: bold; width: 40%;">Nama Batch / Kelompok</td>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1; font-weight: bold; color: #047857;">${flock.namaFlock}</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Kode &amp; Lokasi Kandang</td>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1; font-weight: bold;">${flock.kandang}</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Tipe &amp; Umur Ayam</td>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">${flock.tipe} (${this.getFaseLabel(flock)} - ${this.formatUmurMinggu(flock)})</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Target Bobot Fase</td>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1; font-weight: bold; color: #047857;">${this.getFaseTargetBobot(flock)}</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Populasi Saat Ini / Awal</td>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">${flock.jumlahSaatIni} / ${flock.jumlahAwal} ekor</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Total Pakan Dikonsumsi</td>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">${pakanTotal} Kg (FCR: ${fcr})</td>
-                                </tr>
-                            </table>
-
-                            <h3 style="font-size: 13px; font-weight: bold; color: #047857; margin: 0 0 8px 0; text-transform: uppercase;">2. Rincian Harga Pokok Produksi (HPP)</h3>
-                            <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 18px;">
-                                <thead>
-                                    <tr style="background-color: #ecfdf5; color: #065f46;">
-                                        <th style="padding: 7px 10px; border: 1px solid #a7f3d0; text-align: left;">Komponen Biaya</th>
-                                        <th style="padding: 7px 10px; border: 1px solid #a7f3d0; text-align: right;">Jumlah Nominal</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Biaya Modal Pembelian Ayam</td>
-                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1; text-align: right;">${this.formatRupiah(flock.biayaDoc)}</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Estimasi Biaya Pakan (${pakanTotal} kg @ ${this.formatRupiah(hargaPakanAktif)})</td>
-                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1; text-align: right;">${this.formatRupiah(pakanTotal * hargaPakanAktif)}</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Biaya Operasional &amp; Lainnya</td>
-                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1; text-align: right;">${this.formatRupiah(flock.biayaLainnya || 0)}</td>
-                                    </tr>
-                                    <tr style="font-weight: bold; background-color: #f0fdf4;">
-                                        <td style="padding: 8px 10px; border: 1px solid #a7f3d0; color: #065f46;">TOTAL BIAYA MODAL BATCH</td>
-                                        <td style="padding: 8px 10px; border: 1px solid #a7f3d0; text-align: right; color: #065f46;">${this.formatRupiah(hpp.totalBiayaModal)}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-
-                            <h3 style="font-size: 13px; font-weight: bold; color: #1e3a8a; margin: 0 0 8px 0; text-transform: uppercase;">3. Ringkasan HPP &amp; Proyeksi Omzet</h3>
-                            <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 25px;">
-                                <tr>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1; width: 60%;">HPP per Ekor Ayam</td>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1; font-weight: bold; text-align: right;">${this.formatRupiah(hpp.hppPerEkor)}</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">HPP per Kg (Avg Bobot ${flock.avgBobotKg || 1.2} kg)</td>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1; font-weight: bold; text-align: right; color: #047857;">${this.formatRupiah(hpp.hppPerKg)}</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Harga Jual Pasar per Kg</td>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1; text-align: right;">${this.formatRupiah(flock.hargaJualPerKg)}</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Estimasi Omzet Panen Total</td>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1; text-align: right;">${this.formatRupiah(laba.estOmzet)}</td>
-                                </tr>
-                                <tr style="font-weight: bold; background-color: #eff6ff;">
-                                    <td style="padding: 8px 10px; border: 1px solid #bfdbfe; color: #1e40af;">PROYEKSI LABA BERSIH (Margin ${laba.marginPct}%)</td>
-                                    <td style="padding: 8px 10px; border: 1px solid #bfdbfe; text-align: right; color: ${laba.labaBersih >= 0 ? '#047857' : '#b91c1c'};">${this.formatRupiah(laba.labaBersih)}</td>
-                                </tr>
-                            </table>
-
-                            <table style="width: 100%; margin-top: 30px; page-break-inside: avoid; font-size: 11px;">
-                                <tr>
-                                    <td style="width: 50%; text-align: center; vertical-align: top;">
-                                        <p style="color: #475569; margin: 0 0 55px 0; font-weight: 600;">Petugas Kandang / Operasional,</p>
-                                        <p style="font-weight: bold; color: #0f172a; margin: 0;">( ________________________ )</p>
-                                    </td>
-                                    <td style="width: 50%; text-align: center; vertical-align: top;">
-                                        <p style="color: #475569; margin: 0 0 55px 0; font-weight: 600;">Pemilik / Pengelola Peternakan,</p>
-                                        <p style="font-weight: bold; color: #0f172a; margin: 0;">( ________________________ )</p>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                    `;
-
-                    const opt = {
-                        margin:       0.4,
-                        filename:     `Laporan_HPP_${flock.namaFlock.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
-                        image:        { type: 'jpeg', quality: 0.98 },
-                        html2canvas:  { scale: 2 },
-                        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-                    };
-
-                    this.showToast('Menyiapkan file PDF...', 'info');
-                    html2pdf().set(opt).from(htmlContent).save().then(() => {
-                        this.showToast('Laporan HPP berhasil diunduh (PDF).', 'info');
-                    }).catch(() => {
-                        this.showToast('Gagal membuat PDF.', 'error');
-                    });
-                },
-
-                showToast(msg, type = 'info') {
-                    this.toast = { show: true, message: msg, type: type };
-                    setTimeout(() => { this.toast.show = false; }, 3500);
-                },
-                showConfirm(title, message, action) {
-                    this.confirmModal = { show: true, title: title, message: message, action: action };
-                },
-                executeConfirm() {
-                    if (typeof this.confirmModal.action === 'function') {
-                        this.confirmModal.action();
-                    }
-                    this.confirmModal.show = false;
-                },
-                printLaporan() {
-                    window.print();
-                },
-                getFormattedNow() {
-                    const d = new Date();
-                    return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-                },
-                confirmClearAll() {
-                    this.showConfirm(
-                        'Hapus Semua Data?',
-                        'Tindakan ini akan MENGHAPUS SEMUA DATA di perangkat dan Google Sheets.',
-                        () => {
-                            this.isSyncingFromGas = true;
-                            this.penetasanList = [];
-                            this.flockList = [];
-                            this.harianList = [];
-                            this.keuanganList = [];
-
-                            localStorage.removeItem('mandirifarm_penetasan');
-                            localStorage.removeItem('mandirifarm_flock');
-                            localStorage.removeItem('mandirifarm_harian');
-                            localStorage.removeItem('mandirifarm_keuangan');
-                            localStorage.removeItem('mandirifarm_pakan_presets');
-                            localStorage.removeItem('mandirifarm_pakan_history');
-
-                            this.$nextTick(() => {
-                                this.isSyncingFromGas = false;
-                                this.pushToGas();
-                                this.renderCharts();
-                            });
-                            this.showToast('Semua data berhasil dibersihkan.', 'info');
-                        }
-                    );
-                },
-                openModal(type) {
-                    this.modalType = type;
-                    this.showModal = true;
-                },
-                saveGasUrl() {
-                    localStorage.setItem('mandirifarm_gas_url', this.gasApiUrl);
-                    if (this.gasApiUrl) {
-                        this.fetchFromGas();
-                        if (this.autoSyncTimer) clearInterval(this.autoSyncTimer);
-                        this.autoSyncTimer = setInterval(() => {
-                            this.fetchFromGas(true);
-                        }, 30000);
-                        this.showToast('URL Backend berhasil disimpan.', 'info');
-                    }
-                },
-                debouncedPushToGas() {
-                    if (this.pushTimer) clearTimeout(this.pushTimer);
-                    this.pushTimer = setTimeout(() => {
-                        this.pushToGas();
-                    }, 1000);
-                },
-                async fetchFromGas(isBackground = false) {
-                    if (!this.gasApiUrl || this.isSaving) return;
-                    this.isSyncingFromGas = true;
-                    try {
-                        const res = await fetch(this.gasApiUrl);
-                        const text = await res.text();
-                        let json;
-                        try { json = JSON.parse(text); } catch (e) { throw new Error("Respon bukan JSON."); }
-
-                        if (json.status === 'success' && json.data) {
-                            if (Array.isArray(json.data.penetasanList)) {
-                                this.penetasanList = json.data.penetasanList.map(p => ({
-                                    ...p,
-                                    jumlahTelur: parseInt(p.jumlahTelur) || 0,
-                                    dayaTetas: parseInt(p.dayaTetas) || 0,
-                                    telurFertil: parseInt(p.telurFertil) || 0,
-                                    telurInfertil: parseInt(p.telurInfertil) || 0,
-                                    menetasCount: parseInt(p.menetasCount) || 0
-                                }));
-                            }
-                            if (Array.isArray(json.data.flockList)) {
-                                this.flockList = json.data.flockList.map(f => ({
-                                    biayaDoc: 0,
-                                    hargaPakanStarter: 0,
-                                    hargaPakanGrower: 0,
-                                    avgBobotKg: 1.2,
-                                    hargaJualPerKg: 0,
-                                    kandang: f.kandang || 'G01 - Kandang Grower 1',
-                                    umurAwalHari: 0,
-                                    ...f,
-                                    jumlahAwal: parseInt(f.jumlahAwal) || 0,
-                                    jumlahSaatIni: parseInt(f.jumlahSaatIni) || 0
-                                }));
-                            }
-                            if (Array.isArray(json.data.harianList)) {
-                                this.harianList = json.data.harianList.map(h => ({
-                                    ...h,
-                                    pakanKg: parseFloat(h.pakanKg) || 0,
-                                    kematian: parseInt(h.kematian) || 0,
-                                    telurBagus: parseInt(h.telurBagus) || 0,
-                                    telurRusak: parseInt(h.telurRusak) || 0
-                                }));
-                            }
-                            if (Array.isArray(json.data.keuanganList)) {
-                                this.keuanganList = json.data.keuanganList.map(k => ({
-                                    ...k,
-                                    nominal: parseFloat(k.nominal) || 0
-                                }));
-                            }
-                            if (json.data.pakanPresets) {
-                                this.pakanPresets = json.data.pakanPresets;
-                                localStorage.setItem('mandirifarm_pakan_presets', JSON.stringify(this.pakanPresets));
-                                this.loadPakanPreset(this.activePakanPreset || 'starter');
-                            }
-                            this.isGasSynced = true;
-                        }
-                    } catch (e) {
-                        this.isGasSynced = false;
-                    } finally {
-                        this.isSyncingFromGas = false;
-                        this.$nextTick(() => this.renderCharts());
-                    }
-                },
-                async pushToGas() {
-                    if (!this.gasApiUrl || this.isSyncingFromGas) return;
-                    this.isSaving = true;
-                    try {
-                        const payload = {
-                            penetasanList: this.penetasanList,
-                            flockList: this.flockList,
-                            harianList: this.harianList,
-                            keuanganList: this.keuanganList,
-                            pakanPresets: this.pakanPresets
-                        };
-
-                        await fetch(this.gasApiUrl, {
-                            method: 'POST',
-                            mode: 'no-cors',
-                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                            body: JSON.stringify(payload)
-                        });
-                        this.isGasSynced = true;
-                    } catch (e) {
-                        this.isGasSynced = false;
-                    } finally {
-                        this.isSaving = false;
-                    }
-                },
-
-                savePenetasan() {
-                    const tglMasuk = new Date(this.formPenetasan.tglMasuk);
-                    const estMenetas = new Date(tglMasuk);
-                    estMenetas.setDate(estMenetas.getDate() + 21);
-
-                    if (this.editingPenetasanId) {
-                        const idx = this.penetasanList.findIndex(p => p.id === this.editingPenetasanId);
-                        if (idx !== -1) {
-                            this.penetasanList[idx] = {
-                                ...this.penetasanList[idx],
-                                namaBatch: this.formPenetasan.namaBatch,
-                                mesin: this.formPenetasan.mesin,
-                                tipe: this.formPenetasan.tipe || 'Pedaging',
-                                tglMasuk: this.formPenetasan.tglMasuk,
-                                estMenetas: estMenetas.toISOString().substr(0, 10),
-                                jumlahTelur: parseInt(this.formPenetasan.jumlahTelur) || 0
-                            };
-                        }
-                        this.showToast('Batch penetasan diperbarui.', 'info');
-                    } else {
-                        const newBatch = {
-                            id: 'PEN-' + Date.now(),
-                            namaBatch: this.formPenetasan.namaBatch,
-                            mesin: this.formPenetasan.mesin,
-                            tipe: this.formPenetasan.tipe || 'Pedaging',
-                            tglMasuk: this.formPenetasan.tglMasuk,
-                            estMenetas: estMenetas.toISOString().substr(0, 10),
-                            jumlahTelur: parseInt(this.formPenetasan.jumlahTelur) || 0,
-                            status: 'Berjalan',
-                            dayaTetas: 0,
-                            telurFertil: 0,
-                            telurInfertil: 0,
-                            menetasCount: 0
-                        };
-                        this.penetasanList.unshift(newBatch);
-                        this.showToast('Batch inkubasi 21 hari disimpan.', 'info');
-                    }
-
-                    this.closeModal();
-                    this.formPenetasan = { namaBatch: '', mesin: '', tipe: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 0, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0 };
-                },
-
-                openFinishPenetasanModal(b) {
-                    const total = parseInt(b.jumlahTelur) || 0;
-                    const fertilDefault = Math.round(total * 0.9);
-                    const infertilDefault = total - fertilDefault;
-                    const menetasDefault = Math.round(fertilDefault * 0.85);
-
-                    this.finishHatchingModal = {
-                        show: true,
-                        batch: b,
-                        telurFertilCount: b.telurFertil || fertilDefault,
-                        telurInfertilCount: b.telurInfertil || infertilDefault,
-                        menetasCount: b.menetasCount || menetasDefault,
-                        kandangTarget: 'B01 - Kandang Brooding 1',
-                        createDocFlock: true
-                    };
-                },
-                onFertilInput() {
-                    const total = parseInt(this.finishHatchingModal.batch?.jumlahTelur) || 0;
-                    let fertil = parseInt(this.finishHatchingModal.telurFertilCount) || 0;
-                    if (fertil > total) fertil = total;
-                    this.finishHatchingModal.telurFertilCount = fertil;
-                    this.finishHatchingModal.telurInfertilCount = Math.max(0, total - fertil);
-                    if (this.finishHatchingModal.menetasCount > fertil) {
-                        this.finishHatchingModal.menetasCount = fertil;
-                    }
-                },
-                onInfertilInput() {
-                    const total = parseInt(this.finishHatchingModal.batch?.jumlahTelur) || 0;
-                    let infertil = parseInt(this.finishHatchingModal.telurInfertilCount) || 0;
-                    if (infertil > total) infertil = total;
-                    this.finishHatchingModal.telurInfertilCount = infertil;
-                    this.finishHatchingModal.telurFertilCount = Math.max(0, total - infertil);
-                    if (this.finishHatchingModal.menetasCount > this.finishHatchingModal.telurFertilCount) {
-                        this.finishHatchingModal.menetasCount = this.finishHatchingModal.telurFertilCount;
-                    }
-                },
-                hitungModalFertilitasPct() {
-                    const total = parseInt(this.finishHatchingModal.batch?.jumlahTelur) || 0;
-                    const fertil = parseInt(this.finishHatchingModal.telurFertilCount) || 0;
-                    if (total === 0) return 0;
-                    return Math.round((fertil / total) * 100);
-                },
-                hitungModalDayaTetasPct() {
-                    const fertil = parseInt(this.finishHatchingModal.telurFertilCount) || 0;
-                    const menetas = parseInt(this.finishHatchingModal.menetasCount) || 0;
-                    if (fertil === 0) return 0;
-                    return Math.round((menetas / fertil) * 100);
                 },
                 saveFinishPenetasan() {
                     const b = this.finishHatchingModal.batch;
@@ -2102,7 +2313,7 @@
                             namaFlock: 'DOC Hasil ' + b.namaBatch,
                             tipe: b.tipe || 'Pedaging',
                             faseAwal: 'Starter',
-                            kandang: this.finishHatchingModal.kandangTarget || 'B01 - Kandang Brooding 1',
+                            kandang: this.finishHatchingModal.kandangTarget || 'Kandang B-01',
                             jumlahAwal: menetas,
                             jumlahSaatIni: menetas,
                             biayaDoc: 0,
@@ -2117,15 +2328,8 @@
                     }
 
                     this.finishHatchingModal.show = false;
-                    this.showToast(`Panen DOC Berhasil! Total ${menetas} ekor masuk Kandang Brooding (${this.finishHatchingModal.kandangTarget}).`, 'info');
+                    this.showToast(`Panen DOC Berhasil! Total ${menetas} ekor masuk ${this.finishHatchingModal.kandangTarget}.`, 'info');
                 },
-                confirmDeletePenetasan(id) {
-                    this.showConfirm('Hapus Penetasan?', 'Apakah Anda yakin menghapus catatan inkubasi ini?', () => {
-                        this.penetasanList = this.penetasanList.filter(p => p.id !== id);
-                        this.showToast('Data penetasan dihapus.', 'info');
-                    });
-                },
-
                 saveFlock() {
                     const initial = parseInt(this.formFlock.jumlahAwal) || 0;
                     const modalPembelian = parseFloat(this.formFlock.biayaDoc) || 0;
@@ -2138,7 +2342,7 @@
                                 namaFlock: this.formFlock.namaFlock,
                                 tipe: this.formFlock.tipe,
                                 faseAwal: this.formFlock.faseAwal,
-                                kandang: this.formFlock.kandang || 'B01 - Kandang Brooding 1',
+                                kandang: this.formFlock.kandang || 'Kandang B-01',
                                 jumlahAwal: initial,
                                 jumlahSaatIni: parseInt(this.formFlock.jumlahSaatIni) ?? initial,
                                 biayaDoc: modalPembelian,
@@ -2155,7 +2359,7 @@
                             namaFlock: this.formFlock.namaFlock,
                             tipe: this.formFlock.tipe,
                             faseAwal: this.formFlock.faseAwal,
-                            kandang: this.formFlock.kandang || 'B01 - Kandang Brooding 1',
+                            kandang: this.formFlock.kandang || 'Kandang B-01',
                             jumlahAwal: initial,
                             jumlahSaatIni: initial,
                             biayaDoc: modalPembelian,
@@ -2167,176 +2371,10 @@
                             tglMulai: this.formFlock.tglMulai
                         };
                         this.flockList.unshift(newFlock);
-
-                        if (this.formFlock.autoRecordKeuangan && modalPembelian > 0) {
-                            const newKeuangan = {
-                                id: 'KEU-' + Date.now(),
-                                jenis: 'Pengeluaran',
-                                kategori: 'Pembelian DOC / Indukan',
-                                nominal: modalPembelian,
-                                tanggal: this.formFlock.tglMulai,
-                                keterangan: `Modal Pembelian Ayam: ${this.formFlock.namaFlock} (${initial} ekor)`
-                            };
-                            this.keuanganList.unshift(newKeuangan);
-                            this.showToast('Kelompok ayam disimpan & pengeluaran kas otomatis dicatat!', 'info');
-                        } else {
-                            this.showToast('Kelompok ayam berhasil ditambahkan.', 'info');
-                        }
                     }
 
                     this.closeModal();
-                    this.formFlock = { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'B01 - Kandang Brooding 1', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) };
-                },
-                confirmDeleteFlock(id) {
-                    this.showConfirm('Hapus Kelompok Ayam?', 'Apakah Anda yakin ingin menghapus kelompok ayam ini?', () => {
-                        this.flockList = this.flockList.filter(f => f.id !== id);
-                        this.showToast('Kelompok ayam dihapus.', 'info');
-                    });
-                },
-
-                saveHarian() {
-                    const mati = parseInt(this.formHarian.kematian) || 0;
-                    const newHarian = {
-                        id: 'HRN-' + Date.now(),
-                        flockId: this.formHarian.flockId,
-                        tanggal: this.formHarian.tanggal,
-                        pakanKg: parseFloat(this.formHarian.pakanKg) || 0,
-                        kematian: mati,
-                        telurBagus: parseInt(this.formHarian.telurBagus) || 0,
-                        telurRusak: parseInt(this.formHarian.telurRusak) || 0,
-                        catatan: this.formHarian.catatan
-                    };
-
-                    if (mati > 0) {
-                        const targetFlock = this.flockList.find(f => f.id === this.formHarian.flockId);
-                        if (targetFlock) {
-                            targetFlock.jumlahSaatIni = Math.max(0, targetFlock.jumlahSaatIni - mati);
-                        }
-                    }
-
-                    this.harianList.unshift(newHarian);
-                    this.closeModal();
-                    this.formHarian = { flockId: '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' };
-                    this.showToast('Catatan harian berhasil disimpan.', 'info');
-                },
-                confirmDeleteHarian(id) {
-                    this.showConfirm('Hapus Catatan Harian?', 'Apakah Anda yakin menghapus log harian ini?', () => {
-                        this.harianList = this.harianList.filter(h => h.id !== id);
-                        this.showToast('Catatan harian dihapus.', 'info');
-                    });
-                },
-
-                saveKeuangan() {
-                    const newKeuangan = {
-                        id: 'KEU-' + Date.now(),
-                        jenis: this.formKeuangan.jenis,
-                        kategori: this.formKeuangan.kategori,
-                        nominal: parseFloat(this.formKeuangan.nominal) || 0,
-                        tanggal: this.formKeuangan.tanggal,
-                        keterangan: this.formKeuangan.keterangan
-                    };
-                    this.keuanganList.unshift(newKeuangan);
-                    this.closeModal();
-                    this.formKeuangan = { jenis: 'Pemasukan', kategori: 'Penjualan Telur', nominal: 0, tanggal: new Date().toISOString().substr(0, 10), keterangan: '' };
-                    this.showToast('Transaksi keuangan disimpan.', 'info');
-                },
-                confirmDeleteKeuangan(id) {
-                    this.showConfirm('Hapus Transaksi?', 'Apakah Anda yakin menghapus catatan transaksi ini?', () => {
-                        this.keuanganList = this.keuanganList.filter(k => k.id !== id);
-                        this.showToast('Transaksi keuangan dihapus.', 'info');
-                    });
-                },
-
-                getFlockName(flockId) {
-                    const f = this.flockList.find(x => x.id === flockId);
-                    return f ? `${f.namaFlock} (${f.kandang})` : 'Unknown Flock';
-                },
-                getPakanTotalByFlock(flockId) {
-                    return this.harianList
-                        .filter(h => h.flockId === flockId)
-                        .reduce((acc, curr) => acc + (parseFloat(curr.pakanKg) || 0), 0)
-                        .toFixed(1);
-                },
-                hitungFCR(flock) {
-                    const totalPakan = parseFloat(this.getPakanTotalByFlock(flock.id));
-                    if (totalPakan === 0 || !flock.jumlahSaatIni) return '-';
-                    const avgBobot = flock.avgBobotKg || 1.2;
-                    const estBobotTotalKg = flock.jumlahSaatIni * avgBobot;
-                    return (totalPakan / estBobotTotalKg).toFixed(2);
-                },
-                formatRupiah(num) {
-                    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num || 0);
-                },
-                formatDate(dateStr) {
-                    if (!dateStr) return '-';
-                    const parts = dateStr.split('-');
-                    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
-                    return dateStr;
-                },
-
-                renderCharts() {
-                    const ctxEgg = document.getElementById('eggChart');
-                    if (ctxEgg) {
-                        if (this.eggChartInstance) this.eggChartInstance.destroy();
-                        
-                        const last7Days = Array.from({length: 7}, (_, i) => {
-                            const d = new Date();
-                            d.setDate(d.getDate() - (6 - i));
-                            return d.toISOString().substr(0, 10);
-                        });
-
-                        const eggData = last7Days.map(dateStr => {
-                            return this.harianList
-                                .filter(h => h.tanggal === dateStr)
-                                .reduce((acc, curr) => acc + (parseInt(curr.telurBagus) || 0), 0);
-                        });
-
-                        this.eggChartInstance = new Chart(ctxEgg, {
-                            type: 'line',
-                            data: {
-                                labels: last7Days.map(d => this.formatDate(d)),
-                                datasets: [{
-                                    label: 'Butir Telur Bagus',
-                                    data: eggData,
-                                    borderColor: '#10b981',
-                                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                                    fill: true,
-                                    tension: 0.3,
-                                    borderWidth: 2.5
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: { legend: { display: false } },
-                                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-                            }
-                        });
-                    }
-
-                    const ctxFlock = document.getElementById('flockChart');
-                    if (ctxFlock) {
-                        if (this.flockChartInstance) this.flockChartInstance.destroy();
-
-                        const labels = this.flockList.map(f => `${f.namaFlock} (${f.kandang})`);
-                        const counts = this.flockList.map(f => f.jumlahSaatIni);
-
-                        this.flockChartInstance = new Chart(ctxFlock, {
-                            type: 'doughnut',
-                            data: {
-                                labels: labels.length ? labels : ['Belum Ada Ayam'],
-                                datasets: [{
-                                    data: counts.length ? counts : [1],
-                                    backgroundColor: ['#10b981', '#6366f1', '#f59e0b', '#ec4899', '#3b82f6', '#8b5cf6']
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 } } } }
-                            }
-                        });
-                    }
+                    this.formFlock = { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang B-01', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) };
                 }
             }
         }).mount('#app');
