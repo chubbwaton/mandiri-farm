@@ -57,12 +57,12 @@
         <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-white min-h-screen sticky top-0 shadow-2xl z-30 no-print">
             <div class="p-5 flex items-center justify-between border-b border-slate-800">
                 <div class="flex items-center gap-3">
-                    <div class="flex flex-col items-center justify-center mb-4 mt-8">
-                         <img src="Logo-Mandiri-Farm.png" alt="Mandiri Farm" class="w-20 h-20 object-contain mx-auto mb-2">
-                     </div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-emerald-500/30">
+                        <i class="fa-solid fa-egg"></i>
+                    </div>
                     <div>
                         <h1 class="font-bold text-lg leading-tight text-white tracking-wide">Mandiri Farm</h1>
-                        <p class="text-xs text-emerald-400 font-medium">Monitoring & HPP Ayam</p>
+                        <p class="text-xs text-emerald-400 font-medium">Monitoring Ayam</p>
                     </div>
                 </div>
             </div>
@@ -127,7 +127,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 sm:mb-6 no-print">
                 <div>
                     <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{{ currentNavTitle }}</h2>
-                    <p class="text-slate-500 text-xs sm:text-sm">Kelola penetasan, racikan pakan, HPP, dan keuangan peternakan.</p>
+                    <p class="text-slate-500 text-xs sm:text-sm">Kelola penetasan, 3 fase pertumbuhan ayam, HPP, dan keuangan.</p>
                 </div>
                 <button @click="activeTab = 'pengaturan'" 
                     :class="activeTab === 'pengaturan' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'"
@@ -287,14 +287,20 @@
                         </div>
                     </div>
                 </div>
+
+                <div v-if="penetasanList.length === 0" class="bg-white p-10 rounded-2xl border border-slate-200 text-center space-y-3">
+                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl mx-auto flex items-center justify-center text-xl"><i class="fa-solid fa-egg"></i></div>
+                    <h4 class="font-bold text-slate-800 text-sm">Belum Ada Batch Inkubasi</h4>
+                    <p class="text-xs text-slate-500 max-w-sm mx-auto">Mulai pengeraman telur tetas dengan mengklik tombol "Tambah Inkubasi Baru" di atas.</p>
+                </div>
             </div>
 
-            <!-- TAB 3: MANAJEMEN KELOMPOK AYAM & KALKULATOR HPP -->
+            <!-- TAB 3: MANAJEMEN KELOMPOK AYAM & 3 FASE PERTUMBUHAN -->
             <div v-if="activeTab === 'flock'" class="space-y-4 sm:space-y-6">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 bg-white p-3.5 sm:p-4.5 rounded-2xl border border-slate-200 shadow-sm">
                     <div>
-                        <h3 class="font-bold text-slate-800 text-sm sm:text-base">Kelompok Ayam & Analisis HPP</h3>
-                        <p class="text-xs text-slate-500">Manajemen batch pedaging & petelur beserta kalkulasi HPP dan proyeksi laba.</p>
+                        <h3 class="font-bold text-slate-800 text-sm sm:text-base">Kelompok Ayam & 3 Fase Pertumbuhan</h3>
+                        <p class="text-xs text-slate-500">Monitoring batch ayam (Starter, Grower/Pullet, Layer) beserta target bobot & HPP.</p>
                     </div>
                     <button @click="openModal('flock')" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
                         <i class="fa-solid fa-plus"></i> Tambah Kelompok Baru
@@ -342,17 +348,21 @@
                                 </div>
                             </div>
 
-                            <div class="text-xs space-y-1 text-slate-600 border-t pt-2.5">
+                            <div class="text-xs space-y-1.5 text-slate-600 border-t pt-2.5 bg-amber-50/50 p-2.5 rounded-xl border border-amber-200/50">
                                 <div class="flex justify-between items-center text-[11px]">
-                                    <span class="text-slate-400">Umur Akumulasi:</span>
+                                    <span class="font-bold text-amber-900">Umur Akumulasi:</span>
                                     <span class="font-bold text-slate-800">{{ formatUmurMinggu(f) }}</span>
                                 </div>
                                 <div class="flex justify-between items-center text-[11px]">
-                                    <span class="text-slate-400">Total Pakan Dikonsumsi:</span>
+                                    <span class="font-bold text-amber-900">Target Bobot Fase:</span>
+                                    <span class="font-bold text-emerald-700">{{ getFaseTargetBobot(f) }}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-[11px]">
+                                    <span class="text-slate-500">Pakan Konsumsi:</span>
                                     <span class="font-bold text-slate-800">{{ getPakanTotalByFlock(f.id) }} Kg</span>
                                 </div>
                                 <div class="flex justify-between items-center text-[11px]">
-                                    <span class="text-slate-400">Tarif Pakan Aktif:</span>
+                                    <span class="text-slate-500">Tarif Pakan Aktif:</span>
                                     <span class="font-bold text-emerald-700">{{ formatRupiah(getHargaPakanAktif(f)) }}/Kg</span>
                                 </div>
                             </div>
@@ -377,12 +387,12 @@
 
                                 <div class="grid grid-cols-2 gap-2 pt-1.5 border-t border-emerald-200/60">
                                     <div>
-                                        <label class="block text-[10px] font-bold text-slate-600">Avg Bobot (Kg):</label>
-                                        <input v-model.number="f.avgBobotKg" type="number" step="0.1" min="0.1" class="w-full p-1 rounded-lg border border-emerald-300 bg-white text-xs font-bold outline-none focus:ring-1 focus:ring-emerald-500">
+                                        <label class="block text-[10px] font-bold text-slate-600">Avg Bobot Aktual (Kg):</label>
+                                        <input v-model.number="f.avgBobotKg" type="number" step="0.1" min="0.1" placeholder="1.2" class="w-full p-1 rounded-lg border border-emerald-300 bg-white text-xs font-bold outline-none focus:ring-1 focus:ring-emerald-500">
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-600">Harga Jual/Kg:</label>
-                                        <input type="text" inputmode="numeric" :value="formatRupiahInputVal(f.hargaJualPerKg)" @input="onRupiahInput($event, f, 'hargaJualPerKg')" class="w-full p-1 rounded-lg border border-emerald-300 bg-white text-xs font-bold outline-none focus:ring-1 focus:ring-emerald-500">
+                                        <input type="text" inputmode="numeric" :value="formatRupiahInputVal(f.hargaJualPerKg)" @input="onRupiahInput($event, f, 'hargaJualPerKg')" placeholder="45.000" class="w-full p-1 rounded-lg border border-emerald-300 bg-white text-xs font-bold outline-none focus:ring-1 focus:ring-emerald-500">
                                     </div>
                                 </div>
 
@@ -406,35 +416,41 @@
                         </div>
                     </div>
                 </div>
+
+                <div v-if="flockList.length === 0" class="bg-white p-10 rounded-2xl border border-slate-200 text-center space-y-3">
+                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl mx-auto flex items-center justify-center text-xl"><i class="fa-solid fa-crow"></i></div>
+                    <h4 class="font-bold text-slate-800 text-sm">Belum Ada Kelompok Ayam</h4>
+                    <p class="text-xs text-slate-500 max-w-sm mx-auto">Tambahkan kelompok ayam pertama Anda dengan mengeklik tombol "Tambah Kelompok Baru" di atas.</p>
+                </div>
             </div>
 
-            <!-- TAB 4: FORMULASI PAKAN -->
+            <!-- TAB 4: FORMULASI PAKAN (3 PRESET FASE) -->
             <div v-if="activeTab === 'pakan'" class="space-y-4 sm:space-y-6">
                 <div class="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b pb-3">
                         <div>
                             <h3 class="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
-                                <i class="fa-solid fa-wheat-awn text-amber-500"></i> Formulasi & Racikan Pakan Custom
+                                <i class="fa-solid fa-wheat-awn text-amber-500"></i> Formulasi Pakan Berdasarkan 3 Fase
                             </h3>
-                            <p class="text-xs text-slate-500">Hitung estimasi harga pakan campuran per kg & kadar protein kasar.</p>
+                            <p class="text-xs text-slate-500">Kelola preset pakan untuk Starter, Grower &amp; Pullet, dan Layer.</p>
                         </div>
 
                         <!-- TOMBOL PRESET FASE PAKAN -->
-                        <div class="grid grid-cols-3 gap-1.5 w-full sm:w-auto">
+                        <div class="grid grid-cols-3 gap-2 w-full sm:w-auto">
                             <button @click="loadPakanPreset('starter')" 
                                 :class="activePakanPreset === 'starter' ? 'bg-amber-600 text-white shadow' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
-                                class="py-2 px-2 rounded-xl text-[11px] font-bold text-center transition truncate">
-                                Starter (0-30 Hari)
+                                class="py-2 px-3 rounded-xl text-[11px] font-bold text-center transition truncate">
+                                1. Starter (0-4 Mg)
                             </button>
                             <button @click="loadPakanPreset('grower')" 
                                 :class="activePakanPreset === 'grower' ? 'bg-emerald-600 text-white shadow' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
-                                class="py-2 px-2 rounded-xl text-[11px] font-bold text-center transition truncate">
-                                Grower (31-120 Hari)
+                                class="py-2 px-3 rounded-xl text-[11px] font-bold text-center transition truncate">
+                                2. Grower &amp; Pullet (5-19 Mg)
                             </button>
                             <button @click="loadPakanPreset('layer')" 
                                 :class="activePakanPreset === 'layer' ? 'bg-purple-600 text-white shadow' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
-                                class="py-2 px-2 rounded-xl text-[11px] font-bold text-center transition truncate">
-                                Layer (>120 Hari)
+                                class="py-2 px-3 rounded-xl text-[11px] font-bold text-center transition truncate">
+                                3. Layer (20+ Mg)
                             </button>
                         </div>
                     </div>
@@ -442,9 +458,9 @@
                     <!-- TABEL FORMULASI BAHAN BAKU -->
                     <div class="space-y-3">
                         <div class="flex justify-between items-center">
-                            <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Komponen Bahan Baku Racikan:</span>
-                            <button @click="openBahanModal()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 transition">
-                                <i class="fa-solid fa-plus text-[10px]"></i> Tambah Bahan
+                            <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Komponen Bahan Baku Racikan (Preset: {{ activePakanPreset.toUpperCase() }}):</span>
+                            <button @click="openBahanPakanModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
+                                <i class="fa-solid fa-plus text-xs"></i> Tambah Bahan Pakan
                             </button>
                         </div>
 
@@ -452,40 +468,48 @@
                             <table class="w-full text-left text-xs text-slate-600">
                                 <thead class="bg-slate-50 text-slate-700 font-bold border-b">
                                     <tr>
-                                        <th class="p-2.5">Nama Bahan</th>
-                                        <th class="p-2.5">Proporsi (%)</th>
-                                        <th class="p-2.5">Harga/Kg</th>
-                                        <th class="p-2.5">Protein (%)</th>
-                                        <th class="p-2.5 text-center w-20">Aksi</th>
+                                        <th class="p-3">Nama Bahan</th>
+                                        <th class="p-3 text-center w-28">Proporsi (%)</th>
+                                        <th class="p-3 text-right w-32">Harga/Kg (Rp)</th>
+                                        <th class="p-3 text-center w-28">Protein (%)</th>
+                                        <th class="p-3 text-center w-24">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">
-                                    <tr v-for="(b, idx) in currentFormulasiPakan" :key="idx" class="hover:bg-slate-50">
-                                        <td class="p-2.5 font-semibold text-slate-800">{{ b.nama }}</td>
-                                        <td class="p-2.5 font-bold">{{ b.rasio }}%</td>
-                                        <td class="p-2.5 font-bold">{{ formatRupiah(b.harga) }}</td>
-                                        <td class="p-2.5 font-bold">{{ b.protein }}%</td>
-                                        <td class="p-2.5 text-center whitespace-nowrap">
-                                            <button @click="openBahanModal(idx)" class="text-slate-400 hover:text-blue-600 p-1"><i class="fa-solid fa-pen-to-square"></i></button>
-                                            <button @click="removeBahanPakan(idx)" class="text-slate-300 hover:text-rose-500 p-1"><i class="fa-solid fa-trash"></i></button>
+                                    <tr v-for="(b, idx) in currentFormulasiPakan" :key="idx" class="hover:bg-slate-50 transition">
+                                        <td class="p-3 font-bold text-slate-800">{{ b.nama || '-' }}</td>
+                                        <td class="p-3 text-center font-bold text-emerald-700">{{ b.rasio }}%</td>
+                                        <td class="p-3 text-right font-extrabold text-slate-800">{{ formatRupiah(b.harga) }}</td>
+                                        <td class="p-3 text-center font-semibold text-indigo-700">{{ b.protein }}%</td>
+                                        <td class="p-3 text-center">
+                                            <div class="flex justify-center items-center gap-1">
+                                                <button @click="editBahanPakan(idx)" class="text-slate-400 hover:text-blue-600 p-1.5 rounded-lg hover:bg-blue-50 transition">
+                                                    <i class="fa-solid fa-pen-to-square"></i>
+                                                </button>
+                                                <button @click="removeBahanPakan(idx)" class="text-slate-400 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 transition">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                     <tr v-if="currentFormulasiPakan.length === 0">
-                                        <td colspan="5" class="p-6 text-center text-slate-400">Belum ada bahan. Klik “Tambah Bahan”.</td>
+                                        <td colspan="5" class="p-6 text-center text-slate-400">
+                                            Belum ada bahan pakan pada preset {{ activePakanPreset.toUpperCase() }}. Klik <strong>"Tambah Bahan Pakan"</strong> untuk menambahkan.
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
-                    <!-- RINGKASAN RACIKAN & PENERAPAN PADA KELOMPOK AYAM -->
+                    <!-- RINGKASAN RACIKAN & SIMPAN / AUTO-SYNC KELOMPOK -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 border-t pt-4">
                         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 text-xs">
                             <span class="font-bold text-slate-800 block text-xs border-b pb-1">Hasil Formula Racikan:</span>
                             <div class="flex justify-between items-center">
                                 <span class="text-slate-500">Total Proporsi Mix:</span>
                                 <span class="font-bold" :class="totalPakanRasio === 100 ? 'text-emerald-600' : 'text-rose-600'">
-                                    {{ totalPakanRasio }}% {{ totalPakanRasio !== 100 ? '(Harus 100%)' : '' }}
+                                    {{ totalPakanRasio }}% {{ totalPakanRasio !== 100 ? '(Total Porsi Harus 100%)' : '' }}
                                 </span>
                             </div>
                             <div class="flex justify-between items-center text-sm font-extrabold">
@@ -498,26 +522,15 @@
                             </div>
                         </div>
 
-                        <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 space-y-2.5 text-xs">
-                            <span class="font-bold text-emerald-900 block text-xs border-b border-emerald-200 pb-1">Terapkan Harga Ke HPP Kelompok Ayam:</span>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-700 mb-1">Target Kelompok:</label>
-                                    <select v-model="targetFlockPakanId" class="w-full p-2 rounded-lg border border-emerald-300 bg-white font-semibold text-xs outline-none">
-                                        <option value="" disabled>-- Pilih Kelompok --</option>
-                                        <option v-for="f in flockList" :key="f.id" :value="f.id">{{ f.namaFlock }}</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-700 mb-1">Fase Target:</label>
-                                    <select v-model="targetFasePakanType" class="w-full p-2 rounded-lg border border-emerald-300 bg-white font-semibold text-xs outline-none">
-                                        <option value="starter">Pakan Starter (0-30 Hari)</option>
-                                        <option value="grower">Pakan Grower (>30 Hari)</option>
-                                    </select>
-                                </div>
+                        <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 space-y-2.5 text-xs flex flex-col justify-between">
+                            <div>
+                                <span class="font-bold text-emerald-900 block text-xs border-b border-emerald-200 pb-1">Simpan &amp; Sinkronisasi Otomatis Ke Kelompok Ayam:</span>
+                                <p class="text-[11px] text-emerald-700 mt-1 leading-relaxed">
+                                    Menyimpan preset ini akan otomatis memperbarui tarif harga pakan pada seluruh kelompok ayam yang berada di fase <strong>{{ activePakanPreset.toUpperCase() }}</strong>.
+                                </p>
                             </div>
-                            <button @click="applyPakanToFlock" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-emerald-600/20">
-                                <i class="fa-solid fa-check"></i> Terapkan Ke HPP Batch
+                            <button @click="saveAndAutoSyncPakanPreset" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i> Simpan Preset &amp; Auto-Update Kelompok Ayam
                             </button>
                         </div>
                     </div>
@@ -741,11 +754,11 @@
                     <div class="grid grid-cols-2 gap-2.5">
                         <div>
                             <label class="block font-bold mb-1 text-blue-800">Telur Fertil (Butir)</label>
-                            <input v-model.number="finishHatchingModal.telurFertilCount" @input="onFertilInput" type="number" min="0" :max="finishHatchingModal.batch?.jumlahTelur" class="w-full p-2 rounded-xl border border-blue-300 bg-white font-bold text-slate-800 outline-none">
+                            <input v-model.number="finishHatchingModal.telurFertilCount" @input="onFertilInput" type="number" min="0" :max="finishHatchingModal.batch?.jumlahTelur" placeholder="45" class="w-full p-2 rounded-xl border border-blue-300 bg-white font-bold text-slate-800 outline-none">
                         </div>
                         <div>
                             <label class="block font-bold mb-1 text-amber-800">Telur Infertil (Butir)</label>
-                            <input v-model.number="finishHatchingModal.telurInfertilCount" @input="onInfertilInput" type="number" min="0" :max="finishHatchingModal.batch?.jumlahTelur" class="w-full p-2 rounded-xl border border-amber-300 bg-white font-bold text-slate-800 outline-none">
+                            <input v-model.number="finishHatchingModal.telurInfertilCount" @input="onInfertilInput" type="number" min="0" :max="finishHatchingModal.batch?.jumlahTelur" placeholder="5" class="w-full p-2 rounded-xl border border-amber-300 bg-white font-bold text-slate-800 outline-none">
                         </div>
                     </div>
 
@@ -756,7 +769,7 @@
 
                     <div>
                         <label class="block font-bold mb-1 text-emerald-800">DOC Menetas Hidup (Ekor)</label>
-                        <input v-model.number="finishHatchingModal.menetasCount" type="number" min="0" :max="finishHatchingModal.telurFertilCount" class="w-full p-2.5 rounded-xl border border-emerald-300 bg-white font-extrabold text-emerald-700 text-sm outline-none">
+                        <input v-model.number="finishHatchingModal.menetasCount" type="number" min="0" :max="finishHatchingModal.telurFertilCount" placeholder="40" class="w-full p-2.5 rounded-xl border border-emerald-300 bg-white font-extrabold text-emerald-700 text-sm outline-none">
                     </div>
 
                     <div class="flex justify-between items-center bg-emerald-50 p-2 rounded-xl border border-emerald-200 text-[11px]">
@@ -766,7 +779,7 @@
 
                     <div class="flex items-center gap-2 pt-1 border-t border-slate-200">
                         <input type="checkbox" id="createDocBatch" v-model="finishHatchingModal.createDocFlock" class="w-4 h-4 text-emerald-600 rounded">
-                        <label for="createDocBatch" class="font-semibold text-slate-700 cursor-pointer text-[11px]">Auto Masuk Kandang Brooding (H+1)</label>
+                        <label for="createDocBatch" class="font-semibold text-slate-700 cursor-pointer text-[11px]">Auto Masuk Kandang Starter (H+1)</label>
                     </div>
                 </div>
 
@@ -784,18 +797,55 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
 
+                <!-- Form Bahan Pakan Popup -->
+                <div v-if="modalType === 'bahanPakan'">
+                    <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mb-3.5">{{ editingBahanIndex !== null ? 'Edit Bahan Pakan' : 'Tambah Bahan Pakan Baru' }}</h3>
+                    <form @submit.prevent="saveBahanPakan" class="space-y-3 text-xs">
+                        <div>
+                            <label class="block font-bold mb-1 text-slate-700">Nama Bahan Baku</label>
+                            <input v-model="formBahanPakan.nama" @input="onBahanNamaInput" list="bahanHistoryList" type="text" required placeholder="Contoh: Jagung Giling, Dedak, Konsentrat" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+                            <datalist id="bahanHistoryList">
+                                <option v-for="name in knownBahanNames" :key="name" :value="name"></option>
+                            </datalist>
+                            <p v-if="isKnownBahan" class="text-[10px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
+                                <i class="fa-solid fa-circle-check"></i> Harga & protein otomatis terisi dari riwayat sebelumnya!
+                            </p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block font-bold mb-1 text-slate-700">Proporsi / Rasio Mix (%)</label>
+                                <input v-model.number="formBahanPakan.rasio" type="number" min="0" max="100" required placeholder="30" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-sm">
+                            </div>
+                            <div>
+                                <label class="block font-bold mb-1 text-slate-700">Harga per Kg (Rp)</label>
+                                <input type="text" inputmode="numeric" :value="formatRupiahInputVal(formBahanPakan.harga)" @input="onRupiahInput($event, formBahanPakan, 'harga')" required placeholder="11.000" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-sm">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-bold mb-1 text-slate-700">Kadar Protein Kasar (%)</label>
+                            <input v-model.number="formBahanPakan.protein" type="number" min="0" step="0.1" required placeholder="9.0" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold">
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">
+                            Simpan Bahan Pakan
+                        </button>
+                    </form>
+                </div>
+
                 <!-- Form Penetasan -->
                 <div v-if="modalType === 'penetasan'">
                     <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mb-3.5">{{ editingPenetasanId ? 'Edit Batch Penetasan' : 'Inkubasi Telur Tetas Baru' }}</h3>
                     <form @submit.prevent="savePenetasan" class="space-y-3 text-xs">
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Nama Batch / Label</label>
-                            <input v-model="formPenetasan.namaBatch" type="text" required placeholder="Misal: Penetasan Batch #01" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <input v-model="formPenetasan.namaBatch" type="text" required placeholder="Contoh: Batch Tetas #01" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
                         <div class="grid grid-cols-2 gap-2.5">
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Nama Mesin Tetas</label>
-                                <input v-model="formPenetasan.mesin" type="text" required placeholder="Mesin A" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <input v-model="formPenetasan.mesin" type="text" required placeholder="Contoh: Mesin Tetas Otomatis A" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Tipe Ayam</label>
@@ -812,7 +862,7 @@
                             </div>
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Jumlah Telur (Butir)</label>
-                                <input v-model.number="formPenetasan.jumlahTelur" type="number" required min="1" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <input v-model.number="formPenetasan.jumlahTelur" type="number" required min="1" placeholder="50" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
                         </div>
 
@@ -822,13 +872,13 @@
                     </form>
                 </div>
 
-                <!-- Form Kelompok Ayam (Brooding, Grower, Indukan/Layer) -->
+                <!-- Form Kelompok Ayam (3 Fase) -->
                 <div v-if="modalType === 'flock'">
                     <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mb-3.5">{{ editingFlockId ? 'Edit Kelompok Ayam' : 'Tambah Kelompok Ayam Baru' }}</h3>
                     <form @submit.prevent="saveFlock" class="space-y-3 text-xs">
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Nama Kelompok / Batch</label>
-                            <input v-model="formFlock.namaFlock" type="text" required placeholder="Misal: Kampung Pedaging Batch A" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <input v-model="formFlock.namaFlock" type="text" required placeholder="Contoh: Batch Ayam Kampung A" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
                         <div class="grid grid-cols-2 gap-2.5">
                             <div>
@@ -841,9 +891,9 @@
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Fase Awal Ayam</label>
                                 <select v-model="formFlock.faseAwal" @change="onFaseAwalChange" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
-                                    <option value="DOC">DOC / Brooding (Starter)</option>
-                                    <option value="Grower">Pembesaran / Grower (Remaja)</option>
-                                    <option value="Layer">Produksi / Indukan (Dewasa)</option>
+                                    <option value="Starter">1. Starter (0-4 Minggu)</option>
+                                    <option value="Grower">2. Grower &amp; Pullet (5-19 Minggu)</option>
+                                    <option value="Layer">3. Layer (20+ Minggu)</option>
                                 </select>
                             </div>
                         </div>
@@ -852,33 +902,33 @@
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Pilih Kandang</label>
                                 <select v-model="formFlock.kandang" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
-                                    <option value="Kandang Brooding">Kandang Brooding</option>
+                                    <option value="Kandang Starter">Kandang Starter</option>
                                     <option value="Kandang Grower">Kandang Grower</option>
-                                    <option value="Kandang Indukan/Layer">Kandang Indukan/Layer</option>
+                                    <option value="Kandang Layer / Produksi">Kandang Layer / Produksi</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block font-bold mb-1 text-slate-700">Umur Beli (Hari)</label>
-                                <input v-model.number="formFlock.umurAwalHari" type="number" min="0" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold">
+                                <label class="block font-bold mb-1 text-slate-700">Umur Awal (Hari)</label>
+                                <input v-model.number="formFlock.umurAwalHari" type="number" min="0" required placeholder="0" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-2.5">
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Populasi Awal (Ekor)</label>
-                                <input v-model.number="formFlock.jumlahAwal" type="number" required min="1" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <input v-model.number="formFlock.jumlahAwal" @input="formFlock.jumlahSaatIni = formFlock.jumlahAwal" type="number" required min="1" placeholder="100" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Populasi Saat Ini</label>
-                                <input v-model.number="formFlock.jumlahSaatIni" type="number" required min="0" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-emerald-700">
+                                <input v-model.number="formFlock.jumlahSaatIni" type="number" required min="0" placeholder="100" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-emerald-700">
                             </div>
                         </div>
 
                         <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-2">
                             <div class="grid grid-cols-2 gap-2.5">
                                 <div>
-                                    <label class="block font-bold mb-1 text-slate-700">Biaya Pembelian Modal (Rp)</label>
-                                    <input type="text" inputmode="numeric" :value="formatRupiahInputVal(formFlock.biayaDoc)" @input="onRupiahInput($event, formFlock, 'biayaDoc')" placeholder="750.000" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-bold text-xs">
+                                    <label class="block font-bold mb-1 text-slate-700">Biaya Modal Pembelian (Rp)</label>
+                                    <input type="text" inputmode="numeric" :value="formatRupiahInputVal(formFlock.biayaDoc)" @input="onRupiahInput($event, formFlock, 'biayaDoc')" placeholder="Contoh: 750.000" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-bold text-xs">
                                 </div>
                                 <div class="flex items-end pb-1">
                                     <label v-if="!editingFlockId" class="flex items-center gap-1.5 font-bold text-emerald-800 cursor-pointer text-[11px]">
@@ -889,12 +939,12 @@
                             </div>
                             <div class="grid grid-cols-2 gap-2.5">
                                 <div>
-                                    <label class="block font-bold mb-1 text-slate-700">Pakan Starter (0-30 Hari)</label>
+                                    <label class="block font-bold mb-1 text-slate-700">Harga Pakan Starter (Rp/Kg)</label>
                                     <input type="text" inputmode="numeric" :value="formatRupiahInputVal(formFlock.hargaPakanStarter)" @input="onRupiahInput($event, formFlock, 'hargaPakanStarter')" placeholder="10.000" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-bold text-xs">
                                 </div>
                                 <div>
-                                    <label class="block font-bold mb-1 text-slate-700">Pakan Grower (>30 Hari)</label>
-                                    <input type="text" inputmode="numeric" :value="formatRupiahInputVal(formFlock.hargaPakanGrower)" @input="onRupiahInput($event, formFlock, 'hargaPakanGrower')" placeholder="4.000" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-bold text-xs">
+                                    <label class="block font-bold mb-1 text-slate-700">Harga Pakan Grower/Layer (Rp/Kg)</label>
+                                    <input type="text" inputmode="numeric" :value="formatRupiahInputVal(formFlock.hargaPakanGrower)" @input="onRupiahInput($event, formFlock, 'hargaPakanGrower')" placeholder="8.500" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-bold text-xs">
                                 </div>
                             </div>
                         </div>
@@ -928,57 +978,28 @@
                         <div class="grid grid-cols-2 gap-2.5">
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Pakan Dikonsumsi (Kg)</label>
-                                <input v-model.number="formHarian.pakanKg" type="number" step="0.1" min="0" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <input v-model.number="formHarian.pakanKg" type="number" step="0.1" min="0" placeholder="2.5" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Mati / Afkir (Ekor)</label>
-                                <input v-model.number="formHarian.kematian" type="number" min="0" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <input v-model.number="formHarian.kematian" type="number" min="0" placeholder="0" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-2.5">
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Telur Utuh / Bagus (Butir)</label>
-                                <input v-model.number="formHarian.telurBagus" type="number" min="0" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <input v-model.number="formHarian.telurBagus" type="number" min="0" placeholder="0" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Telur Retak / Rusak (Butir)</label>
-                                <input v-model.number="formHarian.telurRusak" type="number" min="0" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                                <input v-model.number="formHarian.telurRusak" type="number" min="0" placeholder="0" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
                         </div>
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Catatan Kesehatan / Aktivitas</label>
-                            <input v-model="formHarian.catatan" type="text" placeholder="Vaksin / Vitamin Vita Stress" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <input v-model="formHarian.catatan" type="text" placeholder="Contoh: Pemberian vitamin Vita Stress" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
                         <button type="submit" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">Simpan Log Harian</button>
-                    </form>
-                </div>
-
-                <!-- Form Bahan Pakan -->
-                <div v-if="modalType === 'bahanPakan'">
-                    <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mb-3.5">{{ editingBahanIdx !== null ? 'Edit Bahan Pakan' : 'Tambah Bahan Pakan' }}</h3>
-                    <form @submit.prevent="saveBahan" class="space-y-3 text-xs">
-                        <div>
-                            <label class="block font-bold mb-1 text-slate-700">Nama Bahan</label>
-                            <input v-model="formBahan.nama" type="text" required placeholder="Misal: Dedak Padi" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
-                        </div>
-                        <div class="grid grid-cols-2 gap-2.5">
-                            <div>
-                                <label class="block font-bold mb-1 text-slate-700">Proporsi (%)</label>
-                                <input v-model.number="formBahan.rasio" type="number" required min="0" max="100" step="0.1" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold">
-                                <p class="text-[10px] text-slate-400 mt-1">Sisa tersedia: {{ sisaRasioBahan }}%</p>
-                            </div>
-                            <div>
-                                <label class="block font-bold mb-1 text-slate-700">Protein (%)</label>
-                                <input v-model.number="formBahan.protein" type="number" min="0" step="0.1" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block font-bold mb-1 text-slate-700">Harga per Kg (Rp)</label>
-                            <input type="text" inputmode="numeric" :value="formatRupiahInputVal(formBahan.harga)" @input="onRupiahInput($event, formBahan, 'harga')" placeholder="5.000" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold">
-                        </div>
-                        <button type="submit" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">
-                            {{ editingBahanIdx !== null ? 'Simpan Perubahan' : 'Simpan Bahan' }}
-                        </button>
                     </form>
                 </div>
 
@@ -1017,7 +1038,7 @@
                         </div>
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Nominal Rp</label>
-                            <input type="text" inputmode="numeric" :value="formatRupiahInputVal(formKeuangan.nominal)" @input="onRupiahInput($event, formKeuangan, 'nominal')" required placeholder="500.000" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-sm">
+                            <input type="text" inputmode="numeric" :value="formatRupiahInputVal(formKeuangan.nominal)" @input="onRupiahInput($event, formKeuangan, 'nominal')" required placeholder="Contoh: 500.000" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-sm">
                         </div>
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Tanggal Transaksi</label>
@@ -1025,7 +1046,7 @@
                         </div>
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Keterangan Tambahan</label>
-                            <input v-model="formKeuangan.keterangan" type="text" placeholder="Keterangan transaksi" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            <input v-model="formKeuangan.keterangan" type="text" placeholder="Contoh: Penjualan telur 2 krat" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
                         <button type="submit" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">Simpan Transaksi</button>
                     </form>
@@ -1042,14 +1063,14 @@
 
         createApp({
             data() {
-                const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbyZbwa_UD1xaW_C14CNtwBgM3ykiz3BYkN_V0HRhwue7zoDCRhqOm3le-w0kaORKg/exec';
+                const DEFAULT_GAS_URL = '';
                 return {
                     activeTab: 'beranda',
                     showModal: false,
                     modalType: '',
                     editingPenetasanId: null,
                     editingFlockId: null,
-                    editingBahanIdx: null,
+                    editingBahanIndex: null,
 
                     gasApiUrl: localStorage.getItem('mandirifarm_gas_url') !== null 
                         ? localStorage.getItem('mandirifarm_gas_url') 
@@ -1074,30 +1095,26 @@
                     ],
                     
                     penetasanList: JSON.parse(localStorage.getItem('mandirifarm_penetasan')) || [],
-                    flockList: (JSON.parse(localStorage.getItem('mandirifarm_flock')) || []).map(f => ({
-                        biayaDoc: 0,
-                        hargaPakanStarter: 0,
-                        hargaPakanGrower: 0,
-                        hargaPakanPerKg: 0,
-                        biayaLainnya: 0,
-                        avgBobotKg: 1.2,
-                        hargaJualPerKg: 0,
-                        umurAwalHari: 0,
-                        ...f
-                    })),
+                    flockList: JSON.parse(localStorage.getItem('mandirifarm_flock')) || [],
                     harianList: JSON.parse(localStorage.getItem('mandirifarm_harian')) || [],
                     keuanganList: JSON.parse(localStorage.getItem('mandirifarm_keuangan')) || [],
 
-                    // FORMULASI & PRESET PAKAN (DEFAULT KOSONG)
+                    // PRESET 3 FASE PAKAN (PULLET DIGABUNG KE GROWER)
                     activePakanPreset: 'starter',
-                    pakanPresets: JSON.parse(localStorage.getItem('mandirifarm_pakan_presets')) || { starter: [], grower: [], layer: [] },
+                    pakanPresets: JSON.parse(localStorage.getItem('mandirifarm_pakan_presets')) || {
+                        starter: [],
+                        grower: [],
+                        layer: []
+                    },
+                    pakanHistory: JSON.parse(localStorage.getItem('mandirifarm_pakan_history')) || {},
                     currentFormulasiPakan: [],
                     targetFlockPakanId: '',
                     targetFasePakanType: 'starter',
-                    formBahan: { nama: '', rasio: 0, harga: 0, protein: 0 },
+                    isKnownBahan: false,
 
+                    formBahanPakan: { nama: '', rasio: 0, harga: 0, protein: 0 },
                     formPenetasan: { namaBatch: '', mesin: '', tipe: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 0, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0 },
-                    formFlock: { namaFlock: '', tipe: 'Pedaging', faseAwal: 'DOC', kandang: 'Kandang Brooding', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) },
+                    formFlock: { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang Starter', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) },
                     formHarian: { flockId: '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' },
                     formKeuangan: { jenis: 'Pemasukan', kategori: 'Penjualan Telur', nominal: 0, tanggal: new Date().toISOString().substr(0, 10), keterangan: '' },
 
@@ -1128,7 +1145,6 @@
                         .filter(h => h.tanggal === today)
                         .reduce((acc, curr) => acc + (parseInt(curr.telurBagus) || 0), 0);
                 },
-                // KALKULASI KEUANGAN PERSISI (Bebas Masalah Huruf Besar/Kecil)
                 totalPemasukan() {
                     return this.keuanganList
                         .filter(k => k.jenis && k.jenis.toString().toLowerCase() === 'pemasukan')
@@ -1151,10 +1167,6 @@
                 totalPakanRasio() {
                     return this.currentFormulasiPakan.reduce((acc, curr) => acc + (parseFloat(curr.rasio) || 0), 0);
                 },
-                sisaRasioBahan() {
-                    const terpakai = this.currentFormulasiPakan.reduce((a, b, i) => i === this.editingBahanIdx ? a : a + (parseFloat(b.rasio) || 0), 0);
-                    return Math.round((100 - terpakai) * 10) / 10;
-                },
                 hasilPakanPerKg() {
                     if (!this.currentFormulasiPakan.length) return 0;
                     const totalCost = this.currentFormulasiPakan.reduce((acc, curr) => {
@@ -1172,6 +1184,11 @@
                         return acc + ((r / 100) * p);
                     }, 0);
                     return totalProtein.toFixed(1);
+                },
+                knownBahanNames() {
+                    return Object.keys(this.pakanHistory).map(k => {
+                        return k.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                    });
                 }
             },
             watch: {
@@ -1201,7 +1218,9 @@
                 if (this.pushTimer) clearTimeout(this.pushTimer);
             },
             methods: {
-                // FORMATTER INPUT RUPIAH SERIBU
+                isPengeluaran(jenis) {
+                    return jenis && jenis.toString().toLowerCase() === 'pengeluaran';
+                },
                 onRupiahInput(event, targetObj, fieldName) {
                     const raw = event.target.value.replace(/[^0-9]/g, '');
                     const num = raw ? parseInt(raw, 10) : 0;
@@ -1212,71 +1231,111 @@
                     if (!val || isNaN(val) || val === 0) return '';
                     return new Intl.NumberFormat('id-ID').format(val);
                 },
-                isPengeluaran(jenis) {
-                    return jenis && jenis.toString().toLowerCase() === 'pengeluaran';
-                },
 
-                // MANAGEMENT FORMULASI PAKAN
+                // FORMULASI PAKAN 3 FASE & AUTO-SYNC OTOMATIS KE KELOMPOK AYAM
                 loadPakanPreset(type) {
                     this.activePakanPreset = type;
-                    this.currentFormulasiPakan = JSON.parse(JSON.stringify(this.pakanPresets[type] || []))
-                        .filter(b => b.nama || b.rasio > 0);
+                    if (!this.pakanPresets[type]) this.pakanPresets[type] = [];
+                    this.currentFormulasiPakan = JSON.parse(JSON.stringify(this.pakanPresets[type]));
                 },
-                openBahanModal(idx = null) {
-                    this.editingBahanIdx = idx;
-                    this.formBahan = idx === null
-                        ? { nama: '', rasio: 0, harga: 0, protein: 0 }
-                        : { ...this.currentFormulasiPakan[idx] };
+                openBahanPakanModal() {
+                    this.editingBahanIndex = null;
+                    this.isKnownBahan = false;
+                    this.formBahanPakan = { nama: '', rasio: 0, harga: 0, protein: 0 };
                     this.modalType = 'bahanPakan';
                     this.showModal = true;
                 },
-                saveBahan() {
-                    const rasio = parseFloat(this.formBahan.rasio) || 0;
-                    if (rasio > this.sisaRasioBahan) {
-                        this.showToast(`Proporsi melebihi sisa (${this.sisaRasioBahan}%).`, 'error');
+                editBahanPakan(idx) {
+                    this.editingBahanIndex = idx;
+                    this.isKnownBahan = false;
+                    const item = this.currentFormulasiPakan[idx];
+                    this.formBahanPakan = JSON.parse(JSON.stringify(item));
+                    this.modalType = 'bahanPakan';
+                    this.showModal = true;
+                },
+                onBahanNamaInput() {
+                    const rawName = (this.formBahanPakan.nama || '').trim().toLowerCase();
+                    if (rawName && this.pakanHistory[rawName]) {
+                        const saved = this.pakanHistory[rawName];
+                        this.formBahanPakan.harga = saved.harga || 0;
+                        this.formBahanPakan.protein = saved.protein || 0;
+                        this.isKnownBahan = true;
+                    } else {
+                        this.isKnownBahan = false;
+                    }
+                },
+                saveBahanPakan() {
+                    const name = (this.formBahanPakan.nama || '').trim();
+                    if (!name) {
+                        this.showToast('Nama bahan pakan tidak boleh kosong.', 'error');
                         return;
                     }
-                    const item = {
-                        nama: (this.formBahan.nama || '').trim(),
-                        rasio: rasio,
-                        harga: parseFloat(this.formBahan.harga) || 0,
-                        protein: parseFloat(this.formBahan.protein) || 0
+
+                    const key = name.toLowerCase();
+                    this.pakanHistory[key] = {
+                        harga: parseFloat(this.formBahanPakan.harga) || 0,
+                        protein: parseFloat(this.formBahanPakan.protein) || 0
                     };
-                    if (this.editingBahanIdx !== null) this.currentFormulasiPakan.splice(this.editingBahanIdx, 1, item);
-                    else this.currentFormulasiPakan.push(item);
-                    this.persistPakan();
-                    this.closeModal();
-                    this.showToast('Bahan pakan tersimpan.', 'info');
-                },
-                removeBahanPakan(idx) {
-                    this.showConfirm('Hapus Bahan?', 'Bahan ini akan dihapus dari racikan.', () => {
-                        this.currentFormulasiPakan.splice(idx, 1);
-                        this.persistPakan();
-                        this.showToast('Bahan pakan dihapus.', 'info');
-                    });
-                },
-                persistPakan() {
+                    localStorage.setItem('mandirifarm_pakan_history', JSON.stringify(this.pakanHistory));
+
+                    const newItem = {
+                        nama: name,
+                        rasio: parseFloat(this.formBahanPakan.rasio) || 0,
+                        harga: parseFloat(this.formBahanPakan.harga) || 0,
+                        protein: parseFloat(this.formBahanPakan.protein) || 0
+                    };
+
+                    if (this.editingBahanIndex !== null) {
+                        this.currentFormulasiPakan[this.editingBahanIndex] = newItem;
+                    } else {
+                        this.currentFormulasiPakan.push(newItem);
+                    }
+
                     this.pakanPresets[this.activePakanPreset] = JSON.parse(JSON.stringify(this.currentFormulasiPakan));
                     localStorage.setItem('mandirifarm_pakan_presets', JSON.stringify(this.pakanPresets));
                     this.debouncedPushToGas();
+
+                    this.closeModal();
+                    this.showToast(`Bahan "${name}" berhasil disimpan ke preset ${this.activePakanPreset.toUpperCase()}!`, 'info');
                 },
-                applyPakanToFlock() {
-                    if (!this.targetFlockPakanId) {
-                        this.showToast('Pilih kelompok ayam target.', 'error');
+                removeBahanPakan(idx) {
+                    this.currentFormulasiPakan.splice(idx, 1);
+                    this.pakanPresets[this.activePakanPreset] = JSON.parse(JSON.stringify(this.currentFormulasiPakan));
+                    localStorage.setItem('mandirifarm_pakan_presets', JSON.stringify(this.pakanPresets));
+                    this.debouncedPushToGas();
+                    this.showToast('Bahan pakan dihapus.', 'info');
+                },
+                saveAndAutoSyncPakanPreset() {
+                    if (this.totalPakanRasio !== 100) {
+                        this.showToast('Total rasio pakan harus tepat 100% sebelum disimpan.', 'error');
                         return;
                     }
-                    const target = this.flockList.find(f => f.id === this.targetFlockPakanId);
-                    if (target) {
-                        if (this.targetFasePakanType === 'starter') {
-                            target.hargaPakanStarter = this.hasilPakanPerKg;
-                        } else {
-                            target.hargaPakanGrower = this.hasilPakanPerKg;
+
+                    this.pakanPresets[this.activePakanPreset] = JSON.parse(JSON.stringify(this.currentFormulasiPakan));
+                    localStorage.setItem('mandirifarm_pakan_presets', JSON.stringify(this.pakanPresets));
+                    this.debouncedPushToGas();
+
+                    const computedPrice = this.hasilPakanPerKg;
+                    let updatedCount = 0;
+
+                    this.flockList.forEach(f => {
+                        const umur = this.hitungUmurAyamHari(f);
+                        if (this.activePakanPreset === 'starter' && umur <= 28) {
+                            f.hargaPakanStarter = computedPrice;
+                            updatedCount++;
+                        } else if (this.activePakanPreset === 'grower' && umur > 28 && umur <= 139) {
+                            f.hargaPakanGrower = computedPrice;
+                            updatedCount++;
+                        } else if (this.activePakanPreset === 'layer' && umur >= 140) {
+                            f.hargaPakanGrower = computedPrice;
+                            updatedCount++;
                         }
-                        this.showToast(`Harga pakan Rp ${this.formatRupiahInputVal(this.hasilPakanPerKg)}/kg diterapkan ke ${target.namaFlock}`, 'info');
-                    }
+                    });
+
+                    this.showToast(`Preset ${this.activePakanPreset.toUpperCase()} disimpan! Harga ${this.formatRupiah(computedPrice)}/kg otomatis di-update ke ${updatedCount} kelompok ayam.`, 'info');
                 },
 
-                // ATURAN UMUR & FASE OTOMATIS
+                // LOGIKA 3 FASE PERTUMBUHAN
                 hitungUmurAyamHari(flock) {
                     if (!flock.tglMulai) return flock.umurAwalHari || 0;
                     const start = new Date(flock.tglMulai);
@@ -1292,19 +1351,25 @@
                 },
                 getFaseLabel(flock) {
                     const umur = this.hitungUmurAyamHari(flock);
-                    if (umur <= 30) return 'DOC / Brooding';
-                    if (umur <= 120) return 'Pembesaran / Grower';
-                    return 'Produksi / Indukan';
+                    if (umur <= 28) return '1. Starter (0-4 Mg)';
+                    if (umur <= 139) return '2. Grower & Pullet (5-19 Mg)';
+                    return '3. Layer (20+ Mg)';
                 },
                 getFaseBadgeClass(flock) {
                     const umur = this.hitungUmurAyamHari(flock);
-                    if (umur <= 30) return 'bg-amber-100 text-amber-800';
-                    if (umur <= 120) return 'bg-emerald-100 text-emerald-800';
+                    if (umur <= 28) return 'bg-amber-100 text-amber-800';
+                    if (umur <= 139) return 'bg-emerald-100 text-emerald-800';
                     return 'bg-purple-100 text-purple-800';
+                },
+                getFaseTargetBobot(flock) {
+                    const umur = this.hitungUmurAyamHari(flock);
+                    if (umur <= 28) return '50g - 400 gram';
+                    if (umur <= 139) return '450g - 1.500 gram';
+                    return '1.500g - 1.700+ gram';
                 },
                 getHargaPakanAktif(flock) {
                     const umur = this.hitungUmurAyamHari(flock);
-                    if (umur <= 30) {
+                    if (umur <= 28) {
                         return parseFloat(flock.hargaPakanStarter) || 0;
                     }
                     return parseFloat(flock.hargaPakanGrower) || 0;
@@ -1314,14 +1379,15 @@
                 exportBackupFile() {
                     const backupData = {
                         app: 'MandiriFarm',
-                        version: '1.6.0',
+                        version: '1.8.0',
                         exportedAt: new Date().toISOString(),
                         data: {
                             penetasanList: this.penetasanList,
                             flockList: this.flockList,
                             harianList: this.harianList,
                             keuanganList: this.keuanganList,
-                            pakanPresets: this.pakanPresets
+                            pakanPresets: this.pakanPresets,
+                            pakanHistory: this.pakanHistory
                         }
                     };
 
@@ -1357,9 +1423,13 @@
                                         this.harianList = imported.data.harianList || [];
                                         this.keuanganList = imported.data.keuanganList || [];
                                         if (imported.data.pakanPresets) {
-                                            this.pakanPresets = { starter: [], grower: [], layer: [], ...imported.data.pakanPresets };
+                                            this.pakanPresets = imported.data.pakanPresets;
                                             localStorage.setItem('mandirifarm_pakan_presets', JSON.stringify(this.pakanPresets));
                                             this.loadPakanPreset('starter');
+                                        }
+                                        if (imported.data.pakanHistory) {
+                                            this.pakanHistory = imported.data.pakanHistory;
+                                            localStorage.setItem('mandirifarm_pakan_history', JSON.stringify(this.pakanHistory));
                                         }
 
                                         this.$nextTick(() => {
@@ -1384,19 +1454,20 @@
                     this.showModal = false;
                     this.editingPenetasanId = null;
                     this.editingFlockId = null;
-                    this.editingBahanIdx = null;
+                    this.editingBahanIndex = null;
+                    this.isKnownBahan = false;
                 },
 
                 onFaseAwalChange() {
-                    if (this.formFlock.faseAwal === 'DOC') {
+                    if (this.formFlock.faseAwal === 'Starter') {
                         this.formFlock.umurAwalHari = 0;
-                        this.formFlock.kandang = 'Kandang Brooding';
+                        this.formFlock.kandang = 'Kandang Starter';
                     } else if (this.formFlock.faseAwal === 'Grower') {
                         this.formFlock.umurAwalHari = 31;
                         this.formFlock.kandang = 'Kandang Grower';
                     } else if (this.formFlock.faseAwal === 'Layer') {
-                        this.formFlock.umurAwalHari = 121;
-                        this.formFlock.kandang = 'Kandang Indukan/Layer';
+                        this.formFlock.umurAwalHari = 140;
+                        this.formFlock.kandang = 'Kandang Layer / Produksi';
                     }
                 },
 
@@ -1483,7 +1554,11 @@
                                 </tr>
                                 <tr>
                                     <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Tipe &amp; Umur Ayam</td>
-                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">${flock.tipe} (${this.getFaseLabel(flock)} - ${this.hitungUmurAyamHari(flock)} Hari)</td>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">${flock.tipe} (${this.getFaseLabel(flock)} - ${this.formatUmurMinggu(flock)})</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Target Bobot Fase</td>
+                                    <td style="padding: 6px 10px; border: 1px solid #cbd5e1; font-weight: bold; color: #047857;">${this.getFaseTargetBobot(flock)}</td>
                                 </tr>
                                 <tr>
                                     <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Kandang / Lokasi</td>
@@ -1517,7 +1592,7 @@
                                         <td style="padding: 6px 10px; border: 1px solid #cbd5e1; text-align: right;">${this.formatRupiah(pakanTotal * hargaPakanAktif)}</td>
                                     </tr>
                                     <tr>
-                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Biaya Operasional &amp; Obat-obatan</td>
+                                        <td style="padding: 6px 10px; border: 1px solid #cbd5e1;">Biaya Operasional &amp; Lainnya</td>
                                         <td style="padding: 6px 10px; border: 1px solid #cbd5e1; text-align: right;">${this.formatRupiah(flock.biayaLainnya || 0)}</td>
                                     </tr>
                                     <tr style="font-weight: bold; background-color: #f0fdf4;">
@@ -1618,8 +1693,7 @@
                             localStorage.removeItem('mandirifarm_harian');
                             localStorage.removeItem('mandirifarm_keuangan');
                             localStorage.removeItem('mandirifarm_pakan_presets');
-                            this.pakanPresets = { starter: [], grower: [], layer: [] };
-                            this.currentFormulasiPakan = [];
+                            localStorage.removeItem('mandirifarm_pakan_history');
 
                             this.$nextTick(() => {
                                 this.isSyncingFromGas = false;
@@ -1700,12 +1774,9 @@
                                 }));
                             }
                             if (json.data.pakanPresets) {
-                                this.pakanPresets = { starter: [], grower: [], layer: [], ...json.data.pakanPresets };
+                                this.pakanPresets = json.data.pakanPresets;
                                 localStorage.setItem('mandirifarm_pakan_presets', JSON.stringify(this.pakanPresets));
-                                // Jangan timpa isi form saat popup bahan sedang terbuka
-                                if (!(this.showModal && this.modalType === 'bahanPakan')) {
-                                    this.loadPakanPreset(this.activePakanPreset || 'starter');
-                                }
+                                this.loadPakanPreset(this.activePakanPreset || 'starter');
                             }
                             this.isGasSynced = true;
                         }
@@ -1849,30 +1920,30 @@
 
                     if (this.finishHatchingModal.createDocFlock && menetas > 0) {
                         const tglHatching = new Date(b.estMenetas || new Date());
-                        const tglBrooding = new Date(tglHatching);
-                        tglBrooding.setDate(tglBrooding.getDate() + 1);
+                        const tglStarter = new Date(tglHatching);
+                        tglStarter.setDate(tglStarter.getDate() + 1);
 
                         const newFlock = {
                             id: 'FLK-' + Date.now(),
                             namaFlock: 'DOC Hasil ' + b.namaBatch,
                             tipe: b.tipe || 'Pedaging',
-                            faseAwal: 'DOC',
-                            kandang: 'Kandang Brooding',
+                            faseAwal: 'Starter',
+                            kandang: 'Kandang Starter',
                             jumlahAwal: menetas,
                             jumlahSaatIni: menetas,
                             biayaDoc: 0,
                             hargaPakanStarter: 0,
                             hargaPakanGrower: 0,
-                            avgBobotKg: 1.2,
+                            avgBobotKg: 0.05,
                             hargaJualPerKg: 0,
                             umurAwalHari: 0,
-                            tglMulai: tglBrooding.toISOString().substr(0, 10)
+                            tglMulai: tglStarter.toISOString().substr(0, 10)
                         };
                         this.flockList.unshift(newFlock);
                     }
 
                     this.finishHatchingModal.show = false;
-                    this.showToast(`Panen DOC Berhasil! Total ${menetas} ekor masuk Kandang Brooding (H+1).`, 'info');
+                    this.showToast(`Panen DOC Berhasil! Total ${menetas} ekor masuk Kandang Starter (H+1).`, 'info');
                 },
                 confirmDeletePenetasan(id) {
                     this.showConfirm('Hapus Penetasan?', 'Apakah Anda yakin menghapus catatan inkubasi ini?', () => {
@@ -1881,7 +1952,6 @@
                     });
                 },
 
-                // OTOMATISASI KEUANGAN SAAT BELI DOC / INDUKAN / AYAM BARU
                 saveFlock() {
                     const initial = parseInt(this.formFlock.jumlahAwal) || 0;
                     const modalPembelian = parseFloat(this.formFlock.biayaDoc) || 0;
@@ -1917,14 +1987,13 @@
                             biayaDoc: modalPembelian,
                             hargaPakanStarter: parseFloat(this.formFlock.hargaPakanStarter) || 0,
                             hargaPakanGrower: parseFloat(this.formFlock.hargaPakanGrower) || 0,
-                            avgBobotKg: 1.2,
+                            avgBobotKg: 0.05,
                             hargaJualPerKg: 0,
                             umurAwalHari: parseInt(this.formFlock.umurAwalHari) || 0,
                             tglMulai: this.formFlock.tglMulai
                         };
                         this.flockList.unshift(newFlock);
 
-                        // OTOMATISASI KE KEUANGAN (PENGELUARAN)
                         if (this.formFlock.autoRecordKeuangan && modalPembelian > 0) {
                             const newKeuangan = {
                                 id: 'KEU-' + Date.now(),
@@ -1942,7 +2011,7 @@
                     }
 
                     this.closeModal();
-                    this.formFlock = { namaFlock: '', tipe: 'Pedaging', faseAwal: 'DOC', kandang: 'Kandang Brooding', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) };
+                    this.formFlock = { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang Starter', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) };
                 },
                 confirmDeleteFlock(id) {
                     this.showConfirm('Hapus Kelompok Ayam?', 'Apakah Anda yakin ingin menghapus kelompok ayam ini?', () => {
