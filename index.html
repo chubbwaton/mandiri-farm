@@ -57,12 +57,12 @@
         <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-white min-h-screen sticky top-0 shadow-2xl z-30 no-print">
             <div class="p-5 flex items-center justify-between border-b border-slate-800">
                 <div class="flex items-center gap-3">
-                    <div class="flex flex-col items-center justify-center mb-4 mt-8">
-                         <img src="Logo-Mandiri-Farm.png" alt="Mandiri Farm" class="w-20 h-20 object-contain mx-auto mb-2">
-                     </div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-emerald-500/30">
+                        <i class="fa-solid fa-egg"></i>
+                    </div>
                     <div>
                         <h1 class="font-bold text-lg leading-tight text-white tracking-wide">Mandiri Farm</h1>
-                        <p class="text-xs text-emerald-400 font-medium">Monitoring Ayam Kampung</p>
+                        <p class="text-xs text-emerald-400 font-medium">Monitoring Ayam</p>
                     </div>
                 </div>
             </div>
@@ -188,34 +188,6 @@
                 </div>
                 <div v-else class="text-xs text-slate-500 p-3 text-center bg-slate-50 rounded-xl">
                     <i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i> Tidak ada notifikasi baru. Seluruh kelompok ayam berada di kandang yang sesuai umur.
-                </div>
-            </div>
-
-            <!-- BANNER ALERT JADWAL PINDAH KANDANG -->
-            <div v-if="flockMoveAlerts.length > 0" class="mb-5 bg-gradient-to-r from-amber-500 to-rose-500 text-white p-4 rounded-2xl shadow-lg no-print">
-                <div class="flex items-start justify-between gap-3">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-xl shrink-0">
-                            <i class="fa-solid fa-truck-ramp-box animate-bounce"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-extrabold text-sm sm:text-base">Pemberitahuan Pindah Kandang ({{ flockMoveAlerts.length }} Kelompok)</h3>
-                            <p class="text-xs text-amber-100 mt-0.5">Ayam telah memasuki batas umur fase baru dan siap dipindahkan ke kandang berikutnya.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <div v-for="alert in flockMoveAlerts" :key="alert.flock.id" class="bg-white/10 backdrop-blur-md p-2.5 rounded-xl flex items-center justify-between gap-2 border border-white/20">
-                        <div class="text-xs">
-                            <span class="font-bold block">{{ alert.flock.namaFlock }}</span>
-                            <span class="text-[11px] text-amber-100">
-                                Saat ini: <strong class="underline">{{ alert.flock.kandang }}</strong> ({{ formatUmurMinggu(alert.flock) }})
-                            </span>
-                        </div>
-                        <button @click="triggerMoveFromCard(alert.flock)" class="px-3 py-1.5 bg-white text-rose-700 hover:bg-amber-50 font-extrabold rounded-lg text-[11px] transition shadow">
-                            <i class="fa-solid fa-right-left mr-1"></i> Pindah ke {{ alert.suggestedKandang }}
-                        </button>
-                    </div>
                 </div>
             </div>
 
