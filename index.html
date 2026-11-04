@@ -779,7 +779,7 @@
 
                     <div class="flex items-center gap-2 pt-1 border-t border-slate-200">
                         <input type="checkbox" id="createDocBatch" v-model="finishHatchingModal.createDocFlock" class="w-4 h-4 text-emerald-600 rounded">
-                        <label for="createDocBatch" class="font-semibold text-slate-700 cursor-pointer text-[11px]">Auto Masuk Kandang Starter (H+1)</label>
+                        <label for="createDocBatch" class="font-semibold text-slate-700 cursor-pointer text-[11px]">Auto Masuk Kandang Brooding (H+1)</label>
                     </div>
                 </div>
 
@@ -902,7 +902,7 @@
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Pilih Kandang</label>
                                 <select v-model="formFlock.kandang" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
-                                    <option value="Kandang Starter">Kandang Starter</option>
+                                    <option value="Kandang Brooding">Kandang Brooding</option>
                                     <option value="Kandang Grower">Kandang Grower</option>
                                     <option value="Kandang Layer / Produksi">Kandang Layer / Produksi</option>
                                 </select>
@@ -1114,7 +1114,7 @@
 
                     formBahanPakan: { nama: '', rasio: 0, harga: 0, protein: 0 },
                     formPenetasan: { namaBatch: '', mesin: '', tipe: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 0, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0 },
-                    formFlock: { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang Starter', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) },
+                    formFlock: { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang Brooding', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) },
                     formHarian: { flockId: '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' },
                     formKeuangan: { jenis: 'Pemasukan', kategori: 'Penjualan Telur', nominal: 0, tanggal: new Date().toISOString().substr(0, 10), keterangan: '' },
 
@@ -1461,7 +1461,7 @@
                 onFaseAwalChange() {
                     if (this.formFlock.faseAwal === 'Starter') {
                         this.formFlock.umurAwalHari = 0;
-                        this.formFlock.kandang = 'Kandang Starter';
+                        this.formFlock.kandang = 'Kandang Brooding';
                     } else if (this.formFlock.faseAwal === 'Grower') {
                         this.formFlock.umurAwalHari = 31;
                         this.formFlock.kandang = 'Kandang Grower';
@@ -1928,7 +1928,7 @@
                             namaFlock: 'DOC Hasil ' + b.namaBatch,
                             tipe: b.tipe || 'Pedaging',
                             faseAwal: 'Starter',
-                            kandang: 'Kandang Starter',
+                            kandang: 'Kandang Brooding',
                             jumlahAwal: menetas,
                             jumlahSaatIni: menetas,
                             biayaDoc: 0,
@@ -1943,7 +1943,7 @@
                     }
 
                     this.finishHatchingModal.show = false;
-                    this.showToast(`Panen DOC Berhasil! Total ${menetas} ekor masuk Kandang Starter (H+1).`, 'info');
+                    this.showToast(`Panen DOC Berhasil! Total ${menetas} ekor masuk Kandang Brooding (H+1).`, 'info');
                 },
                 confirmDeletePenetasan(id) {
                     this.showConfirm('Hapus Penetasan?', 'Apakah Anda yakin menghapus catatan inkubasi ini?', () => {
@@ -2011,7 +2011,7 @@
                     }
 
                     this.closeModal();
-                    this.formFlock = { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang Starter', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) };
+                    this.formFlock = { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang Brooding', jumlahAwal: 0, jumlahSaatIni: 0, biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) };
                 },
                 confirmDeleteFlock(id) {
                     this.showConfirm('Hapus Kelompok Ayam?', 'Apakah Anda yakin ingin menghapus kelompok ayam ini?', () => {
