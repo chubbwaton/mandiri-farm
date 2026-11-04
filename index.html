@@ -167,7 +167,7 @@
                 </div>
             </div>
 
-            <!-- DROPDOWN / POPUP PANEL NOTIFIKASI (TAMPIL HANYA SAAT IKON LONCENG DIKLIK) -->
+            <!-- DROPDOWN / POPUP PANEL NOTIFIKASI -->
             <div v-if="showNotifDropdown" class="mb-5 bg-white rounded-2xl border border-amber-200 shadow-2xl p-4 space-y-3 relative z-30 no-print animate-in fade-in duration-200">
                 <div class="flex items-center justify-between border-b pb-2">
                     <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2">
@@ -1728,12 +1728,33 @@
                         this.formPenetasan = { namaBatch: '', mesin: '', tipe: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 0, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0, asalTelur: 'Indukan', biayaTelur: 0, sumberBeli: '', indukanFlockId: '' };
                     } else if (type === 'flock') {
                         this.editingFlockId = null;
-                        this.formFlock = { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang B-01', jumlahAwal: 0, jumlahSaatIni: 0, asalDoc: 'Hasil Penetasan', sumberBeli: '', biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) };
+                        this.formFlock = { 
+                            namaFlock: '', 
+                            tipe: 'Pedaging', 
+                            faseAwal: 'Starter', 
+                            kandang: 'Kandang B-01', 
+                            jumlahAwal: 0, 
+                            jumlahSaatIni: 0, 
+                            asalDoc: 'Hasil Penetasan', 
+                            sumberBeli: '', 
+                            biayaDoc: 0, 
+                            autoRecordKeuangan: true, 
+                            hargaPakanStarter: this.getPresetPrice('starter'), 
+                            hargaPakanGrower: this.getPresetPrice('grower'), 
+                            umurAwalHari: 0, 
+                            tglMulai: new Date().toISOString().substr(0, 10) 
+                        };
                     } else if (type === 'harian') {
                         this.formHarian = { flockId: this.flockList.length ? this.flockList[0].id : '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' };
                     } else if (type === 'keuangan') {
                         this.formKeuangan = { jenis: 'Pemasukan', kategori: 'Penjualan Telur', nominal: 0, tanggal: new Date().toISOString().substr(0, 10), keterangan: '' };
                     }
+                    this.showModal = true;
+                },
+                openBahanPakanModal() {
+                    this.editingBahanIndex = null;
+                    this.formBahanPakan = { nama: '', rasio: 0, harga: 0, protein: 0 };
+                    this.modalType = 'bahanPakan';
                     this.showModal = true;
                 },
                 editPenetasan(b) {
@@ -2324,17 +2345,20 @@
                 },
 
                 // FORMULASI PAKAN 3 FASE & AUTO-SYNC OTOMATIS KE KELOMPOK AYAM
+                getPresetPrice(phase) {
+                    const list = this.pakanPresets[phase] || [];
+                    if (!list.length) return 0;
+                    const totalCost = list.reduce((acc, curr) => {
+                        const r = parseFloat(curr.rasio) || 0;
+                        const h = parseFloat(curr.harga) || 0;
+                        return acc + ((r / 100) * h);
+                    }, 0);
+                    return Math.round(totalCost);
+                },
                 loadPakanPreset(type) {
                     this.activePakanPreset = type;
                     if (!this.pakanPresets[type]) this.pakanPresets[type] = [];
                     this.currentFormulasiPakan = JSON.parse(JSON.stringify(this.pakanPresets[type]));
-                },
-                openBahanPakanModal() {
-                    this.editingBahanIndex = null;
-                    this.isKnownBahan = false;
-                    this.formBahanPakan = { nama: '', rasio: 0, harga: 0, protein: 0 };
-                    this.modalType = 'bahanPakan';
-                    this.showModal = true;
                 },
                 editBahanPakan(idx) {
                     this.editingBahanIndex = idx;
@@ -2553,12 +2577,15 @@
                     if (this.formFlock.faseAwal === 'Starter') {
                         this.formFlock.umurAwalHari = 0;
                         this.formFlock.kandang = 'Kandang B-01';
+                        this.formFlock.hargaPakanStarter = this.getPresetPrice('starter');
                     } else if (this.formFlock.faseAwal === 'Grower') {
                         this.formFlock.umurAwalHari = 31;
                         this.formFlock.kandang = 'Kandang G-01';
+                        this.formFlock.hargaPakanGrower = this.getPresetPrice('grower');
                     } else if (this.formFlock.faseAwal === 'Layer') {
                         this.formFlock.umurAwalHari = 140;
                         this.formFlock.kandang = 'Kandang A-01';
+                        this.formFlock.hargaPakanGrower = this.getPresetPrice('layer') || this.getPresetPrice('grower');
                     }
                 },
                 saveFinishPenetasan() {
@@ -2598,8 +2625,8 @@
                             jumlahAwal: menetas,
                             jumlahSaatIni: menetas,
                             biayaDoc: b.asalTelur === 'Beli' ? (parseFloat(b.biayaTelur) || 0) : 0,
-                            hargaPakanStarter: 0,
-                            hargaPakanGrower: 0,
+                            hargaPakanStarter: this.getPresetPrice('starter'),
+                            hargaPakanGrower: this.getPresetPrice('grower'),
                             avgBobotKg: 0.05,
                             hargaJualPerKg: 0,
                             umurAwalHari: 0,
@@ -2688,7 +2715,22 @@
                     }
 
                     this.closeModal();
-                    this.formFlock = { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang B-01', jumlahAwal: 0, jumlahSaatIni: 0, asalDoc: 'Hasil Penetasan', sumberBeli: '', biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) };
+                    this.formFlock = { 
+                        namaFlock: '', 
+                        tipe: 'Pedaging', 
+                        faseAwal: 'Starter', 
+                        kandang: 'Kandang B-01', 
+                        jumlahAwal: 0, 
+                        jumlahSaatIni: 0, 
+                        asalDoc: 'Hasil Penetasan', 
+                        sumberBeli: '', 
+                        biayaDoc: 0, 
+                        autoRecordKeuangan: true, 
+                        hargaPakanStarter: this.getPresetPrice('starter'), 
+                        hargaPakanGrower: this.getPresetPrice('grower'), 
+                        umurAwalHari: 0, 
+                        tglMulai: new Date().toISOString().substr(0, 10) 
+                    };
                 }
             }
         }).mount('#app');
