@@ -60,8 +60,8 @@
             <div class="p-5 flex items-center justify-between border-b border-slate-800">
                 <div class="flex items-center gap-3">
                     <div class="flex flex-col items-center justify-center mb-4 mt-8">
-                     	<img src="Logo-Mandiri-Farm.png" alt="Mandiri Farm" class="w-20 h-20 object-contain mx-auto mb-2">
-                     </div>
+                        <img src="Logo-Mandiri-Farm.png" alt="Mandiri Farm" class="w-20 h-20 object-contain mx-auto mb-2" onerror="this.style.display='none'">
+                    </div>
                     <div>
                         <h1 class="font-bold text-lg leading-tight text-white tracking-wide">Mandiri Farm</h1>
                         <p class="text-xs text-emerald-400 font-medium">Monitoring Ayam Kampung</p>
@@ -145,7 +145,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 sm:mb-6 no-print">
                 <div>
                     <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{{ currentNavTitle }}</h2>
-                    <p class="text-slate-500 text-xs sm:text-sm">Kelola penetasan, 3 fase pertumbuhan ayam, penataan kandang (B-01, G-01, A-01), HPP, dan keuangan.</p>
+                    <p class="text-slate-500 text-xs sm:text-sm">Kelola penetasan, 3 fase pertumbuhan ayam, penataan kandang, HPP, dan keuangan.</p>
                 </div>
                 <div class="hidden md:flex items-center gap-2.5 relative">
                     <!-- TOMBOL IKON LONCENG NOTIFIKASI -->
@@ -656,7 +656,7 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 bg-white p-3.5 sm:p-4.5 rounded-2xl border border-slate-200 shadow-sm">
                     <div>
                         <h3 class="font-bold text-slate-800 text-sm sm:text-base">Jurnal Record Harian Kandang</h3>
-                        <p class="text-xs text-slate-500">Log pakan, produksi telur, dan kematian harian.</p>
+                        <p class="text-xs text-slate-500">Log pakan, bobot ayam, produksi telur, dan kematian harian.</p>
                     </div>
                     <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                         <!-- FITUR PENCARIAN LOG HARIAN -->
@@ -681,6 +681,7 @@
                                     <th class="p-3">Tanggal</th>
                                     <th class="p-3">Kelompok / Kandang</th>
                                     <th class="p-3">Pakan (Kg)</th>
+                                    <th class="p-3">Bobot (Kg)</th>
                                     <th class="p-3">Telur Bagus</th>
                                     <th class="p-3">Telur Rusak</th>
                                     <th class="p-3">Kematian</th>
@@ -693,6 +694,7 @@
                                     <td class="p-3 font-semibold text-slate-800 whitespace-nowrap">{{ formatDate(h.tanggal) }}</td>
                                     <td class="p-3"><span class="font-bold text-emerald-700">{{ getFlockName(h.flockId) }}</span></td>
                                     <td class="p-3 font-bold text-slate-800">{{ h.pakanKg }} Kg</td>
+                                    <td class="p-3 font-semibold text-indigo-600">{{ h.bobotKg ? h.bobotKg + ' Kg' : '-' }}</td>
                                     <td class="p-3"><span class="text-emerald-600 font-bold">{{ h.telurBagus }}</span> Butir</td>
                                     <td class="p-3"><span class="text-amber-600 font-bold">{{ h.telurRusak }}</span> Butir</td>
                                     <td class="p-3"><span class="text-rose-600 font-bold">{{ h.kematian }}</span> Ekor</td>
@@ -703,7 +705,7 @@
                                     </td>
                                 </tr>
                                 <tr v-if="filteredHarianList.length === 0">
-                                    <td colspan="8" class="p-6 text-center text-slate-400">Tidak ada catatan harian yang cocok.</td>
+                                    <td colspan="9" class="p-6 text-center text-slate-400">Tidak ada catatan harian yang cocok.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1298,10 +1300,14 @@
                             <label class="block font-bold mb-1 text-slate-700">Tanggal Record</label>
                             <input v-model="formHarian.tanggal" type="date" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
-                        <div class="grid grid-cols-2 gap-2.5">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Pakan Dikonsumsi (Kg)</label>
                                 <input v-model.number="formHarian.pakanKg" type="number" step="0.1" min="0" placeholder="2.5" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold mb-1 text-slate-700">Rata-rata Bobot (Kg)</label>
+                                <input v-model.number="formHarian.bobotKg" type="number" step="0.01" min="0" placeholder="Contoh: 1.2" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-indigo-700">
                             </div>
                             <div>
                                 <label class="block font-bold mb-1 text-slate-700">Mati / Afkir (Ekor)</label>
@@ -1465,7 +1471,7 @@
                     formBahanPakan: { nama: '', rasio: 0, harga: 0, protein: 0 },
                     formPenetasan: { namaBatch: '', mesin: '', tipe: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 0, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0, asalTelur: 'Indukan', biayaTelur: 0, sumberBeli: '', indukanFlockId: '' },
                     formFlock: { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang B-01', jumlahAwal: 0, jumlahSaatIni: 0, asalDoc: 'Hasil Penetasan', sumberBeli: '', biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) },
-                    formHarian: { flockId: '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' },
+                    formHarian: { flockId: '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, bobotKg: null, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' },
                     formKeuangan: { jenis: 'Pemasukan', kategori: 'Penjualan Telur', nominal: 0, tanggal: new Date().toISOString().substr(0, 10), keterangan: '' },
 
                     eggChartInstance: null,
@@ -1667,6 +1673,38 @@
                     if (fcr <= 2.0) return 'Standar';
                     return 'Perlu Evaluasi';
                 },
+                hitungUmurAyamHari(flock) {
+                    if (!flock || !flock.tglMulai) return 0;
+                    const start = new Date(flock.tglMulai);
+                    const now = new Date();
+                    const diffTime = Math.max(0, now - start);
+                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                    return diffDays + (parseInt(flock.umurAwalHari) || 0);
+                },
+                formatUmurMinggu(flock) {
+                    const totalHari = this.hitungUmurAyamHari(flock);
+                    const minggu = Math.floor(totalHari / 7);
+                    const sisaHari = totalHari % 7;
+                    return `${minggu} Mg ${sisaHari} Hr (${totalHari} Hari)`;
+                },
+                getFaseLabel(flock) {
+                    const hari = this.hitungUmurAyamHari(flock);
+                    if (hari <= 28) return 'Starter';
+                    if (hari <= 139) return 'Grower';
+                    return 'Layer';
+                },
+                getFaseBadgeClass(flock) {
+                    const fase = this.getFaseLabel(flock);
+                    if (fase === 'Starter') return 'bg-amber-100 text-amber-800';
+                    if (fase === 'Grower') return 'bg-emerald-100 text-emerald-800';
+                    return 'bg-purple-100 text-purple-800';
+                },
+                getHargaPakanAktif(flock) {
+                    const hari = this.hitungUmurAyamHari(flock);
+                    if (hari <= 28) return parseFloat(flock.hargaPakanStarter) || this.getPresetPrice('starter');
+                    if (hari <= 139) return parseFloat(flock.hargaPakanGrower) || this.getPresetPrice('grower');
+                    return parseFloat(flock.hargaPakanGrower) || this.getPresetPrice('layer');
+                },
                 toggleArsipFlock(f) {
                     if (f.status === 'Diarsip') {
                         f.status = 'Aktif';
@@ -1750,11 +1788,20 @@
                             tglMulai: new Date().toISOString().substr(0, 10) 
                         };
                     } else if (type === 'harian') {
-                        this.formHarian = { flockId: this.flockList.length ? this.flockList[0].id : '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' };
+                        this.editingHarianId = null;
+                        this.formHarian = { flockId: this.flockList.length ? this.flockList[0].id : '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, bobotKg: null, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' };
                     } else if (type === 'keuangan') {
                         this.formKeuangan = { jenis: 'Pemasukan', kategori: 'Penjualan Telur', nominal: 0, tanggal: new Date().toISOString().substr(0, 10), keterangan: '' };
                     }
                     this.showModal = true;
+                },
+                closeModal() {
+                    this.showModal = false;
+                    this.modalType = '';
+                    this.editingPenetasanId = null;
+                    this.editingFlockId = null;
+                    this.editingBahanIndex = null;
+                    this.editingHarianId = null;
                 },
                 openBahanPakanModal() {
                     this.editingBahanIndex = null;
@@ -1775,7 +1822,6 @@
                         return;
                     }
 
-                    // 1. Validasi Nama Batch Unik
                     const isDuplicate = this.penetasanList.some(p => 
                         p.namaBatch.trim().toLowerCase() === batchName.toLowerCase() && p.id !== this.editingPenetasanId
                     );
@@ -1789,7 +1835,6 @@
                     tglHatch.setDate(tglHatch.getDate() + 21);
                     const estStr = tglHatch.toISOString().substr(0, 10);
 
-                    // 2. Pencatatan Keuangan Otomatis jika Beli Telur Luar
                     if (this.formPenetasan.asalTelur === 'Beli' && parseFloat(this.formPenetasan.biayaTelur) > 0 && !this.editingPenetasanId) {
                         const newTrx = {
                             id: 'TRX-' + Date.now(),
@@ -1846,6 +1891,46 @@
                         createDocFlock: true
                     };
                 },
+                saveFinishPenetasan() {
+                    const m = this.finishHatchingModal;
+                    if (!m.batch) return;
+                    const b = this.penetasanList.find(p => p.id === m.batch.id);
+                    if (b) {
+                        b.status = 'Selesai';
+                        b.telurFertil = parseInt(m.telurFertilCount) || 0;
+                        b.telurInfertil = parseInt(m.telurInfertilCount) || 0;
+                        b.menetasCount = parseInt(m.menetasCount) || 0;
+                        const total = parseInt(b.jumlahTelur) || 1;
+                        const fertil = b.telurFertil || 0;
+                        b.fertilitasPct = Math.round((fertil / total) * 100);
+                        b.dayaTetas = fertil > 0 ? Math.round((b.menetasCount / fertil) * 100) : 0;
+
+                        if (m.createDocFlock && b.menetasCount > 0) {
+                            const newFlock = {
+                                id: 'FLOCK-' + Date.now(),
+                                namaFlock: `DOC ${b.namaBatch}`,
+                                tipe: b.tipe || 'Pedaging',
+                                faseAwal: 'Starter',
+                                kandang: m.kandangTarget || 'Kandang B-01',
+                                jumlahAwal: b.menetasCount,
+                                jumlahSaatIni: b.menetasCount,
+                                asalDoc: 'Hasil Penetasan',
+                                sumberBeli: '',
+                                biayaDoc: 0,
+                                hargaPakanStarter: this.getPresetPrice('starter'),
+                                hargaPakanGrower: this.getPresetPrice('grower'),
+                                umurAwalHari: 0,
+                                tglMulai: new Date().toISOString().substr(0, 10),
+                                status: 'Aktif'
+                            };
+                            this.flockList.unshift(newFlock);
+                            this.showToast(`Panen berhasil! ${b.menetasCount} ekor DOC dimasukkan ke ${newFlock.kandang}.`, 'info');
+                        } else {
+                            this.showToast(`Batch penetasan ${b.namaBatch} diselesaikan.`, 'info');
+                        }
+                    }
+                    this.finishHatchingModal.show = false;
+                },
                 onFertilInput() {
                     if (!this.finishHatchingModal.batch) return;
                     const max = parseInt(this.finishHatchingModal.batch.jumlahTelur) || 0;
@@ -1873,6 +1958,76 @@
                     if (fertil <= 0) return 0;
                     const menetas = parseInt(this.finishHatchingModal.menetasCount) || 0;
                     return Math.round((menetas / fertil) * 100);
+                },
+                onFaseAwalChange() {
+                    if (this.formFlock.faseAwal === 'Starter') {
+                        this.formFlock.umurAwalHari = 0;
+                        this.formFlock.kandang = 'Kandang B-01';
+                    } else if (this.formFlock.faseAwal === 'Grower') {
+                        this.formFlock.umurAwalHari = 29;
+                        this.formFlock.kandang = 'Kandang G-01';
+                    } else if (this.formFlock.faseAwal === 'Layer') {
+                        this.formFlock.umurAwalHari = 140;
+                        this.formFlock.kandang = 'Kandang A-01';
+                    }
+                },
+                saveFlock() {
+                    const flockName = (this.formFlock.namaFlock || '').trim();
+                    if (!flockName) {
+                        this.showToast('Nama kelompok ayam wajib diisi.', 'error');
+                        return;
+                    }
+                    const isDup = this.flockList.some(f => f.namaFlock.trim().toLowerCase() === flockName.toLowerCase() && f.id !== this.editingFlockId);
+                    if (isDup) {
+                        this.showToast('Nama kelompok ayam sudah ada! Gunakan nama yang unik.', 'error');
+                        return;
+                    }
+
+                    if (this.formFlock.asalDoc === 'Beli' && parseFloat(this.formFlock.biayaDoc) > 0 && this.formFlock.autoRecordKeuangan && !this.editingFlockId) {
+                        const newTrx = {
+                            id: 'TRX-' + Date.now(),
+                            jenis: 'Pengeluaran',
+                            kategori: 'Pembelian DOC / Indukan',
+                            nominal: parseFloat(this.formFlock.biayaDoc) || 0,
+                            tanggal: this.formFlock.tglMulai,
+                            keterangan: `Pembelian DOC (${flockName}) - Supplier: ${this.formFlock.sumberBeli || '-'}`
+                        };
+                        this.keuanganList.unshift(newTrx);
+                    }
+
+                    if (this.editingFlockId) {
+                        const idx = this.flockList.findIndex(f => f.id === this.editingFlockId);
+                        if (idx !== -1) {
+                            this.flockList[idx] = {
+                                ...this.flockList[idx],
+                                ...this.formFlock,
+                                namaFlock: flockName,
+                                jumlahAwal: parseInt(this.formFlock.jumlahAwal) || 0,
+                                jumlahSaatIni: parseInt(this.formFlock.jumlahSaatIni) || 0,
+                                biayaDoc: parseFloat(this.formFlock.biayaDoc) || 0,
+                                hargaPakanStarter: parseFloat(this.formFlock.hargaPakanStarter) || 0,
+                                hargaPakanGrower: parseFloat(this.formFlock.hargaPakanGrower) || 0,
+                                umurAwalHari: parseInt(this.formFlock.umurAwalHari) || 0
+                            };
+                        }
+                        this.showToast('Data kelompok ayam berhasil diperbarui.', 'info');
+                    } else {
+                        const newF = {
+                            id: 'FLOCK-' + Date.now(),
+                            ...this.formFlock,
+                            namaFlock: flockName,
+                            jumlahAwal: parseInt(this.formFlock.jumlahAwal) || 0,
+                            jumlahSaatIni: parseInt(this.formFlock.jumlahSaatIni) || 0,
+                            biayaDoc: parseFloat(this.formFlock.biayaDoc) || 0,
+                            hargaPakanStarter: parseFloat(this.formFlock.hargaPakanStarter) || 0,
+                            hargaPakanGrower: parseFloat(this.formFlock.hargaPakanGrower) || 0,
+                            umurAwalHari: parseInt(this.formFlock.umurAwalHari) || 0,
+                            status: 'Aktif'
+                        };
+                        this.flockList.unshift(newF);
+                        this.showToast('Kelompok ayam baru disimpan.', 'info');
+                    }
+                    this.closeModal();
                 },
                 editFlock(f) {
                     this.editingFlockId = f.id;
@@ -1979,37 +2134,6 @@
                         this.recalculateFlockPopulation(f.id);
                     });
                 },
-                openModal(type) {
-                    this.modalType = type;
-                    if (type === 'penetasan') {
-                        this.editingPenetasanId = null;
-                        this.formPenetasan = { namaBatch: '', mesin: '', tipe: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 0, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0, asalTelur: 'Indukan', biayaTelur: 0, sumberBeli: '', indukanFlockId: '' };
-                    } else if (type === 'flock') {
-                        this.editingFlockId = null;
-                        this.formFlock = { 
-                            namaFlock: '', 
-                            tipe: 'Pedaging', 
-                            faseAwal: 'Starter', 
-                            kandang: 'Kandang B-01', 
-                            jumlahAwal: 0, 
-                            jumlahSaatIni: 0, 
-                            asalDoc: 'Hasil Penetasan', 
-                            sumberBeli: '', 
-                            biayaDoc: 0, 
-                            autoRecordKeuangan: true, 
-                            hargaPakanStarter: this.getPresetPrice('starter'), 
-                            hargaPakanGrower: this.getPresetPrice('grower'), 
-                            umurAwalHari: 0, 
-                            tglMulai: new Date().toISOString().substr(0, 10) 
-                        };
-                    } else if (type === 'harian') {
-                        this.editingHarianId = null;
-                        this.formHarian = { flockId: this.flockList.length ? this.flockList[0].id : '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' };
-                    } else if (type === 'keuangan') {
-                        this.formKeuangan = { jenis: 'Pemasukan', kategori: 'Penjualan Telur', nominal: 0, tanggal: new Date().toISOString().substr(0, 10), keterangan: '' };
-                    }
-                    this.showModal = true;
-                },
                 editHarian(h) {
                     this.editingHarianId = h.id;
                     this.formHarian = JSON.parse(JSON.stringify(h));
@@ -2025,6 +2149,7 @@
 
                     const dead = parseInt(this.formHarian.kematian) || 0;
                     const oldFlockId = this.editingHarianId ? (this.harianList.find(h => h.id === this.editingHarianId)?.flockId) : null;
+                    const inputBobot = this.formHarian.bobotKg !== null && this.formHarian.bobotKg !== '' ? parseFloat(this.formHarian.bobotKg) : null;
 
                     if (this.editingHarianId) {
                         const idx = this.harianList.findIndex(h => h.id === this.editingHarianId);
@@ -2033,6 +2158,7 @@
                                 ...this.harianList[idx],
                                 ...this.formHarian,
                                 pakanKg: parseFloat(this.formHarian.pakanKg) || 0,
+                                bobotKg: inputBobot,
                                 kematian: dead,
                                 telurBagus: parseInt(this.formHarian.telurBagus) || 0,
                                 telurRusak: parseInt(this.formHarian.telurRusak) || 0
@@ -2047,12 +2173,18 @@
                             id: 'LOG-' + Date.now(),
                             ...this.formHarian,
                             pakanKg: parseFloat(this.formHarian.pakanKg) || 0,
+                            bobotKg: inputBobot,
                             kematian: dead,
                             telurBagus: parseInt(this.formHarian.telurBagus) || 0,
                             telurRusak: parseInt(this.formHarian.telurRusak) || 0
                         };
                         this.harianList.unshift(newHarian);
                         this.showToast('Catatan harian berhasil disimpan.', 'info');
+                    }
+
+                    // Otomatis sinkronkan bobot ke kelompok jika diisi
+                    if (inputBobot && inputBobot > 0) {
+                        f.avgBobotKg = inputBobot;
                     }
 
                     this.recalculateFlockPopulation(this.formHarian.flockId);
@@ -2109,7 +2241,6 @@
                         'Keterangan': k.keterangan || '-'
                     }));
 
-                    // Baris Total di bagian bawah Excel
                     data.push({});
                     data.push({ 'Tanggal': 'TOTAL PEMASUKAN', 'Nominal (Rp)': this.totalPemasukan });
                     data.push({ 'Tanggal': 'TOTAL PENGELUARAN', 'Nominal (Rp)': this.totalPengeluaran });
@@ -2131,6 +2262,7 @@
                         'Tanggal': h.tanggal,
                         'Kelompok / Kandang': this.getFlockName(h.flockId),
                         'Pakan (Kg)': parseFloat(h.pakanKg) || 0,
+                        'Rata-rata Bobot (Kg)': h.bobotKg ? parseFloat(h.bobotKg) : '-',
                         'Telur Utuh (Butir)': parseInt(h.telurBagus) || 0,
                         'Telur Rusak (Butir)': parseInt(h.telurRusak) || 0,
                         'Kematian (Ekor)': parseInt(h.kematian) || 0,
@@ -2138,7 +2270,7 @@
                     }));
 
                     const worksheet = XLSX.utils.json_to_sheet(data);
-                    worksheet['!cols'] = [{ wch: 15 }, { wch: 28 }, { wch: 14 }, { wch: 18 }, { wch: 18 }, { wch: 16 }, { wch: 35 }];
+                    worksheet['!cols'] = [{ wch: 15 }, { wch: 28 }, { wch: 14 }, { wch: 20 }, { wch: 18 }, { wch: 18 }, { wch: 16 }, { wch: 35 }];
                     const workbook = XLSX.utils.book_new();
                     XLSX.utils.book_append_sheet(workbook, worksheet, "Jurnal Log Harian");
                     XLSX.writeFile(workbook, `MandiriFarm_LogHarian_${new Date().toISOString().substr(0, 10)}.xlsx`);
@@ -2324,7 +2456,6 @@
                         const oldName = this.kandangList[this.manageKandangModal.editIndex];
                         this.kandangList[this.manageKandangModal.editIndex] = name;
                         
-                        // Otomatis update nama kandang pada kelompok ayam yang sedang menempati kandang ini
                         let updatedFlocks = 0;
                         this.flockList.forEach(f => {
                             if (f.kandang === oldName) {
@@ -2513,291 +2644,54 @@
                         }
                     });
 
-                    this.showToast(`Preset ${this.activePakanPreset.toUpperCase()} disimpan! Harga ${this.formatRupiah(computedPrice)}/kg otomatis di-update ke ${updatedCount} kelompok ayam.`, 'info');
+                    this.showToast(`Preset ${this.activePakanPreset.toUpperCase()} (${this.formatRupiah(computedPrice)}/Kg) diselaraskan ke ${updatedCount} kelompok!`, 'info');
                 },
-
-                // LOGIKA 3 FASE PERTUMBUHAN
-                hitungUmurAyamHari(flock) {
-                    if (!flock.tglMulai) return flock.umurAwalHari || 0;
-                    const start = new Date(flock.tglMulai);
-                    const now = new Date();
-                    const diffTime = Math.abs(now - start);
-                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                    return diffDays + (parseInt(flock.umurAwalHari) || 0);
-                },
-                formatUmurMinggu(flock) {
-                    const totalHari = this.hitungUmurAyamHari(flock);
-                    const minggu = Math.floor(totalHari / 7);
-                    return `${minggu} Minggu (${totalHari} Hari)`;
-                },
-                getFaseLabel(flock) {
-                    const umur = this.hitungUmurAyamHari(flock);
-                    if (umur <= 28) return '1. Starter (0-4 Mg)';
-                    if (umur <= 139) return '2. Grower & Pullet (5-19 Mg)';
-                    return '3. Layer (20+ Mg)';
-                },
-                getFaseBadgeClass(flock) {
-                    const umur = this.hitungUmurAyamHari(flock);
-                    if (umur <= 28) return 'bg-amber-100 text-amber-800';
-                    if (umur <= 139) return 'bg-emerald-100 text-emerald-800';
-                    return 'bg-purple-100 text-purple-800';
-                },
-                getFaseTargetBobot(flock) {
-                    const umur = this.hitungUmurAyamHari(flock);
-                    if (umur <= 28) return '50g - 400 gram';
-                    if (umur <= 139) return '450g - 1.500 gram';
-                    return '1.500g - 1.700+ gram';
-                },
-                getHargaPakanAktif(flock) {
-                    const umur = this.hitungUmurAyamHari(flock);
-                    if (umur <= 28) {
-                        return parseFloat(flock.hargaPakanStarter) || 0;
-                    }
-                    return parseFloat(flock.hargaPakanGrower) || 0;
-                },
-
-                // SYSTEM BACKUP & RESTORE
                 exportBackupFile() {
                     const backupData = {
-                        app: 'MandiriFarm',
-                        version: '1.9.0',
-                        exportedAt: new Date().toISOString(),
-                        data: {
-                            penetasanList: this.penetasanList,
-                            flockList: this.flockList,
-                            harianList: this.harianList,
-                            keuanganList: this.keuanganList,
-                            pakanPresets: this.pakanPresets,
-                            pakanHistory: this.pakanHistory
-                        }
+                        version: '1.0',
+                        exportDate: new Date().toISOString(),
+                        kandangList: this.kandangList,
+                        penetasanList: this.penetasanList,
+                        flockList: this.flockList,
+                        harianList: this.harianList,
+                        keuanganList: this.keuanganList,
+                        pakanPresets: this.pakanPresets,
+                        pakanHistory: this.pakanHistory
                     };
-
                     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
                     const downloadAnchor = document.createElement('a');
-                    const fileName = `MandiriFarm_Backup_${new Date().toISOString().substr(0, 10)}.json`;
-
                     downloadAnchor.setAttribute("href", dataStr);
-                    downloadAnchor.setAttribute("download", fileName);
+                    downloadAnchor.setAttribute("download", `MandiriFarm_Backup_${new Date().toISOString().substr(0,10)}.json`);
                     document.body.appendChild(downloadAnchor);
                     downloadAnchor.click();
                     downloadAnchor.remove();
-
-                    this.showToast('File backup berhasil diunduh.', 'info');
+                    this.showToast('File backup (JSON) berhasil diunduh.', 'info');
                 },
-
                 importBackupFile(event) {
                     const file = event.target.files[0];
                     if (!file) return;
-
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         try {
-                            const imported = JSON.parse(e.target.result);
-                            if (imported && imported.data) {
-                                this.showConfirm(
-                                    'Pulihkan Data (Restore)?',
-                                    'Tindakan ini akan menggantikan seluruh data aplikasi dari berkas cadangan ini.',
-                                    () => {
-                                        this.isSyncingFromGas = true;
-                                        this.penetasanList = imported.data.penetasanList || [];
-                                        this.flockList = imported.data.flockList || [];
-                                        this.harianList = imported.data.harianList || [];
-                                        this.keuanganList = imported.data.keuanganList || [];
-                                        if (imported.data.pakanPresets) {
-                                            this.pakanPresets = imported.data.pakanPresets;
-                                            localStorage.setItem('mandirifarm_pakan_presets', JSON.stringify(this.pakanPresets));
-                                            this.loadPakanPreset('starter');
-                                        }
-                                        if (imported.data.pakanHistory) {
-                                            this.pakanHistory = imported.data.pakanHistory;
-                                            localStorage.setItem('mandirifarm_pakan_history', JSON.stringify(this.pakanHistory));
-                                        }
-
-                                        this.$nextTick(() => {
-                                            this.isSyncingFromGas = false;
-                                            this.pushToGas();
-                                            this.renderCharts();
-                                        });
-                                        this.showToast('Data berhasil dipulihkan dari backup.', 'info');
-                                    }
-                                );
+                            const data = JSON.parse(e.target.result);
+                            if (data.penetasanList || data.flockList || data.harianList || data.keuanganList) {
+                                if (data.kandangList) this.kandangList = data.kandangList;
+                                if (data.penetasanList) this.penetasanList = data.penetasanList;
+                                if (data.flockList) this.flockList = data.flockList;
+                                if (data.harianList) this.harianList = data.harianList;
+                                if (data.keuanganList) this.keuanganList = data.keuanganList;
+                                if (data.pakanPresets) this.pakanPresets = data.pakanPresets;
+                                if (data.pakanHistory) this.pakanHistory = data.pakanHistory;
+                                this.debouncedPushToGas();
+                                this.showToast('Data berhasil dipulihkan dari file JSON!', 'info');
                             } else {
-                                this.showToast('Format file backup tidak valid.', 'error');
+                                this.showToast('Format file JSON backup tidak valid.', 'error');
                             }
                         } catch (err) {
-                            this.showToast('Gagal membaca file backup JSON.', 'error');
+                            this.showToast('Gagal membaca file JSON.', 'error');
                         }
                     };
                     reader.readAsText(file);
-                },
-
-                closeModal() {
-                    this.showModal = false;
-                    this.editingPenetasanId = null;
-                    this.editingFlockId = null;
-                    this.editingBahanIndex = null;
-                    this.editingHarianId = null;
-                    this.isKnownBahan = false;
-                },
-
-                onFaseAwalChange() {
-                    if (this.formFlock.faseAwal === 'Starter') {
-                        this.formFlock.umurAwalHari = 0;
-                        this.formFlock.kandang = 'Kandang B-01';
-                        this.formFlock.hargaPakanStarter = this.getPresetPrice('starter');
-                    } else if (this.formFlock.faseAwal === 'Grower') {
-                        this.formFlock.umurAwalHari = 31;
-                        this.formFlock.kandang = 'Kandang G-01';
-                        this.formFlock.hargaPakanGrower = this.getPresetPrice('grower');
-                    } else if (this.formFlock.faseAwal === 'Layer') {
-                        this.formFlock.umurAwalHari = 140;
-                        this.formFlock.kandang = 'Kandang A-01';
-                        this.formFlock.hargaPakanGrower = this.getPresetPrice('layer') || this.getPresetPrice('grower');
-                    }
-                },
-                saveFinishPenetasan() {
-                    const b = this.finishHatchingModal.batch;
-                    if (!b) return;
-
-                    const fertil = parseInt(this.finishHatchingModal.telurFertilCount) || 0;
-                    const infertil = parseInt(this.finishHatchingModal.telurInfertilCount) || 0;
-                    const menetas = parseInt(this.finishHatchingModal.menetasCount) || 0;
-                    const totalTelur = parseInt(b.jumlahTelur) || 1;
-
-                    b.status = 'Selesai';
-                    b.telurFertil = fertil;
-                    b.telurInfertil = infertil;
-                    b.menetasCount = menetas;
-                    b.fertilitasPct = Math.round((fertil / totalTelur) * 100);
-                    b.dayaTetas = fertil > 0 ? Math.round((menetas / fertil) * 100) : 0;
-
-                    if (this.finishHatchingModal.createDocFlock && menetas > 0) {
-                        const tglHatching = new Date(b.estMenetas || new Date());
-                        const tglStarter = new Date(tglHatching);
-                        tglStarter.setDate(tglStarter.getDate() + 1);
-
-                        // MENGGUNAKAN NAMA BATCH YANG SAMA DENGAN PENETASAN UNTUK KONTINUITAS MONITORING
-                        let docBatchName = b.namaBatch;
-                        const isDuplicateFlock = this.flockList.some(f => f.namaFlock.trim().toLowerCase() === docBatchName.trim().toLowerCase());
-                        if (isDuplicateFlock) {
-                            docBatchName = docBatchName + ' (DOC)';
-                        }
-
-                        const newFlock = {
-                            id: 'FLK-' + Date.now(),
-                            namaFlock: docBatchName,
-                            tipe: b.tipe || 'Pedaging',
-                            faseAwal: 'Starter',
-                            kandang: this.finishHatchingModal.kandangTarget || 'Kandang B-01',
-                            jumlahAwal: menetas,
-                            jumlahSaatIni: menetas,
-                            biayaDoc: b.asalTelur === 'Beli' ? (parseFloat(b.biayaTelur) || 0) : 0,
-                            hargaPakanStarter: this.getPresetPrice('starter'),
-                            hargaPakanGrower: this.getPresetPrice('grower'),
-                            avgBobotKg: 0.05,
-                            hargaJualPerKg: 0,
-                            umurAwalHari: 0,
-                            tglMulai: tglStarter.toISOString().substr(0, 10),
-                            parentPenetasanId: b.id
-                        };
-                        this.flockList.unshift(newFlock);
-                    }
-
-                    this.finishHatchingModal.show = false;
-                    this.showToast(`Panen DOC Berhasil! Batch "${b.namaBatch}" masuk ${this.finishHatchingModal.kandangTarget}.`, 'info');
-                },
-                saveFlock() {
-                    const flockName = (this.formFlock.namaFlock || '').trim();
-                    if (!flockName) {
-                        this.showToast('Nama kelompok / batch wajib diisi.', 'error');
-                        return;
-                    }
-
-                    // VALIDASI NAMA BATCH KELOMPOK UNIK
-                    const isDuplicate = this.flockList.some(f => 
-                        f.namaFlock.trim().toLowerCase() === flockName.toLowerCase() && f.id !== this.editingFlockId
-                    );
-                    if (isDuplicate) {
-                        this.showToast('Nama kelompok / batch sudah digunakan! Pilih nama batch yang unik.', 'error');
-                        return;
-                    }
-
-                    const initial = parseInt(this.formFlock.jumlahAwal) || 0;
-                    const modalPembelian = parseFloat(this.formFlock.biayaDoc) || 0;
-
-                    // 1. Catat Pengeluaran Kas Otomatis jika Beli DOC dari Luar
-                    if (this.formFlock.asalDoc === 'Beli' && modalPembelian > 0 && !this.editingFlockId) {
-                        const newTrx = {
-                            id: 'TRX-' + Date.now(),
-                            jenis: 'Pengeluaran',
-                            kategori: 'Pembelian DOC / Indukan',
-                            nominal: modalPembelian,
-                            tanggal: this.formFlock.tglMulai,
-                            keterangan: `Pembelian DOC (${flockName}) - Supplier: ${this.formFlock.sumberBeli || '-'}`
-                        };
-                        this.keuanganList.unshift(newTrx);
-                    }
-                    
-                    if (this.editingFlockId) {
-                        const idx = this.flockList.findIndex(f => f.id === this.editingFlockId);
-                        if (idx !== -1) {
-                            this.flockList[idx] = {
-                                ...this.flockList[idx],
-                                namaFlock: flockName,
-                                tipe: this.formFlock.tipe,
-                                faseAwal: this.formFlock.faseAwal,
-                                kandang: this.formFlock.kandang || 'Kandang B-01',
-                                jumlahAwal: initial,
-                                jumlahSaatIni: parseInt(this.formFlock.jumlahSaatIni) ?? initial,
-                                asalDoc: this.formFlock.asalDoc,
-                                sumberBeli: this.formFlock.asalDoc === 'Beli' ? this.formFlock.sumberBeli : '',
-                                biayaDoc: modalPembelian,
-                                hargaPakanStarter: parseFloat(this.formFlock.hargaPakanStarter) || 0,
-                                hargaPakanGrower: parseFloat(this.formFlock.hargaPakanGrower) || 0,
-                                umurAwalHari: parseInt(this.formFlock.umurAwalHari) || 0,
-                                tglMulai: this.formFlock.tglMulai
-                            };
-                        }
-                        this.showToast('Kelompok ayam diperbarui.', 'info');
-                    } else {
-                        const newFlock = {
-                            id: 'FLK-' + Date.now(),
-                            namaFlock: flockName,
-                            tipe: this.formFlock.tipe,
-                            faseAwal: this.formFlock.faseAwal,
-                            kandang: this.formFlock.kandang || 'Kandang B-01',
-                            jumlahAwal: initial,
-                            jumlahSaatIni: initial,
-                            asalDoc: this.formFlock.asalDoc,
-                            sumberBeli: this.formFlock.asalDoc === 'Beli' ? this.formFlock.sumberBeli : '',
-                            biayaDoc: modalPembelian,
-                            hargaPakanStarter: parseFloat(this.formFlock.hargaPakanStarter) || 0,
-                            hargaPakanGrower: parseFloat(this.formFlock.hargaPakanGrower) || 0,
-                            avgBobotKg: 0.05,
-                            hargaJualPerKg: 0,
-                            umurAwalHari: parseInt(this.formFlock.umurAwalHari) || 0,
-                            tglMulai: this.formFlock.tglMulai
-                        };
-                        this.flockList.unshift(newFlock);
-                    }
-
-                    this.closeModal();
-                    this.formFlock = { 
-                        namaFlock: '', 
-                        tipe: 'Pedaging', 
-                        faseAwal: 'Starter', 
-                        kandang: 'Kandang B-01', 
-                        jumlahAwal: 0, 
-                        jumlahSaatIni: 0, 
-                        asalDoc: 'Hasil Penetasan', 
-                        sumberBeli: '', 
-                        biayaDoc: 0, 
-                        autoRecordKeuangan: true, 
-                        hargaPakanStarter: this.getPresetPrice('starter'), 
-                        hargaPakanGrower: this.getPresetPrice('grower'), 
-                        umurAwalHari: 0, 
-                        tglMulai: new Date().toISOString().substr(0, 10) 
-                    };
                 }
             }
         }).mount('#app');
