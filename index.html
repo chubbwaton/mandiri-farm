@@ -298,6 +298,9 @@
                                 <p class="text-xs text-slate-400">Mesin: {{ b.mesin }}</p>
                             </div>
                             <div class="flex items-center gap-1 shrink-0">
+                                <button @click="printPenetasanLabel(b)" class="text-slate-400 hover:text-emerald-600 p-1.5 rounded-lg hover:bg-emerald-50 transition" title="Cetak Label Tempel Penetasan (7x10 cm)">
+                                    <i class="fa-solid fa-print"></i>
+                                </button>
                                 <button @click="editPenetasan(b)" class="text-slate-400 hover:text-blue-600 p-1.5 rounded-lg hover:bg-blue-50 transition">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
@@ -430,6 +433,9 @@
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-1 shrink-0">
+                                    <button @click="printFlockLabel(f)" class="text-slate-400 hover:text-emerald-600 p-1.5 rounded-lg hover:bg-emerald-50 transition" title="Cetak Label Tempel Kandang (7x10 cm)">
+                                        <i class="fa-solid fa-print"></i>
+                                    </button>
                                     <button @click="toggleArsipFlock(f)" :title="f.status === 'Diarsip' ? 'Aktifkan Kembali' : 'Arsipkan Kelompok'" class="text-slate-400 hover:text-amber-600 p-1.5 rounded-lg hover:bg-amber-50 transition">
                                         <i class="fa-solid" :class="f.status === 'Diarsip' ? 'fa-box-open' : 'fa-box-archive'"></i>
                                     </button>
@@ -2093,32 +2099,271 @@
                 exportHppPdf(flock) {
                     const hpp = this.hitungHPP(flock);
                     const laba = this.hitungProyeksiLaba(flock);
-                    const content = `
-                        <div style="font-family: sans-serif; padding: 20px; color: #333;">
-                            <h2 style="text-align: center; margin-bottom: 5px;">MANDIRI FARM - LAPORAN HPP BATCH</h2>
-                            <p style="text-align: center; color: #666; font-size: 12px; margin-top: 0;">Kelompok: ${flock.namaFlock} (${flock.kandang})</p>
-                            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #ccc;">
-                            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-                                <tr><td style="padding: 6px 0;">Populasi Saat Ini:</td><td style="font-weight: bold; text-align: right;">${flock.jumlahSaatIni} Ekor</td></tr>
-                                <tr><td style="padding: 6px 0;">Umur Akumulasi:</td><td style="font-weight: bold; text-align: right;">${this.formatUmurMinggu(flock)}</td></tr>
-                                <tr><td style="padding: 6px 0;">Modal DOC/Bibit:</td><td style="font-weight: bold; text-align: right;">${this.formatRupiah(flock.biayaDoc || 0)}</td></tr>
-                                <tr><td style="padding: 6px 0;">Pakan Dikonsumsi:</td><td style="font-weight: bold; text-align: right;">${this.getPakanTotalByFlock(flock.id)} Kg</td></tr>
-                                <tr><td style="padding: 6px 0;">Total Estimasi Biaya:</td><td style="font-weight: bold; text-align: right;">${this.formatRupiah(hpp.totalBiaya)}</td></tr>
-                                <tr style="background: #f0fdf4;"><td style="padding: 8px 6px; font-weight: bold;">HPP Per Ekor:</td><td style="font-weight: bold; text-align: right; color: #15803d;">${this.formatRupiah(hpp.hppPerEkor)}</td></tr>
-                                <tr style="background: #f0fdf4;"><td style="padding: 8px 6px; font-weight: bold;">HPP Per Kg:</td><td style="font-weight: bold; text-align: right; color: #15803d;">${this.formatRupiah(hpp.hppPerKg)}</td></tr>
-                                <tr><td style="padding: 6px 0;">Proyeksi Omzet:</td><td style="font-weight: bold; text-align: right;">${this.formatRupiah(laba.estOmzet)}</td></tr>
-                                <tr style="background: #ecfdf5;"><td style="padding: 8px 6px; font-weight: bold;">Proyeksi Laba Bersih:</td><td style="font-weight: bold; text-align: right; color: #166534;">${this.formatRupiah(laba.labaBersih)}</td></tr>
-                            </table>
+                    
+                    // Buat elemen DOM sementara dan masukan ke document.body agar html2canvas dapat merender dengan sempurna
+                    const element = document.createElement('div');
+                    element.style.padding = '20px';
+                    element.style.background = '#ffffff';
+                    element.style.color = '#333333';
+                    element.style.fontFamily = 'Arial, sans-serif';
+                    element.innerHTML = `
+                        <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #059669; padding-bottom: 10px;">
+                            <h2 style="margin: 0; color: #065f46; font-size: 20px; text-transform: uppercase;">MANDIRI FARM</h2>
+                            <h3 style="margin: 5px 0 0 0; color: #334155; font-size: 14px;">LAPORAN ANALISIS HPP & PROYEKSI BATCH</h3>
+                            <p style="margin: 3px 0 0 0; color: #64748b; font-size: 11px;">Tanggal Cetak: ${this.getFormattedNow()}</p>
                         </div>
+
+                        <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px;">
+                            <tr style="background-color: #f8fafc;">
+                                <td style="padding: 8px 12px; font-weight: bold; border: 1px solid #e2e8f0; width: 40%;">Nama Kelompok Ayam</td>
+                                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; font-weight: bold; color: #1e293b;">${flock.namaFlock}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 12px; font-weight: bold; border: 1px solid #e2e8f0;">Lokasi Kandang</td>
+                                <td style="padding: 8px 12px; border: 1px solid #e2e8f0;">${flock.kandang}</td>
+                            </tr>
+                            <tr style="background-color: #f8fafc;">
+                                <td style="padding: 8px 12px; font-weight: bold; border: 1px solid #e2e8f0;">Tipe & Fase Ayam</td>
+                                <td style="padding: 8px 12px; border: 1px solid #e2e8f0;">${flock.tipe} - ${this.getFaseLabel(flock)}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 12px; font-weight: bold; border: 1px solid #e2e8f0;">Umur Akumulasi</td>
+                                <td style="padding: 8px 12px; border: 1px solid #e2e8f0;">${this.formatUmurMinggu(flock)}</td>
+                            </tr>
+                            <tr style="background-color: #f8fafc;">
+                                <td style="padding: 8px 12px; font-weight: bold; border: 1px solid #e2e8f0;">Populasi Saat Ini</td>
+                                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; font-weight: bold; color: #047857;">${flock.jumlahSaatIni} Ekor (Awal: ${flock.jumlahAwal} Ekor)</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 12px; font-weight: bold; border: 1px solid #e2e8f0;">Rata-rata Bobot Ayam</td>
+                                <td style="padding: 8px 12px; border: 1px solid #e2e8f0;">${flock.avgBobotKg || 1} Kg / Ekor</td>
+                            </tr>
+                        </table>
+
+                        <h4 style="margin: 0 0 10px 0; color: #1e293b; font-size: 13px; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px;">Rincian Biaya & Perhitungan HPP</h4>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px;">
+                            <tr style="background-color: #f8fafc;">
+                                <td style="padding: 8px 12px; border: 1px solid #e2e8f0;">Modal Pembelian DOC / Bibit</td>
+                                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; text-align: right; font-weight: bold;">${this.formatRupiah(flock.biayaDoc || 0)}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 12px; border: 1px solid #e2e8f0;">Biaya Pakan Dikonsumsi (${this.getPakanTotalByFlock(flock.id)} Kg)</td>
+                                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; text-align: right; font-weight: bold;">${this.formatRupiah(hpp.totalBiaya - (flock.biayaDoc || 0))}</td>
+                            </tr>
+                            <tr style="background-color: #f1f5f9; font-weight: bold;">
+                                <td style="padding: 10px 12px; border: 1px solid #cbd5e1;">TOTAL ESTIMASI BIAYA PRODUKSI</td>
+                                <td style="padding: 10px 12px; border: 1px solid #cbd5e1; text-align: right; color: #0f172a; font-size: 13px;">${this.formatRupiah(hpp.totalBiaya)}</td>
+                            </tr>
+                            <tr style="background-color: #ecfdf5; font-weight: bold;">
+                                <td style="padding: 10px 12px; border: 1px solid #a7f3d0; color: #065f46;">HPP PER EKOR AYAM</td>
+                                <td style="padding: 10px 12px; border: 1px solid #a7f3d0; text-align: right; color: #047857; font-size: 14px;">${this.formatRupiah(hpp.hppPerEkor)}</td>
+                            </tr>
+                            <tr style="background-color: #ecfdf5; font-weight: bold;">
+                                <td style="padding: 10px 12px; border: 1px solid #a7f3d0; color: #065f46;">HPP PER KG AYAM</td>
+                                <td style="padding: 10px 12px; border: 1px solid #a7f3d0; text-align: right; color: #047857; font-size: 14px;">${this.formatRupiah(hpp.hppPerKg)}</td>
+                            </tr>
+                        </table>
+
+                        <h4 style="margin: 0 0 10px 0; color: #1e293b; font-size: 13px; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px;">Proyeksi Penjualan & Perkiraan Laba</h4>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                            <tr>
+                                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; width: 40%;">Harga Jual Acuan (per Kg)</td>
+                                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; text-align: right; font-weight: bold;">${this.formatRupiah(flock.hargaJualPerKg || 0)}</td>
+                            </tr>
+                            <tr style="background-color: #f8fafc;">
+                                <td style="padding: 8px 12px; border: 1px solid #e2e8f0;">Estimasi Total Omzet Penjualan</td>
+                                <td style="padding: 8px 12px; border: 1px solid #e2e8f0; text-align: right; font-weight: bold;">${this.formatRupiah(laba.estOmzet)}</td>
+                            </tr>
+                            <tr style="background-color: ${laba.labaBersih >= 0 ? '#f0fdf4' : '#fef2f2'}; font-weight: bold;">
+                                <td style="padding: 10px 12px; border: 1px solid #cbd5e1; color: ${laba.labaBersih >= 0 ? '#166534' : '#991b1b'};">PROYEKSI LABA BERSIH BATCH</td>
+                                <td style="padding: 10px 12px; border: 1px solid #cbd5e1; text-align: right; color: ${laba.labaBersih >= 0 ? '#15803d' : '#dc2626'}; font-size: 14px;">${this.formatRupiah(laba.labaBersih)}</td>
+                            </tr>
+                        </table>
                     `;
+
+                    document.body.appendChild(element);
+                    this.showToast('Memproses unduhan PDF...', 'info');
+
                     const opt = {
-                        margin: 10,
-                        filename: `HPP_${flock.namaFlock.replace(/\s+/g, '_')}_${new Date().toISOString().substr(0,10)}.pdf`,
+                        margin: [10, 10, 10, 10],
+                        filename: `Laporan_HPP_${(flock.namaFlock || 'Kelompok').replace(/\s+/g, '_')}_${new Date().toISOString().substr(0,10)}.pdf`,
                         image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2 },
+                        html2canvas: { scale: 2, useCORS: true, logging: false },
                         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                     };
-                    html2pdf().from(content).set(opt).save();
+
+                    html2pdf().set(opt).from(element).save().then(() => {
+                        if (document.body.contains(element)) document.body.removeChild(element);
+                        this.showToast('Laporan HPP berhasil diunduh sebagai PDF!', 'info');
+                    }).catch(err => {
+                        console.error('PDF export error:', err);
+                        if (document.body.contains(element)) document.body.removeChild(element);
+                        this.showToast('Gagal membuat file PDF. Silakan coba lagi.', 'error');
+                    });
+                },
+                printPenetasanLabel(b) {
+                    const asalText = b.asalTelur === 'Beli' 
+                        ? `Beli (${b.sumberBeli || '-'})` 
+                        : `Indukan (${this.getIndukanFlockName(b.indukanFlockId)})`;
+
+                    const element = document.createElement('div');
+                    element.style.width = '70mm';
+                    element.style.height = '100mm';
+                    element.style.padding = '4mm';
+                    element.style.boxSizing = 'border-box';
+                    element.style.backgroundColor = '#ffffff';
+                    element.style.color = '#000000';
+                    element.style.fontFamily = 'Arial, sans-serif';
+                    element.style.border = '2px solid #000000';
+                    element.style.borderRadius = '4px';
+
+                    element.innerHTML = `
+                        <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 3px; margin-bottom: 4px;">
+                            <h3 style="margin: 0; font-size: 11pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">MANDIRI FARM</h3>
+                            <p style="margin: 1px 0 0 0; font-size: 7.5pt; font-weight: bold; background: #000; color: #fff; padding: 1px 4px; display: inline-block; border-radius: 2px;">LABEL INKUBASI TELUR</p>
+                        </div>
+
+                        <div style="margin-bottom: 4px; background: #f1f5f9; padding: 3px; border: 1px solid #cbd5e1; border-radius: 3px; text-align: center;">
+                            <span style="font-size: 7pt; font-weight: bold; color: #475569; display: block;">NAMA BATCH / LABEL:</span>
+                            <strong style="font-size: 10pt; color: #0f172a; display: block; line-height: 1.1;">${b.namaBatch}</strong>
+                        </div>
+
+                        <table style="width: 100%; border-collapse: collapse; font-size: 7.5pt; margin-bottom: 4px;">
+                            <tr>
+                                <td style="padding: 1.5px 0; font-weight: bold; width: 45%;">Mesin Tetas:</td>
+                                <td style="padding: 1.5px 0; font-weight: bold;">${b.mesin}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1.5px 0; font-weight: bold;">Tipe Ayam:</td>
+                                <td style="padding: 1.5px 0;">${b.tipe || 'Pedaging'}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1.5px 0; font-weight: bold;">Jumlah Telur:</td>
+                                <td style="padding: 1.5px 0; font-weight: bold; font-size: 8.5pt;">${b.jumlahTelur} Butir</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1.5px 0; font-weight: bold;">Asal Telur:</td>
+                                <td style="padding: 1.5px 0; font-size: 7pt;">${asalText}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1.5px 0; font-weight: bold;">Tgl Masuk:</td>
+                                <td style="padding: 1.5px 0;">${this.formatDate(b.tglMasuk)}</td>
+                            </tr>
+                            <tr style="background: #e2e8f0; font-weight: bold;">
+                                <td style="padding: 2px 2px; font-weight: bold;">EST. MENETAS:</td>
+                                <td style="padding: 2px 2px; font-weight: 800; font-size: 8pt; color: #000;">${this.formatDate(b.estMenetas)}</td>
+                            </tr>
+                        </table>
+
+                        <div style="border: 1px solid #000; padding: 3px; border-radius: 3px; margin-bottom: 3px; background: #fafafa;">
+                            <span style="font-size: 6.5pt; font-weight: bold; display: block; margin-bottom: 2px; border-bottom: 1px solid #ddd; padding-bottom: 1px;">CHECKLIST PENGERAMAN (CANDLING):</span>
+                            <div style="font-size: 6.5pt; line-height: 1.3;">
+                                <div>[ &nbsp; ] <strong>Day 7:</strong> Teropong Fertilitas</div>
+                                <div>[ &nbsp; ] <strong>Day 14:</strong> Evaluasi Embrio</div>
+                                <div>[ &nbsp; ] <strong>Day 18:</strong> Stop Putar (Lockdown)</div>
+                            </div>
+                        </div>
+
+                        <div style="border: 1px dashed #94a3b8; padding: 2px; height: 14mm; box-sizing: border-box; border-radius: 2px;">
+                            <span style="font-size: 6pt; color: #64748b; font-weight: bold;">Catatan / Penanganan:</span>
+                        </div>
+                    `;
+
+                    document.body.appendChild(element);
+                    this.showToast('Memproses cetak label 7x10 cm...', 'info');
+
+                    const opt = {
+                        margin: 0,
+                        filename: `Label_Penetasan_${(b.namaBatch || 'Batch').replace(/\s+/g, '_')}_7x10cm.pdf`,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 3, useCORS: true, logging: false },
+                        jsPDF: { unit: 'mm', format: [70, 100], orientation: 'portrait' }
+                    };
+
+                    html2pdf().set(opt).from(element).save().then(() => {
+                        if (document.body.contains(element)) document.body.removeChild(element);
+                        this.showToast('Label Penetasan 7x10 cm siap dicetak!', 'info');
+                    }).catch(err => {
+                        console.error('Label export error:', err);
+                        if (document.body.contains(element)) document.body.removeChild(element);
+                        this.showToast('Gagal memproses label penetasan.', 'error');
+                    });
+                },
+                printFlockLabel(f) {
+                    const element = document.createElement('div');
+                    element.style.width = '70mm';
+                    element.style.height = '100mm';
+                    element.style.padding = '4mm';
+                    element.style.boxSizing = 'border-box';
+                    element.style.backgroundColor = '#ffffff';
+                    element.style.color = '#000000';
+                    element.style.fontFamily = 'Arial, sans-serif';
+                    element.style.border = '2px solid #000000';
+                    element.style.borderRadius = '4px';
+
+                    element.innerHTML = `
+                        <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 3px; margin-bottom: 4px;">
+                            <h3 style="margin: 0; font-size: 11pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">MANDIRI FARM</h3>
+                            <p style="margin: 1px 0 0 0; font-size: 7.5pt; font-weight: bold; background: #000; color: #fff; padding: 1px 4px; display: inline-block; border-radius: 2px;">LABEL KANDANG AYAM</p>
+                        </div>
+
+                        <div style="margin-bottom: 4px; background: #0f172a; color: #ffffff; padding: 4px; border-radius: 3px; text-align: center;">
+                            <span style="font-size: 6.5pt; font-weight: bold; color: #94a3b8; display: block;">KODE KANDANG:</span>
+                            <strong style="font-size: 13pt; color: #34d399; display: block; line-height: 1.1; letter-spacing: 0.5px;">${f.kandang}</strong>
+                        </div>
+
+                        <div style="margin-bottom: 4px; border-bottom: 1px border-top: 1px solid #cbd5e1; padding: 2px 0;">
+                            <span style="font-size: 6.5pt; font-weight: bold; color: #475569; display: block;">KELOMPOK BATCH:</span>
+                            <strong style="font-size: 9pt; color: #0f172a; display: block; line-height: 1.1;">${f.namaFlock}</strong>
+                        </div>
+
+                        <table style="width: 100%; border-collapse: collapse; font-size: 7.5pt; margin-bottom: 4px;">
+                            <tr>
+                                <td style="padding: 1.5px 0; font-weight: bold; width: 45%;">Tipe & Fase:</td>
+                                <td style="padding: 1.5px 0; font-weight: bold;">${f.tipe} (${this.getFaseLabel(f)})</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1.5px 0; font-weight: bold;">Tgl Masuk:</td>
+                                <td style="padding: 1.5px 0;">${this.formatDate(f.tglMulai)}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1.5px 0; font-weight: bold;">Populasi Awal:</td>
+                                <td style="padding: 1.5px 0;">${f.jumlahAwal} Ekor</td>
+                            </tr>
+                            <tr style="background: #f1f5f9;">
+                                <td style="padding: 2px 2px; font-weight: bold;">Populasi Saat Ini:</td>
+                                <td style="padding: 2px 2px; font-weight: 800; font-size: 8.5pt; color: #047857;">${f.jumlahSaatIni} Ekor</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1.5px 0; font-weight: bold;">Asal DOC:</td>
+                                <td style="padding: 1.5px 0; font-size: 7pt;">${f.asalDoc || 'Hasil Penetasan'}</td>
+                            </tr>
+                        </table>
+
+                        <div style="border: 1px solid #000; padding: 3px; border-radius: 3px; background: #fafafa; height: 16mm; box-sizing: border-box;">
+                            <span style="font-size: 6.5pt; font-weight: bold; display: block; margin-bottom: 2px; border-bottom: 1px solid #cbd5e1; padding-bottom: 1px;">CATATAN PAKAN & VAKSINASI:</span>
+                        </div>
+                    `;
+
+                    document.body.appendChild(element);
+                    this.showToast('Memproses cetak label kandang 7x10 cm...', 'info');
+
+                    const opt = {
+                        margin: 0,
+                        filename: `Label_Kandang_${(f.kandang || 'Kandang').replace(/\s+/g, '_')}_7x10cm.pdf`,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 3, useCORS: true, logging: false },
+                        jsPDF: { unit: 'mm', format: [70, 100], orientation: 'portrait' }
+                    };
+
+                    html2pdf().set(opt).from(element).save().then(() => {
+                        if (document.body.contains(element)) document.body.removeChild(element);
+                        this.showToast('Label Kandang 7x10 cm siap dicetak!', 'info');
+                    }).catch(err => {
+                        console.error('Label export error:', err);
+                        if (document.body.contains(element)) document.body.removeChild(element);
+                        this.showToast('Gagal memproses label kandang.', 'error');
+                    });
                 },
                 recalculateFlockPopulation(flockId) {
                     if (!flockId) return;
