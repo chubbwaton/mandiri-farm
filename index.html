@@ -6,13 +6,13 @@
     <title>Mandiri Farm - Monitoring & Keuangan Peternakan Ayam</title>
     
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Vue 3 -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.js"></script>
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
     <!-- html2pdf.js (Ekspor PDF) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <!-- SheetJS (Ekspor Excel .xlsx Rapi) -->
@@ -80,6 +80,9 @@
                     </div>
                     <span v-if="item.id === 'flock' && flockMoveAlerts.length > 0" class="w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center animate-bounce">
                         {{ flockMoveAlerts.length }}
+                    </span>
+                    <span v-if="item.id === 'pakan' && stokMenipisCount > 0" class="w-5 h-5 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center" title="Stok pakan menipis">
+                        {{ stokMenipisCount }}
                     </span>
                 </button>
             </nav>
@@ -563,6 +566,18 @@
 
             <!-- TAB 4: FORMULASI PAKAN 3 FASE -->
             <div v-if="activeTab === 'pakan'" class="space-y-4 sm:space-y-6">
+                <!-- SUB TAB: FORMULA / GUDANG -->
+                <div class="grid grid-cols-2 gap-2 bg-slate-200 p-1.5 rounded-2xl text-xs font-bold no-print">
+                    <button @click="pakanSubTab = 'formula'" :class="pakanSubTab === 'formula' ? 'bg-emerald-600 text-white shadow' : 'text-slate-600 hover:text-slate-900'" class="py-2.5 rounded-xl transition text-center flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-flask"></i> Formula Pakan
+                    </button>
+                    <button @click="pakanSubTab = 'gudang'" :class="pakanSubTab === 'gudang' ? 'bg-emerald-600 text-white shadow' : 'text-slate-600 hover:text-slate-900'" class="py-2.5 rounded-xl transition text-center flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-warehouse"></i> Gudang Pakan
+                        <span v-if="stokMenipisCount > 0" class="w-4 h-4 rounded-full bg-amber-500 text-white text-[9px] font-bold flex items-center justify-center">{{ stokMenipisCount }}</span>
+                    </button>
+                </div>
+
+                <template v-if="pakanSubTab === 'formula'">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 bg-white p-3.5 sm:p-4.5 rounded-2xl border border-slate-200 shadow-sm">
                     <div>
                         <h3 class="font-bold text-slate-800 text-sm sm:text-base">Kalkulator Formulasi Pakan (3 Fase)</h3>
@@ -655,6 +670,152 @@
                         </button>
                     </div>
                 </div>
+                </template>
+
+                <!-- ===== SUB TAB: GUDANG PAKAN ===== -->
+                <template v-else>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 bg-white p-3.5 sm:p-4.5 rounded-2xl border border-slate-200 shadow-sm">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm sm:text-base">Gudang Pakan &amp; Stok</h3>
+                            <p class="text-xs text-slate-500">Stok pakan jadi &amp; bahan baku, terhubung ke formula, Log Harian, dan Keuangan.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                            <button @click="openGudangMasuk()" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
+                                <i class="fa-solid fa-cart-plus"></i> Beli / Stok Masuk
+                            </button>
+                            <button @click="openRacikModal()" class="w-full sm:w-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
+                                <i class="fa-solid fa-blender"></i> Racik Pakan
+                            </button>
+                            <button @click="openGudangItemModal()" class="w-full sm:w-auto px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
+                                <i class="fa-solid fa-plus"></i> Jenis Pakan Baru
+                            </button>
+                            <button @click="exportGudangExcel" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
+                                <i class="fa-solid fa-file-excel"></i> Ekspor Excel (.xlsx)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jenis Terdaftar</span>
+                            <div class="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">{{ gudangItems.length }}</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Stok</span>
+                            <div class="text-xl sm:text-2xl font-extrabold text-emerald-600 mt-0.5 truncate">{{ gudangTotalStok }} <span class="text-xs font-normal text-slate-400">Kg</span></div>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nilai Stok</span>
+                            <div class="text-xl sm:text-2xl font-extrabold text-indigo-600 mt-0.5 truncate">{{ formatRupiah(gudangNilaiTotal) }}</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Stok Menipis / Habis</span>
+                            <div class="text-xl sm:text-2xl font-extrabold mt-0.5" :class="stokMenipisCount > 0 ? 'text-amber-600' : 'text-emerald-600'">{{ stokMenipisCount }}</div>
+                        </div>
+                    </div>
+
+                    <!-- DAFTAR STOK -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                        <div class="p-3 border-b border-slate-100 flex gap-1.5 text-xs font-bold">
+                            <button v-for="t in [['semua','Semua'],['Pakan Jadi','Pakan Jadi'],['Bahan Baku','Bahan Baku']]" :key="t[0]" @click="gudangTipeFilter = t[0]"
+                                :class="gudangTipeFilter === t[0] ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" class="px-3 py-1.5 rounded-lg transition">{{ t[1] }}</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-slate-600">
+                                <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-3">Jenis Pakan</th>
+                                        <th class="p-3">Stok</th>
+                                        <th class="p-3">Harga Rata-rata / Kg</th>
+                                        <th class="p-3">Nilai Stok</th>
+                                        <th class="p-3">Estimasi Habis</th>
+                                        <th class="p-3">Status</th>
+                                        <th class="p-3 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <tr v-for="i in gudangRowsFiltered" :key="i.id" class="hover:bg-slate-50 transition">
+                                        <td class="p-3">
+                                            <div class="font-bold text-slate-800">{{ i.nama }}</div>
+                                            <div class="text-[10px] text-slate-400">{{ i.tipe }}<span v-if="i.tipe === 'Pakan Jadi' && i.fase && i.fase !== 'Semua'"> · {{ i.fase }}</span></div>
+                                        </td>
+                                        <td class="p-3 font-extrabold" :class="i.status === 'Aman' ? 'text-slate-800' : (i.status === 'Menipis' ? 'text-amber-600' : 'text-rose-600')">{{ i.stok }} Kg</td>
+                                        <td class="p-3">{{ i.avg > 0 ? formatRupiah(i.avg) : '-' }}</td>
+                                        <td class="p-3 font-semibold text-slate-800">{{ formatRupiah(i.nilai) }}</td>
+                                        <td class="p-3 text-slate-500 whitespace-nowrap">{{ i.sisaHari !== null ? '± ' + i.sisaHari + ' hari' : '-' }}</td>
+                                        <td class="p-3"><span class="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase" :class="gudangStatusClass(i.status)">{{ i.status }}</span></td>
+                                        <td class="p-3 text-center whitespace-nowrap">
+                                            <button @click="openGudangMasuk(i.id)" class="text-slate-400 hover:text-emerald-600 p-1 mr-1" title="Stok Masuk / Beli"><i class="fa-solid fa-cart-plus"></i></button>
+                                            <button @click="openGudangOpname(i.id)" class="text-slate-400 hover:text-indigo-600 p-1 mr-1" title="Sesuaikan Stok (Opname)"><i class="fa-solid fa-scale-balanced"></i></button>
+                                            <button @click="editGudangItem(i)" class="text-slate-400 hover:text-blue-600 p-1 mr-1" title="Edit Jenis"><i class="fa-solid fa-pen-to-square"></i></button>
+                                            <button @click="confirmDeleteGudangItem(i)" class="text-slate-300 hover:text-rose-500 p-1" title="Hapus Jenis"><i class="fa-solid fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr v-if="gudangRowsFiltered.length === 0">
+                                        <td colspan="7" class="p-6 text-center text-slate-400">Belum ada jenis pakan di gudang. Klik "Jenis Pakan Baru" untuk mulai.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- RIWAYAT MUTASI -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                        <div class="p-3.5 border-b border-slate-100 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                            <h4 class="font-bold text-slate-800 text-xs sm:text-sm">Riwayat Mutasi Stok</h4>
+                            <div class="relative w-full sm:w-64">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
+                                <input v-model="gudangSearch" type="text" placeholder="Cari jenis / tanggal / keterangan..." class="w-full pl-8 pr-3 py-2 rounded-xl border border-slate-300 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-slate-600">
+                                <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-3">Tanggal</th>
+                                        <th class="p-3">Jenis Pakan</th>
+                                        <th class="p-3">Mutasi</th>
+                                        <th class="p-3">Jumlah</th>
+                                        <th class="p-3">Harga / Kg</th>
+                                        <th class="p-3">Sumber</th>
+                                        <th class="p-3">Keterangan</th>
+                                        <th class="p-3 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <tr v-for="m in paginatedGudangMutasi" :key="m.id" class="hover:bg-slate-50 transition">
+                                        <td class="p-3 font-semibold text-slate-800 whitespace-nowrap">{{ formatDate(m.tanggal) }}</td>
+                                        <td class="p-3 font-bold text-slate-700">{{ getGudangItemName(m.itemId) }}</td>
+                                        <td class="p-3">
+                                            <span class="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase" :class="m.tipe === 'Masuk' ? 'bg-emerald-100 text-emerald-700' : (m.tipe === 'Keluar' ? 'bg-rose-100 text-rose-700' : 'bg-indigo-100 text-indigo-700')">{{ m.tipe }}</span>
+                                        </td>
+                                        <td class="p-3 font-extrabold" :class="m.qty >= 0 ? 'text-emerald-600' : 'text-rose-600'">{{ m.qty >= 0 ? '+' : '' }}{{ m.qty }} Kg</td>
+                                        <td class="p-3">{{ m.hargaPerKg ? formatRupiah(m.hargaPerKg) : '-' }}</td>
+                                        <td class="p-3 whitespace-nowrap">
+                                            {{ sumberLabel(m.sumber) }}
+                                            <i v-if="m.trxId" class="fa-solid fa-link text-emerald-500 ml-1" title="Tercatat di Keuangan"></i>
+                                        </td>
+                                        <td class="p-3 text-slate-400 italic max-w-xs truncate">{{ m.keterangan || m.supplier || '-' }}</td>
+                                        <td class="p-3 text-center">
+                                            <button v-if="m.sumber !== 'harian'" @click="confirmDeleteMutasi(m)" class="text-slate-300 hover:text-rose-500 p-1" title="Hapus Mutasi"><i class="fa-solid fa-trash"></i></button>
+                                            <i v-else class="fa-solid fa-lock text-slate-300 p-1" title="Ubah lewat Log Harian"></i>
+                                        </td>
+                                    </tr>
+                                    <tr v-if="filteredGudangMutasi.length === 0">
+                                        <td colspan="8" class="p-6 text-center text-slate-400">Belum ada mutasi stok.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-if="gudangMutasiTotalPages > 1" class="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs">
+                            <span class="text-slate-500">Halaman {{ gudangMutasiPage }} dari {{ gudangMutasiTotalPages }} (Total {{ filteredGudangMutasi.length }} mutasi)</span>
+                            <div class="flex gap-1">
+                                <button @click="gudangMutasiPage = Math.max(1, gudangMutasiPage - 1)" :disabled="gudangMutasiPage === 1" class="px-3 py-1 rounded-lg border bg-white disabled:opacity-50 font-bold text-slate-700">Prev</button>
+                                <button @click="gudangMutasiPage = Math.min(gudangMutasiTotalPages, gudangMutasiPage + 1)" :disabled="gudangMutasiPage === gudangMutasiTotalPages" class="px-3 py-1 rounded-lg border bg-white disabled:opacity-50 font-bold text-slate-700">Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
             </div>
 
             <!-- TAB 5: CATATAN HARIAN -->
@@ -699,7 +860,7 @@
                                 <tr v-for="h in paginatedHarianList" :key="h.id" class="hover:bg-slate-50 transition">
                                     <td class="p-3 font-semibold text-slate-800 whitespace-nowrap">{{ formatDate(h.tanggal) }}</td>
                                     <td class="p-3"><span class="font-bold text-emerald-700">{{ getFlockName(h.flockId) }}</span></td>
-                                    <td class="p-3 font-bold text-slate-800">{{ h.pakanKg }} Kg</td>
+                                    <td class="p-3 font-bold text-slate-800">{{ h.pakanKg }} Kg<div v-if="h.pakanItemId" class="text-[10px] font-normal text-slate-400">{{ getGudangItemName(h.pakanItemId) }}</div></td>
                                     <td class="p-3 font-semibold text-indigo-600">{{ h.bobotKg ? h.bobotKg + ' Kg' : '-' }}</td>
                                     <td class="p-3"><span class="text-emerald-600 font-bold">{{ h.telurBagus }}</span> Butir</td>
                                     <td class="p-3"><span class="text-amber-600 font-bold">{{ h.telurRusak }}</span> Butir</td>
@@ -879,6 +1040,7 @@
                 <i :class="item.icon" class="text-base mb-0.5"></i>
                 <span class="text-[9px] tracking-tight truncate max-w-[55px]">{{ item.label }}</span>
                 <span v-if="item.id === 'flock' && flockMoveAlerts.length > 0" class="absolute top-1 right-3 w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+                <span v-if="item.id === 'pakan' && stokMenipisCount > 0" class="absolute top-1 right-3 w-2.5 h-2.5 rounded-full bg-amber-500"></span>
             </button>
         </nav>
 
@@ -1297,7 +1459,7 @@
                     <form @submit.prevent="saveHarian" class="space-y-3 text-xs">
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Pilih Kelompok Ayam</label>
-                            <select v-model="formHarian.flockId" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+                            <select v-model="formHarian.flockId" @change="autoPickPakanItem" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
                                 <option value="" disabled>-- Pilih Kelompok --</option>
                                 <option v-for="f in flockList" :key="f.id" :value="f.id">{{ f.namaFlock }} (Kandang: {{ f.kandang }})</option>
                             </select>
@@ -1319,6 +1481,21 @@
                                 <label class="block font-bold mb-1 text-slate-700">Mati / Afkir (Ekor)</label>
                                 <input v-model.number="formHarian.kematian" type="number" min="0" placeholder="0" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                             </div>
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1 text-slate-700">Jenis Pakan (dari Gudang)</label>
+                            <select v-model="formHarian.pakanItemId" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+                                <option value="">-- Tidak potong stok gudang --</option>
+                                <optgroup label="Pakan Jadi">
+                                    <option v-for="i in gudangItems.filter(x => x.tipe === 'Pakan Jadi')" :key="i.id" :value="i.id">{{ i.nama }} (stok {{ getStokItem(i.id) }} Kg)</option>
+                                </optgroup>
+                                <optgroup label="Bahan Baku">
+                                    <option v-for="i in gudangItems.filter(x => x.tipe === 'Bahan Baku')" :key="i.id" :value="i.id">{{ i.nama }} (stok {{ getStokItem(i.id) }} Kg)</option>
+                                </optgroup>
+                            </select>
+                            <p v-if="formHarian.pakanItemId" class="text-[10px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
+                                <i class="fa-solid fa-circle-check"></i> Stok gudang otomatis berkurang sesuai jumlah pakan.
+                            </p>
                         </div>
                         <div class="grid grid-cols-2 gap-2.5">
                             <div>
@@ -1373,6 +1550,9 @@
                                 </select>
                             </div>
                         </div>
+                        <p v-if="formKeuangan.jenis === 'Pengeluaran' && formKeuangan.kategori === 'Pembelian Pakan'" class="text-[10px] text-amber-600 font-bold flex items-center gap-1">
+                            <i class="fa-solid fa-circle-info"></i> Tip: catat lewat Pakan &rsaquo; Gudang Pakan agar stok ikut bertambah &amp; transaksi ini terbuat otomatis.
+                        </p>
                         <div>
                             <label class="block font-bold mb-1 text-slate-700">Nominal Rp</label>
                             <input type="text" inputmode="numeric" :value="formatRupiahInputVal(formKeuangan.nominal)" @input="onRupiahInput($event, formKeuangan, 'nominal')" required placeholder="Contoh: 500.000" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-sm">
@@ -1386,6 +1566,179 @@
                             <input v-model="formKeuangan.keterangan" type="text" placeholder="Contoh: Penjualan telur 2 krat" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
                         </div>
                         <button type="submit" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">Simpan Transaksi</button>
+                    </form>
+                </div>
+
+                <!-- Form Jenis Pakan Gudang -->
+                <div v-if="modalType === 'gudangItem'">
+                    <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mb-3.5">{{ editingGudangItemId ? 'Edit Jenis Pakan' : 'Tambah Jenis Pakan Baru' }}</h3>
+                    <form @submit.prevent="saveGudangItem" class="space-y-3 text-xs">
+                        <div>
+                            <label class="block font-bold mb-1 text-slate-700">Nama Pakan / Bahan</label>
+                            <input v-model="formGudangItem.nama" list="gudangNamaList" type="text" required placeholder="Contoh: Jagung Giling, Konsentrat 511" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+                            <datalist id="gudangNamaList">
+                                <option v-for="name in knownBahanNames" :key="name" :value="name"></option>
+                            </datalist>
+                            <p class="text-[10px] text-slate-400 mt-1">Gunakan nama yang sama dengan bahan di Formula Pakan agar otomatis terpotong saat racik.</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block font-bold mb-1 text-slate-700">Tipe</label>
+                                <select v-model="formGudangItem.tipe" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+                                    <option value="Bahan Baku">Bahan Baku</option>
+                                    <option value="Pakan Jadi">Pakan Jadi</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-bold mb-1 text-slate-700">Untuk Fase</label>
+                                <select v-model="formGudangItem.fase" :disabled="formGudangItem.tipe !== 'Pakan Jadi'" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold disabled:bg-slate-100">
+                                    <option value="Semua">Semua Fase</option>
+                                    <option value="Starter">Starter</option>
+                                    <option value="Grower">Grower</option>
+                                    <option value="Layer">Layer</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1 text-slate-700">Batas Stok Minimum (Kg)</label>
+                            <input v-model.number="formGudangItem.stokMin" type="number" min="0" step="0.1" placeholder="Contoh: 50" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold">
+                            <p class="text-[10px] text-slate-400 mt-1">Status "Menipis" muncul jika stok sama atau di bawah batas ini.</p>
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">Simpan Jenis Pakan</button>
+                    </form>
+                </div>
+
+                <!-- Form Stok Masuk / Pembelian -->
+                <div v-if="modalType === 'gudangMasuk'">
+                    <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mb-3.5">Beli / Stok Masuk</h3>
+                    <form @submit.prevent="saveGudangMasuk" class="space-y-3 text-xs">
+                        <div>
+                            <label class="block font-bold mb-1 text-slate-700">Jenis Pakan</label>
+                            <select v-model="formGudangMasuk.itemId" @change="onGudangMasukItemChange" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+                                <option value="" disabled>-- Pilih Jenis Pakan --</option>
+                                <option v-for="i in gudangItems" :key="i.id" :value="i.id">{{ i.nama }} ({{ i.tipe }}) - stok {{ getStokItem(i.id) }} Kg</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block font-bold mb-1 text-slate-700">Jumlah (Kg)</label>
+                                <input v-model.number="formGudangMasuk.qty" type="number" min="0" step="0.1" required placeholder="50" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-sm">
+                            </div>
+                            <div>
+                                <label class="block font-bold mb-1 text-slate-700">Harga per Kg (Rp)</label>
+                                <input type="text" inputmode="numeric" :value="formatRupiahInputVal(formGudangMasuk.harga)" @input="onRupiahInput($event, formGudangMasuk, 'harga')" placeholder="11.000" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-sm">
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex justify-between items-center">
+                            <span class="font-bold text-slate-500">Total Pembelian</span>
+                            <span class="font-extrabold text-slate-900 text-sm">{{ formatRupiah(Math.round((parseFloat(formGudangMasuk.qty) || 0) * (parseFloat(formGudangMasuk.harga) || 0))) }}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block font-bold mb-1 text-slate-700">Tanggal</label>
+                                <input v-model="formGudangMasuk.tanggal" type="date" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold mb-1 text-slate-700">Supplier / Toko</label>
+                                <input v-model="formGudangMasuk.supplier" type="text" placeholder="Opsional" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1 text-slate-700">Catatan</label>
+                            <input v-model="formGudangMasuk.keterangan" type="text" placeholder="Opsional" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                        </div>
+                        <label class="flex items-start gap-2 bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 cursor-pointer">
+                            <input v-model="formGudangMasuk.catatKeuangan" type="checkbox" class="mt-0.5 accent-emerald-600">
+                            <span class="text-emerald-800 font-semibold">Catat otomatis ke Keuangan sebagai Pengeluaran (kategori Pembelian Pakan)</span>
+                        </label>
+                        <button type="submit" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">Simpan Stok Masuk</button>
+                    </form>
+                </div>
+
+                <!-- Form Penyesuaian Stok (Opname) -->
+                <div v-if="modalType === 'gudangOpname'">
+                    <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mb-3.5">Sesuaikan Stok (Opname)</h3>
+                    <form @submit.prevent="saveGudangOpname" class="space-y-3 text-xs">
+                        <div>
+                            <label class="block font-bold mb-1 text-slate-700">Jenis Pakan</label>
+                            <select v-model="formGudangOpname.itemId" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+                                <option value="" disabled>-- Pilih Jenis Pakan --</option>
+                                <option v-for="i in gudangItems" :key="i.id" :value="i.id">{{ i.nama }}</option>
+                            </select>
+                        </div>
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex justify-between items-center">
+                            <span class="font-bold text-slate-500">Stok di Sistem</span>
+                            <span class="font-extrabold text-slate-900 text-sm">{{ formGudangOpname.itemId ? getStokItem(formGudangOpname.itemId) : 0 }} Kg</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block font-bold mb-1 text-slate-700">Stok Fisik Sebenarnya (Kg)</label>
+                                <input v-model.number="formGudangOpname.stokFisik" type="number" min="0" step="0.1" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-sm">
+                            </div>
+                            <div>
+                                <label class="block font-bold mb-1 text-slate-700">Tanggal</label>
+                                <input v-model="formGudangOpname.tanggal" type="date" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1 text-slate-700">Alasan / Catatan</label>
+                            <input v-model="formGudangOpname.keterangan" type="text" placeholder="Contoh: Pakan tumpah, susut, salah hitung" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700 transition shadow-md shadow-emerald-600/20 mt-2">Simpan Penyesuaian</button>
+                    </form>
+                </div>
+
+                <!-- Form Racik Pakan dari Formula -->
+                <div v-if="modalType === 'gudangRacik'">
+                    <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mb-1">Racik Pakan dari Formula</h3>
+                    <p class="text-xs text-slate-500 mb-3.5">Bahan baku di gudang akan berkurang sesuai rasio formula, hasil racikan masuk sebagai stok Pakan Jadi.</p>
+                    <form @submit.prevent="saveRacik" class="space-y-3 text-xs">
+                        <div class="grid grid-cols-3 gap-1.5 bg-slate-200 p-1 rounded-xl font-bold">
+                            <button type="button" @click="formRacik.preset = 'starter'" :class="formRacik.preset === 'starter' ? 'bg-amber-500 text-white shadow' : 'text-slate-600'" class="py-2 rounded-lg transition">Starter</button>
+                            <button type="button" @click="formRacik.preset = 'grower'" :class="formRacik.preset === 'grower' ? 'bg-emerald-600 text-white shadow' : 'text-slate-600'" class="py-2 rounded-lg transition">Grower</button>
+                            <button type="button" @click="formRacik.preset = 'layer'" :class="formRacik.preset === 'layer' ? 'bg-purple-600 text-white shadow' : 'text-slate-600'" class="py-2 rounded-lg transition">Layer</button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block font-bold mb-1 text-slate-700">Total Racikan (Kg)</label>
+                                <input v-model.number="formRacik.totalKg" type="number" min="0" step="0.1" required placeholder="100" class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-sm">
+                            </div>
+                            <div>
+                                <label class="block font-bold mb-1 text-slate-700">Tanggal</label>
+                                <input v-model="formRacik.tanggal" type="date" required class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none">
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                            <table class="w-full text-left text-[11px] text-slate-600">
+                                <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-2">Bahan</th>
+                                        <th class="p-2">Rasio</th>
+                                        <th class="p-2">Butuh</th>
+                                        <th class="p-2">Stok</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <tr v-for="r in racikPlan.rows" :key="r.nama">
+                                        <td class="p-2 font-bold text-slate-800">{{ r.nama }}</td>
+                                        <td class="p-2">{{ r.rasio }}%</td>
+                                        <td class="p-2 font-bold">{{ r.need }} Kg</td>
+                                        <td class="p-2 font-bold" :class="!r.tracked ? 'text-slate-400' : (r.cukup ? 'text-emerald-600' : 'text-rose-600')">
+                                            {{ r.tracked ? r.stok + ' Kg' : 'Tidak dilacak' }}
+                                        </td>
+                                    </tr>
+                                    <tr v-if="racikPlan.rows.length === 0">
+                                        <td colspan="4" class="p-4 text-center text-slate-400">Preset {{ formRacik.preset.toUpperCase() }} belum punya bahan. Isi dulu di Formula Pakan.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 space-y-1">
+                            <div class="flex justify-between"><span class="font-bold text-slate-500">Total Rasio</span><span class="font-extrabold" :class="racikPlan.totalRasio === 100 ? 'text-emerald-600' : 'text-rose-600'">{{ racikPlan.totalRasio }}%</span></div>
+                            <div class="flex justify-between"><span class="font-bold text-slate-500">HPP Racikan / Kg</span><span class="font-extrabold text-slate-900">{{ formatRupiah(Math.round(racikPlan.hpp)) }}</span></div>
+                        </div>
+                        <p v-if="racikPlan.adaKurang" class="text-[10px] text-rose-600 font-bold flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> Ada bahan yang stoknya kurang. Tambah stok dulu.</p>
+                        <button type="submit" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl text-xs hover:bg-blue-700 transition shadow-md shadow-blue-600/20 mt-2">Proses Racikan</button>
                     </form>
                 </div>
 
@@ -1469,6 +1822,19 @@
                         layer: []
                     },
                     pakanHistory: JSON.parse(localStorage.getItem('mandirifarm_pakan_history')) || {},
+
+                    // GUDANG PAKAN
+                    pakanSubTab: 'formula',
+                    gudangTipeFilter: 'semua',
+                    gudangSearch: '',
+                    gudangMutasiPage: 1,
+                    editingGudangItemId: null,
+                    gudangItems: JSON.parse(localStorage.getItem('mandirifarm_gudang_items')) || [],
+                    gudangMutasi: JSON.parse(localStorage.getItem('mandirifarm_gudang_mutasi')) || [],
+                    formGudangItem: { nama: '', tipe: 'Bahan Baku', fase: 'Semua', stokMin: 0 },
+                    formGudangMasuk: { itemId: '', tanggal: new Date().toISOString().substr(0, 10), qty: 0, harga: 0, supplier: '', keterangan: '', catatKeuangan: true },
+                    formGudangOpname: { itemId: '', tanggal: new Date().toISOString().substr(0, 10), stokFisik: 0, keterangan: '' },
+                    formRacik: { preset: 'starter', totalKg: 0, tanggal: new Date().toISOString().substr(0, 10) },
                     currentFormulasiPakan: [],
                     targetFlockPakanId: '',
                     targetFasePakanType: 'starter',
@@ -1477,7 +1843,7 @@
                     formBahanPakan: { nama: '', rasio: 0, harga: 0, protein: 0 },
                     formPenetasan: { namaBatch: '', mesin: '', tipe: 'Pedaging', tglMasuk: new Date().toISOString().substr(0, 10), jumlahTelur: 0, status: 'Berjalan', dayaTetas: 0, telurFertil: 0, telurInfertil: 0, asalTelur: 'Indukan', biayaTelur: 0, sumberBeli: '', indukanFlockId: '' },
                     formFlock: { namaFlock: '', tipe: 'Pedaging', faseAwal: 'Starter', kandang: 'Kandang B-01', jumlahAwal: 0, jumlahSaatIni: 0, asalDoc: 'Hasil Penetasan', sumberBeli: '', biayaDoc: 0, autoRecordKeuangan: true, hargaPakanStarter: 0, hargaPakanGrower: 0, umurAwalHari: 0, tglMulai: new Date().toISOString().substr(0, 10) },
-                    formHarian: { flockId: '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, bobotKg: null, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' },
+                    formHarian: { flockId: '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, pakanItemId: '', bobotKg: null, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' },
                     formKeuangan: { jenis: 'Pemasukan', kategori: 'Penjualan Telur', nominal: 0, tanggal: new Date().toISOString().substr(0, 10), keterangan: '' },
 
                     eggChartInstance: null,
@@ -1599,6 +1965,94 @@
                     });
                 },
 
+                // ===== GUDANG PAKAN =====
+                gudangStokMap() {
+                    const map = {};
+                    this.gudangItems.forEach(i => { map[i.id] = { stok: 0, masukQty: 0, masukVal: 0, avg: 0 }; });
+                    this.gudangMutasi.forEach(m => {
+                        const e = map[m.itemId];
+                        if (!e) return;
+                        const q = parseFloat(m.qty) || 0;
+                        e.stok += q;
+                        if (m.tipe === 'Masuk') {
+                            e.masukQty += q;
+                            e.masukVal += q * (parseFloat(m.hargaPerKg) || 0);
+                        }
+                    });
+                    Object.values(map).forEach(e => {
+                        e.avg = e.masukQty > 0 ? e.masukVal / e.masukQty : 0;
+                        e.stok = Math.round(e.stok * 100) / 100;
+                    });
+                    return map;
+                },
+                gudangRows() {
+                    const cutoff = new Date(Date.now() - 7 * 86400000).toISOString().substr(0, 10);
+                    return this.gudangItems.map(i => {
+                        const e = this.gudangStokMap[i.id] || { stok: 0, avg: 0 };
+                        const pakai7 = this.gudangMutasi
+                            .filter(m => m.itemId === i.id && m.sumber === 'harian' && m.tanggal >= cutoff)
+                            .reduce((a, m) => a + Math.abs(parseFloat(m.qty) || 0), 0);
+                        const perHari = pakai7 / 7;
+                        const sisaHari = perHari > 0 ? Math.floor(Math.max(0, e.stok) / perHari) : null;
+                        const min = parseFloat(i.stokMin) || 0;
+                        let status = 'Aman';
+                        if (e.stok <= 0) status = 'Habis';
+                        else if (min > 0 && e.stok <= min) status = 'Menipis';
+                        return { ...i, stok: e.stok, avg: e.avg, nilai: Math.max(0, e.stok) * e.avg, sisaHari, status };
+                    }).sort((a, b) => (a.tipe || '').localeCompare(b.tipe || '') || (a.nama || '').localeCompare(b.nama || ''));
+                },
+                gudangRowsFiltered() {
+                    return this.gudangTipeFilter === 'semua' ? this.gudangRows : this.gudangRows.filter(r => r.tipe === this.gudangTipeFilter);
+                },
+                gudangTotalStok() {
+                    return Math.round(this.gudangRows.reduce((a, r) => a + Math.max(0, r.stok), 0) * 100) / 100;
+                },
+                gudangNilaiTotal() {
+                    return Math.round(this.gudangRows.reduce((a, r) => a + r.nilai, 0));
+                },
+                stokMenipisCount() {
+                    return this.gudangRows.filter(r => r.status !== 'Aman').length;
+                },
+                filteredGudangMutasi() {
+                    let list = [...this.gudangMutasi].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal) || (b.createdAt || 0) - (a.createdAt || 0));
+                    const q = (this.gudangSearch || '').toLowerCase().trim();
+                    if (q) {
+                        list = list.filter(m => (m.tanggal || '').includes(q)
+                            || this.getGudangItemName(m.itemId).toLowerCase().includes(q)
+                            || (m.keterangan || '').toLowerCase().includes(q)
+                            || (m.supplier || '').toLowerCase().includes(q)
+                            || this.sumberLabel(m.sumber).toLowerCase().includes(q));
+                    }
+                    return list;
+                },
+                gudangMutasiTotalPages() {
+                    return Math.ceil(this.filteredGudangMutasi.length / this.itemsPerPage) || 1;
+                },
+                paginatedGudangMutasi() {
+                    const start = (this.gudangMutasiPage - 1) * this.itemsPerPage;
+                    return this.filteredGudangMutasi.slice(start, start + this.itemsPerPage);
+                },
+                racikPlan() {
+                    const preset = this.pakanPresets[this.formRacik.preset] || [];
+                    const total = parseFloat(this.formRacik.totalKg) || 0;
+                    const rows = preset.map(b => {
+                        const need = Math.round((parseFloat(b.rasio) || 0) / 100 * total * 100) / 100;
+                        const item = this.findGudangItemByName(b.nama);
+                        const e = item ? this.gudangStokMap[item.id] : null;
+                        const stok = item ? e.stok : null;
+                        const hargaPakai = (e && e.avg > 0) ? e.avg : (parseFloat(b.harga) || 0);
+                        return { nama: b.nama, rasio: b.rasio, need, item, stok, tracked: !!item, cukup: item ? stok >= need - 0.001 : true, hargaPakai, biaya: need * hargaPakai };
+                    });
+                    const totalRasio = preset.reduce((a, b) => a + (parseFloat(b.rasio) || 0), 0);
+                    const biaya = rows.reduce((a, r) => a + r.biaya, 0);
+                    return {
+                        rows, totalRasio, biaya,
+                        hpp: total > 0 ? biaya / total : 0,
+                        adaKurang: rows.some(r => !r.cukup),
+                        adaTracked: rows.some(r => r.tracked)
+                    };
+                },
+
                 // LOGIKA AUTO REKOMENDASI NOTIFIKASI PINDAH KANDANG
                 flockMoveAlerts() {
                     const alerts = [];
@@ -1628,6 +2082,7 @@
             },
             watch: {
                 harianSearch() { this.harianPage = 1; },
+                gudangSearch() { this.gudangMutasiPage = 1; },
                 keuanganSearch() { this.keuanganPage = 1; },
                 activeTab(newTab) {
                     if (newTab === 'beranda') {
@@ -1638,7 +2093,9 @@
                 penetasanList: { handler(val) { localStorage.setItem('mandirifarm_penetasan', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true },
                 flockList: { handler(val) { localStorage.setItem('mandirifarm_flock', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true },
                 harianList: { handler(val) { localStorage.setItem('mandirifarm_harian', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true },
-                keuanganList: { handler(val) { localStorage.setItem('mandirifarm_keuangan', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true }
+                keuanganList: { handler(val) { localStorage.setItem('mandirifarm_keuangan', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true },
+                gudangItems: { handler(val) { localStorage.setItem('mandirifarm_gudang_items', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true },
+                gudangMutasi: { handler(val) { localStorage.setItem('mandirifarm_gudang_mutasi', JSON.stringify(val)); if(!this.isSyncingFromGas) this.debouncedPushToGas(); }, deep: true }
             },
             mounted() {
                 this.loadPakanPreset('starter');
@@ -1795,7 +2252,8 @@
                         };
                     } else if (type === 'harian') {
                         this.editingHarianId = null;
-                        this.formHarian = { flockId: this.flockList.length ? this.flockList[0].id : '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, bobotKg: null, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' };
+                        this.formHarian = { flockId: this.flockList.length ? this.flockList[0].id : '', tanggal: new Date().toISOString().substr(0, 10), pakanKg: 0, pakanItemId: '', bobotKg: null, kematian: 0, telurBagus: 0, telurRusak: 0, catatan: '' };
+                        this.autoPickPakanItem();
                     } else if (type === 'keuangan') {
                         this.formKeuangan = { jenis: 'Pemasukan', kategori: 'Penjualan Telur', nominal: 0, tanggal: new Date().toISOString().substr(0, 10), keterangan: '' };
                     }
@@ -1808,6 +2266,7 @@
                     this.editingFlockId = null;
                     this.editingBahanIndex = null;
                     this.editingHarianId = null;
+                    this.editingGudangItemId = null;
                 },
                 openBahanPakanModal() {
                     this.editingBahanIndex = null;
@@ -2382,6 +2841,7 @@
                 editHarian(h) {
                     this.editingHarianId = h.id;
                     this.formHarian = JSON.parse(JSON.stringify(h));
+                    if (this.formHarian.pakanItemId === undefined) this.formHarian.pakanItemId = '';
                     this.modalType = 'harian';
                     this.showModal = true;
                 },
@@ -2391,6 +2851,21 @@
                         this.showToast('Pilih kelompok ayam terlebih dahulu.', 'error');
                         return;
                     }
+
+                    // Validasi stok gudang (jika jenis pakan dipilih)
+                    const pakanKgInput = parseFloat(this.formHarian.pakanKg) || 0;
+                    const pakanItemId = this.formHarian.pakanItemId || '';
+                    if (pakanItemId && pakanKgInput > 0) {
+                        const prev = this.editingHarianId
+                            ? this.gudangMutasi.find(m => m.sumber === 'harian' && m.refId === this.editingHarianId && m.itemId === pakanItemId)
+                            : null;
+                        const tersedia = this.getStokItem(pakanItemId) + (prev ? Math.abs(parseFloat(prev.qty) || 0) : 0);
+                        if (pakanKgInput > tersedia + 0.001) {
+                            this.showToast(`Stok ${this.getGudangItemName(pakanItemId)} tidak cukup (tersedia ${Math.round(tersedia * 100) / 100} Kg). Tambah stok di Pakan > Gudang.`, 'error');
+                            return;
+                        }
+                    }
+                    let savedHarianId = this.editingHarianId;
 
                     const dead = parseInt(this.formHarian.kematian) || 0;
                     const oldFlockId = this.editingHarianId ? (this.harianList.find(h => h.id === this.editingHarianId)?.flockId) : null;
@@ -2424,8 +2899,12 @@
                             telurRusak: parseInt(this.formHarian.telurRusak) || 0
                         };
                         this.harianList.unshift(newHarian);
+                        savedHarianId = newHarian.id;
                         this.showToast('Catatan harian berhasil disimpan.', 'info');
                     }
+
+                    // Sinkronkan pemotongan stok gudang
+                    this.syncHarianPakanMutasi(savedHarianId, this.formHarian.flockId, this.formHarian.tanggal, pakanItemId, pakanKgInput);
 
                     // Otomatis sinkronkan bobot ke kelompok jika diisi
                     if (inputBobot && inputBobot > 0) {
@@ -2441,6 +2920,7 @@
                         const targetFlockId = targetLog ? targetLog.flockId : null;
 
                         this.harianList = this.harianList.filter(h => h.id !== id);
+                        this.gudangMutasi = this.gudangMutasi.filter(m => !(m.sumber === 'harian' && m.refId === id));
                         if (targetFlockId) {
                             this.recalculateFlockPopulation(targetFlockId);
                         }
@@ -2542,6 +3022,10 @@
                         this.flockList = [];
                         this.harianList = [];
                         this.keuanganList = [];
+                        this.gudangItems = [];
+                        this.gudangMutasi = [];
+                        localStorage.removeItem('mandirifarm_gudang_items');
+                        localStorage.removeItem('mandirifarm_gudang_mutasi');
                         localStorage.removeItem('mandirifarm_penetasan');
                         localStorage.removeItem('mandirifarm_flock');
                         localStorage.removeItem('mandirifarm_harian');
@@ -2567,7 +3051,9 @@
                         keuanganList: this.keuanganList,
                         pakanPresets: this.pakanPresets,
                         pakanHistory: this.pakanHistory,
-                        kandangList: this.kandangList
+                        kandangList: this.kandangList,
+                        gudangItems: this.gudangItems,
+                        gudangMutasi: this.gudangMutasi
                     };
 
                     try {
@@ -2596,6 +3082,8 @@
                             if (result.data.flockList) this.flockList = result.data.flockList;
                             if (result.data.harianList) this.harianList = result.data.harianList;
                             if (result.data.keuanganList) this.keuanganList = result.data.keuanganList;
+                            if (result.data.gudangItems) this.gudangItems = result.data.gudangItems;
+                            if (result.data.gudangMutasi) this.gudangMutasi = result.data.gudangMutasi;
                             if (result.data.kandangList && result.data.kandangList.length) {
                                 this.kandangList = result.data.kandangList;
                                 localStorage.setItem('mandirifarm_kandang_list', JSON.stringify(this.kandangList));
@@ -2891,6 +3379,275 @@
 
                     this.showToast(`Preset ${this.activePakanPreset.toUpperCase()} (${this.formatRupiah(computedPrice)}/Kg) diselaraskan ke ${updatedCount} kelompok!`, 'info');
                 },
+                // ===== GUDANG PAKAN: HELPER =====
+                getGudangItem(id) { return this.gudangItems.find(i => i.id === id); },
+                getGudangItemName(id) { const i = this.getGudangItem(id); return i ? i.nama : 'Item Terhapus'; },
+                findGudangItemByName(nama) {
+                    const k = (nama || '').trim().toLowerCase();
+                    if (!k) return null;
+                    return this.gudangItems.find(i => (i.nama || '').trim().toLowerCase() === k) || null;
+                },
+                getStokItem(id) { const e = this.gudangStokMap[id]; return e ? e.stok : 0; },
+                getAvgHargaItem(id) { const e = this.gudangStokMap[id]; return e ? e.avg : 0; },
+                sumberLabel(s) {
+                    return ({ beli: 'Pembelian', racik: 'Racik Formula', harian: 'Log Harian', opname: 'Opname' })[s] || 'Manual';
+                },
+                gudangStatusClass(status) {
+                    if (status === 'Habis') return 'bg-rose-100 text-rose-700';
+                    if (status === 'Menipis') return 'bg-amber-100 text-amber-800';
+                    return 'bg-emerald-100 text-emerald-700';
+                },
+                todayStr() { return new Date().toISOString().substr(0, 10); },
+
+                // ===== GUDANG PAKAN: JENIS PAKAN =====
+                openGudangItemModal() {
+                    this.editingGudangItemId = null;
+                    this.formGudangItem = { nama: '', tipe: 'Bahan Baku', fase: 'Semua', stokMin: 0 };
+                    this.modalType = 'gudangItem';
+                    this.showModal = true;
+                },
+                editGudangItem(i) {
+                    this.editingGudangItemId = i.id;
+                    this.formGudangItem = { nama: i.nama, tipe: i.tipe, fase: i.fase || 'Semua', stokMin: i.stokMin || 0 };
+                    this.modalType = 'gudangItem';
+                    this.showModal = true;
+                },
+                saveGudangItem() {
+                    const nama = (this.formGudangItem.nama || '').trim();
+                    if (!nama) { this.showToast('Nama pakan tidak boleh kosong.', 'error'); return; }
+                    const dup = this.findGudangItemByName(nama);
+                    if (dup && dup.id !== this.editingGudangItemId) {
+                        this.showToast(`Jenis "${nama}" sudah ada di gudang.`, 'error');
+                        return;
+                    }
+                    const data = {
+                        nama,
+                        tipe: this.formGudangItem.tipe,
+                        fase: this.formGudangItem.tipe === 'Pakan Jadi' ? (this.formGudangItem.fase || 'Semua') : '-',
+                        stokMin: parseFloat(this.formGudangItem.stokMin) || 0
+                    };
+                    if (this.editingGudangItemId) {
+                        const idx = this.gudangItems.findIndex(i => i.id === this.editingGudangItemId);
+                        if (idx !== -1) this.gudangItems[idx] = { ...this.gudangItems[idx], ...data };
+                        this.showToast('Jenis pakan diperbarui.', 'info');
+                    } else {
+                        this.gudangItems.push({ id: 'GDG-' + Date.now(), ...data });
+                        this.showToast(`Jenis pakan "${nama}" ditambahkan ke gudang.`, 'info');
+                    }
+                    this.closeModal();
+                },
+                confirmDeleteGudangItem(i) {
+                    this.showConfirm('Hapus Jenis Pakan?', `"${i.nama}" beserta seluruh riwayat mutasi stoknya akan dihapus. Transaksi di Keuangan tidak ikut terhapus.`, () => {
+                        this.gudangItems = this.gudangItems.filter(x => x.id !== i.id);
+                        this.gudangMutasi = this.gudangMutasi.filter(m => m.itemId !== i.id);
+                        this.showToast('Jenis pakan dihapus dari gudang.', 'info');
+                    });
+                },
+
+                // ===== GUDANG PAKAN: STOK MASUK / PEMBELIAN (+ KEUANGAN) =====
+                openGudangMasuk(itemId = '') {
+                    if (!this.gudangItems.length) {
+                        this.showToast('Tambah jenis pakan dulu sebelum mencatat stok masuk.', 'error');
+                        return;
+                    }
+                    this.formGudangMasuk = { itemId: itemId || '', tanggal: this.todayStr(), qty: 0, harga: 0, supplier: '', keterangan: '', catatKeuangan: true };
+                    if (itemId) this.onGudangMasukItemChange();
+                    this.modalType = 'gudangMasuk';
+                    this.showModal = true;
+                },
+                onGudangMasukItemChange() {
+                    const item = this.getGudangItem(this.formGudangMasuk.itemId);
+                    if (!item) return;
+                    const avg = this.getAvgHargaItem(item.id);
+                    const hist = this.pakanHistory[(item.nama || '').trim().toLowerCase()];
+                    this.formGudangMasuk.harga = avg > 0 ? Math.round(avg) : (hist ? (parseFloat(hist.harga) || 0) : 0);
+                },
+                saveGudangMasuk() {
+                    const f = this.formGudangMasuk;
+                    const item = this.getGudangItem(f.itemId);
+                    const qty = Math.round((parseFloat(f.qty) || 0) * 100) / 100;
+                    const harga = parseFloat(f.harga) || 0;
+                    if (!item) { this.showToast('Pilih jenis pakan terlebih dahulu.', 'error'); return; }
+                    if (qty <= 0) { this.showToast('Jumlah stok masuk harus lebih dari 0.', 'error'); return; }
+                    if (f.catatKeuangan && harga <= 0) { this.showToast('Isi harga per Kg agar bisa dicatat ke Keuangan.', 'error'); return; }
+
+                    const now = Date.now();
+                    const total = Math.round(qty * harga);
+                    let trxId = null;
+                    if (f.catatKeuangan && total > 0) {
+                        trxId = 'TRX-' + now;
+                        this.keuanganList.unshift({
+                            id: trxId,
+                            jenis: 'Pengeluaran',
+                            kategori: 'Pembelian Pakan',
+                            nominal: total,
+                            tanggal: f.tanggal,
+                            keterangan: `Gudang Pakan: ${item.nama} ${qty} Kg @ ${this.formatRupiah(harga)}` + (f.supplier ? ` - ${f.supplier}` : '')
+                        });
+                    }
+                    this.gudangMutasi.unshift({
+                        id: 'MUT-' + now, createdAt: now, tanggal: f.tanggal, itemId: item.id,
+                        tipe: 'Masuk', qty, hargaPerKg: harga, total, sumber: 'beli',
+                        supplier: (f.supplier || '').trim(), keterangan: (f.keterangan || '').trim(), trxId
+                    });
+                    this.closeModal();
+                    this.showToast(`+${qty} Kg ${item.nama} masuk gudang` + (trxId ? ' & tercatat di Keuangan.' : '.'), 'info');
+                },
+
+                // ===== GUDANG PAKAN: OPNAME =====
+                openGudangOpname(itemId = '') {
+                    if (!this.gudangItems.length) { this.showToast('Belum ada jenis pakan di gudang.', 'error'); return; }
+                    this.formGudangOpname = { itemId, tanggal: this.todayStr(), stokFisik: itemId ? this.getStokItem(itemId) : 0, keterangan: '' };
+                    this.modalType = 'gudangOpname';
+                    this.showModal = true;
+                },
+                saveGudangOpname() {
+                    const f = this.formGudangOpname;
+                    const item = this.getGudangItem(f.itemId);
+                    if (!item) { this.showToast('Pilih jenis pakan terlebih dahulu.', 'error'); return; }
+                    const fisik = parseFloat(f.stokFisik);
+                    if (isNaN(fisik) || fisik < 0) { this.showToast('Stok fisik tidak valid.', 'error'); return; }
+                    const diff = Math.round((fisik - this.getStokItem(item.id)) * 100) / 100;
+                    if (diff === 0) { this.closeModal(); this.showToast('Stok fisik sama dengan sistem. Tidak ada perubahan.', 'info'); return; }
+                    const now = Date.now();
+                    this.gudangMutasi.unshift({
+                        id: 'MUT-' + now, createdAt: now, tanggal: f.tanggal, itemId: item.id,
+                        tipe: 'Penyesuaian', qty: diff, hargaPerKg: Math.round(this.getAvgHargaItem(item.id)),
+                        sumber: 'opname', keterangan: (f.keterangan || '').trim() || 'Penyesuaian stok fisik'
+                    });
+                    this.closeModal();
+                    this.showToast(`Stok ${item.nama} disesuaikan (${diff > 0 ? '+' : ''}${diff} Kg).`, 'info');
+                },
+
+                // ===== GUDANG PAKAN: RACIK DARI FORMULA =====
+                openRacikModal() {
+                    this.formRacik = { preset: this.activePakanPreset || 'starter', totalKg: 0, tanggal: this.todayStr() };
+                    this.modalType = 'gudangRacik';
+                    this.showModal = true;
+                },
+                saveRacik() {
+                    const plan = this.racikPlan;
+                    const total = Math.round((parseFloat(this.formRacik.totalKg) || 0) * 100) / 100;
+                    if (total <= 0) { this.showToast('Isi total racikan (Kg) terlebih dahulu.', 'error'); return; }
+                    if (!plan.rows.length) { this.showToast('Preset formula ini masih kosong.', 'error'); return; }
+                    if (plan.totalRasio !== 100) { this.showToast('Total rasio formula harus tepat 100%. Perbaiki di Formula Pakan.', 'error'); return; }
+                    if (!plan.adaTracked) { this.showToast('Belum ada bahan di gudang yang namanya cocok dengan formula. Tambahkan jenis bahan baku dulu.', 'error'); return; }
+                    if (plan.adaKurang) { this.showToast('Stok bahan baku tidak cukup untuk racikan ini.', 'error'); return; }
+
+                    const now = Date.now();
+                    const batchId = 'RCK-' + now;
+                    const faseLabel = this.formRacik.preset.charAt(0).toUpperCase() + this.formRacik.preset.slice(1);
+                    const tgl = this.formRacik.tanggal;
+
+                    plan.rows.filter(r => r.tracked).forEach((r, idx) => {
+                        this.gudangMutasi.unshift({
+                            id: 'MUT-' + now + '-' + idx, createdAt: now, tanggal: tgl, itemId: r.item.id,
+                            tipe: 'Keluar', qty: -r.need, hargaPerKg: Math.round(r.hargaPakai),
+                            sumber: 'racik', refId: batchId, keterangan: `Bahan racikan ${faseLabel} ${total} Kg`
+                        });
+                    });
+
+                    let out = this.findGudangItemByName('Racikan ' + faseLabel);
+                    if (!out) {
+                        out = { id: 'GDG-' + now + '-R', nama: 'Racikan ' + faseLabel, tipe: 'Pakan Jadi', fase: faseLabel, stokMin: 0 };
+                        this.gudangItems.push(out);
+                    }
+                    this.gudangMutasi.unshift({
+                        id: 'MUT-' + now + '-out', createdAt: now + 1, tanggal: tgl, itemId: out.id,
+                        tipe: 'Masuk', qty: total, hargaPerKg: Math.round(plan.hpp), total: Math.round(plan.biaya),
+                        sumber: 'racik', refId: batchId, keterangan: `Hasil racikan formula ${faseLabel}`
+                    });
+                    this.closeModal();
+                    this.showToast(`Racikan ${faseLabel} ${total} Kg selesai (HPP ${this.formatRupiah(Math.round(plan.hpp))}/Kg).`, 'info');
+                },
+
+                // ===== GUDANG PAKAN: INTEGRASI LOG HARIAN =====
+                autoPickPakanItem() {
+                    if (this.editingHarianId) return;
+                    const f = this.flockList.find(x => x.id === this.formHarian.flockId);
+                    if (!f) return;
+                    const fase = this.getFaseLabel(f);
+                    const cands = this.gudangItems.filter(i => i.tipe === 'Pakan Jadi' && i.fase === fase);
+                    const pick = cands.find(i => this.getStokItem(i.id) > 0) || cands[0];
+                    if (pick) { this.formHarian.pakanItemId = pick.id; return; }
+                    const last = this.harianList.find(h => h.flockId === f.id && h.pakanItemId && this.getGudangItem(h.pakanItemId));
+                    this.formHarian.pakanItemId = last ? last.pakanItemId : '';
+                },
+                syncHarianPakanMutasi(harianId, flockId, tanggal, itemId, kg) {
+                    this.gudangMutasi = this.gudangMutasi.filter(m => !(m.sumber === 'harian' && m.refId === harianId));
+                    if (!itemId || !(kg > 0)) return;
+                    const now = Date.now();
+                    this.gudangMutasi.unshift({
+                        id: 'MUT-' + now + '-H', createdAt: now, tanggal, itemId,
+                        tipe: 'Keluar', qty: -Math.round(kg * 100) / 100,
+                        hargaPerKg: Math.round(this.getAvgHargaItem(itemId)),
+                        sumber: 'harian', refId: harianId, flockId,
+                        keterangan: 'Pemberian pakan: ' + this.getFlockName(flockId)
+                    });
+                },
+
+                // ===== GUDANG PAKAN: HAPUS MUTASI & EKSPOR =====
+                confirmDeleteMutasi(m) {
+                    if (m.sumber === 'harian') {
+                        this.showToast('Mutasi ini berasal dari Log Harian. Ubah atau hapus lewat Log Harian.', 'info');
+                        return;
+                    }
+                    const batch = m.sumber === 'racik' && m.refId ? this.gudangMutasi.filter(x => x.refId === m.refId) : [m];
+                    // Cegah stok jadi minus
+                    const perItem = {};
+                    batch.forEach(x => { perItem[x.itemId] = (perItem[x.itemId] || 0) + (parseFloat(x.qty) || 0); });
+                    for (const id of Object.keys(perItem)) {
+                        if (this.getStokItem(id) - perItem[id] < -0.001) {
+                            this.showToast(`Tidak bisa dihapus: stok ${this.getGudangItemName(id)} akan minus (sebagian sudah terpakai).`, 'error');
+                            return;
+                        }
+                    }
+                    let msg = 'Mutasi stok ini akan dihapus.';
+                    if (m.sumber === 'racik') msg = 'Seluruh mutasi racikan batch ini (bahan keluar dan pakan jadi masuk) akan dihapus.';
+                    else if (m.trxId) msg = 'Mutasi stok dan transaksi pengeluaran terkait di tab Keuangan akan dihapus.';
+                    this.showConfirm('Hapus Mutasi Stok?', msg, () => {
+                        const ids = new Set(batch.map(x => x.id));
+                        const trxIds = new Set(batch.map(x => x.trxId).filter(Boolean));
+                        this.gudangMutasi = this.gudangMutasi.filter(x => !ids.has(x.id));
+                        if (trxIds.size) this.keuanganList = this.keuanganList.filter(k => !trxIds.has(k.id));
+                        this.showToast('Mutasi stok dihapus.', 'info');
+                    });
+                },
+                exportGudangExcel() {
+                    if (!this.gudangItems.length) {
+                        this.showToast('Belum ada data gudang untuk diekspor.', 'error');
+                        return;
+                    }
+                    const stok = this.gudangRows.map(r => ({
+                        'Jenis Pakan': r.nama,
+                        'Tipe': r.tipe,
+                        'Fase': r.fase || '-',
+                        'Stok (Kg)': r.stok,
+                        'Harga Rata-rata / Kg (Rp)': Math.round(r.avg),
+                        'Nilai Stok (Rp)': Math.round(r.nilai),
+                        'Batas Minimum (Kg)': r.stokMin || 0,
+                        'Status': r.status
+                    }));
+                    const mut = this.filteredGudangMutasi.map(m => ({
+                        'Tanggal': m.tanggal,
+                        'Jenis Pakan': this.getGudangItemName(m.itemId),
+                        'Mutasi': m.tipe,
+                        'Jumlah (Kg)': parseFloat(m.qty) || 0,
+                        'Harga / Kg (Rp)': parseFloat(m.hargaPerKg) || 0,
+                        'Sumber': this.sumberLabel(m.sumber),
+                        'Supplier': m.supplier || '-',
+                        'Keterangan': m.keterangan || '-'
+                    }));
+                    const wb = XLSX.utils.book_new();
+                    const ws1 = XLSX.utils.json_to_sheet(stok);
+                    ws1['!cols'] = [{ wch: 28 }, { wch: 14 }, { wch: 10 }, { wch: 12 }, { wch: 24 }, { wch: 18 }, { wch: 18 }, { wch: 12 }];
+                    XLSX.utils.book_append_sheet(wb, ws1, 'Stok Gudang');
+                    const ws2 = XLSX.utils.json_to_sheet(mut.length ? mut : [{}]);
+                    ws2['!cols'] = [{ wch: 14 }, { wch: 28 }, { wch: 14 }, { wch: 14 }, { wch: 16 }, { wch: 16 }, { wch: 18 }, { wch: 40 }];
+                    XLSX.utils.book_append_sheet(wb, ws2, 'Riwayat Mutasi');
+                    XLSX.writeFile(wb, `MandiriFarm_GudangPakan_${this.todayStr()}.xlsx`);
+                    this.showToast('Data Gudang Pakan berhasil diekspor ke Excel (.xlsx)!', 'info');
+                },
                 exportBackupFile() {
                     const backupData = {
                         version: '1.0',
@@ -2901,7 +3658,9 @@
                         harianList: this.harianList,
                         keuanganList: this.keuanganList,
                         pakanPresets: this.pakanPresets,
-                        pakanHistory: this.pakanHistory
+                        pakanHistory: this.pakanHistory,
+                        gudangItems: this.gudangItems,
+                        gudangMutasi: this.gudangMutasi
                     };
                     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
                     const downloadAnchor = document.createElement('a');
@@ -2927,6 +3686,8 @@
                                 if (data.keuanganList) this.keuanganList = data.keuanganList;
                                 if (data.pakanPresets) this.pakanPresets = data.pakanPresets;
                                 if (data.pakanHistory) this.pakanHistory = data.pakanHistory;
+                                if (data.gudangItems) this.gudangItems = data.gudangItems;
+                                if (data.gudangMutasi) this.gudangMutasi = data.gudangMutasi;
                                 this.debouncedPushToGas();
                                 this.showToast('Data berhasil dipulihkan dari file JSON!', 'info');
                             } else {
