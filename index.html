@@ -640,6 +640,7 @@
                                     <th class="p-3">Proporsi / Rasio (%)</th>
                                     <th class="p-3">Harga / Kg (Rp)</th>
                                     <th class="p-3">Protein Kasar (%)</th>
+                                    <th class="p-3">Stok Gudang</th>
                                     <th class="p-3 text-right">Biaya Kontribusi</th>
                                     <th class="p-3 text-center">Aksi</th>
                                 </tr>
@@ -650,6 +651,10 @@
                                     <td class="p-3 font-semibold text-emerald-600">{{ b.rasio }}%</td>
                                     <td class="p-3">{{ formatRupiah(b.harga) }}</td>
                                     <td class="p-3 font-semibold text-indigo-600">{{ b.protein }}%</td>
+                                    <td class="p-3 font-semibold whitespace-nowrap">
+                                        <span v-if="getStokByNama(b.nama) !== null" :class="getStokByNama(b.nama) > 0 ? 'text-emerald-600' : 'text-rose-600'">{{ getStokByNama(b.nama) }} Kg</span>
+                                        <span v-else class="text-slate-300" title="Belum terdaftar di Gudang Pakan">-</span>
+                                    </td>
                                     <td class="p-3 text-right font-bold text-slate-800">{{ formatRupiah((b.rasio / 100) * b.harga) }}</td>
                                     <td class="p-3 text-center">
                                         <button @click="editBahanPakan(idx)" class="text-slate-400 hover:text-blue-600 p-1 mr-1"><i class="fa-solid fa-pen-to-square"></i></button>
@@ -657,7 +662,7 @@
                                     </td>
                                 </tr>
                                 <tr v-if="currentFormulasiPakan.length === 0">
-                                    <td colspan="6" class="p-6 text-center text-slate-400">Belum ada bahan pakan pada preset {{ activePakanPreset.toUpperCase() }}. Klik "Tambah Bahan Pakan" di atas.</td>
+                                    <td colspan="7" class="p-6 text-center text-slate-400">Belum ada bahan pakan pada preset {{ activePakanPreset.toUpperCase() }}. Klik "Tambah Bahan Pakan" di atas.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -665,9 +670,14 @@
 
                     <div class="pt-2 border-t flex flex-col sm:flex-row justify-between items-center gap-2">
                         <span class="text-xs text-slate-500">Klik simpan untuk menerapkan tarif harga pakan ke kelompok ayam aktif secara otomatis.</span>
-                        <button @click="saveAndAutoSyncPakanPreset()" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-md transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-floppy-disk"></i> Simpan &amp; Auto-Sync Preset Ke Kelompok
-                        </button>
+                        <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                            <button @click="openRacikModal()" class="w-full sm:w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-blender"></i> Racik Sekarang (Potong Stok Gudang)
+                            </button>
+                            <button @click="saveAndAutoSyncPakanPreset()" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-md transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i> Simpan &amp; Auto-Sync Preset Ke Kelompok
+                            </button>
+                        </div>
                     </div>
                 </div>
                 </template>
@@ -682,9 +692,6 @@
                         <div class="flex flex-wrap gap-2 w-full sm:w-auto">
                             <button @click="openGudangMasuk()" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
                                 <i class="fa-solid fa-cart-plus"></i> Beli / Stok Masuk
-                            </button>
-                            <button @click="openRacikModal()" class="w-full sm:w-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
-                                <i class="fa-solid fa-blender"></i> Racik Pakan
                             </button>
                             <button @click="openGudangItemModal()" class="w-full sm:w-auto px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
                                 <i class="fa-solid fa-plus"></i> Jenis Pakan Baru
@@ -1691,12 +1698,11 @@
                 <!-- Form Racik Pakan dari Formula -->
                 <div v-if="modalType === 'gudangRacik'">
                     <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mb-1">Racik Pakan dari Formula</h3>
-                    <p class="text-xs text-slate-500 mb-3.5">Bahan baku di gudang akan berkurang sesuai rasio formula, hasil racikan masuk sebagai stok Pakan Jadi.</p>
+                    <p class="text-xs text-slate-500 mb-3.5">Fase mengikuti pilihan di tab Formula Pakan. Bahan baku di gudang berkurang sesuai rasio, hasil racikan masuk sebagai stok Pakan Jadi.</p>
                     <form @submit.prevent="saveRacik" class="space-y-3 text-xs">
-                        <div class="grid grid-cols-3 gap-1.5 bg-slate-200 p-1 rounded-xl font-bold">
-                            <button type="button" @click="formRacik.preset = 'starter'" :class="formRacik.preset === 'starter' ? 'bg-amber-500 text-white shadow' : 'text-slate-600'" class="py-2 rounded-lg transition">Starter</button>
-                            <button type="button" @click="formRacik.preset = 'grower'" :class="formRacik.preset === 'grower' ? 'bg-emerald-600 text-white shadow' : 'text-slate-600'" class="py-2 rounded-lg transition">Grower</button>
-                            <button type="button" @click="formRacik.preset = 'layer'" :class="formRacik.preset === 'layer' ? 'bg-purple-600 text-white shadow' : 'text-slate-600'" class="py-2 rounded-lg transition">Layer</button>
+                        <div class="flex items-center justify-between bg-slate-100 rounded-xl p-2.5">
+                            <span class="font-bold text-slate-500">Formula yang dipakai</span>
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase" :class="formRacik.preset === 'starter' ? 'bg-amber-100 text-amber-800' : (formRacik.preset === 'grower' ? 'bg-emerald-100 text-emerald-800' : 'bg-purple-100 text-purple-800')">{{ formRacik.preset }}</span>
                         </div>
                         <div class="grid grid-cols-2 gap-2.5">
                             <div>
@@ -3386,6 +3392,10 @@
                     const k = (nama || '').trim().toLowerCase();
                     if (!k) return null;
                     return this.gudangItems.find(i => (i.nama || '').trim().toLowerCase() === k) || null;
+                },
+                getStokByNama(nama) {
+                    const item = this.findGudangItemByName(nama);
+                    return item ? this.getStokItem(item.id) : null;
                 },
                 getStokItem(id) { const e = this.gudangStokMap[id]; return e ? e.stok : 0; },
                 getAvgHargaItem(id) { const e = this.gudangStokMap[id]; return e ? e.avg : 0; },
